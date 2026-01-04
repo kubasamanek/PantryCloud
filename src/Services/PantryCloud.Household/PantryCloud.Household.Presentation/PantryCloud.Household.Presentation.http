@@ -1,0 +1,6 @@
+@PantryCloud.Household.Presentation_HostAddress = http://localhost:5098
+
+GET {{PantryCloud.Household.Presentation_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
