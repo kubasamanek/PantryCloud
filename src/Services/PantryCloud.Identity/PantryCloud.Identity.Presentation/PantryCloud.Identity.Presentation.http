@@ -1,6 +1,0 @@
-@PantryCloud.Identity.Presentation_HostAddress = http://localhost:5269
-
-GET {{PantryCloud.Identity.Presentation_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

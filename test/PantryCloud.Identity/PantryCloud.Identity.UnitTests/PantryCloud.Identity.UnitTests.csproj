@@ -12,7 +12,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.7" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageReference Include="NSubstitute" Version="5.3.0" />
+    <PackageReference Include="Shouldly" Version="4.3.0" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
       <PrivateAssets>all</PrivateAssets>
@@ -25,8 +29,23 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Auth\Certs\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Auth/Certs/jwt-private.pem">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Auth/Certs/jwt-public.pem">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  
+  <ItemGroup>
     <ProjectReference Include="..\..\..\src\Services\PantryCloud.Identity\PantryCloud.Identity.Application\PantryCloud.Identity.Application.csproj" />
     <ProjectReference Include="..\..\..\src\Services\PantryCloud.Identity\PantryCloud.Identity.Core\PantryCloud.Identity.Core.csproj" />
+    <ProjectReference Include="..\..\..\src\Services\PantryCloud.Identity\PantryCloud.Identity.Infrastructure\PantryCloud.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\Services\PantryCloud.Identity\PantryCloud.Identity.Presentation\PantryCloud.Identity.Presentation.csproj" />
   </ItemGroup>
 
 </Project>

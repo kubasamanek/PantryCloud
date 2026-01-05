@@ -23,3 +23,6 @@ secrets.json
 
 ## --- Logs ---
 *.log
+
+## --- Secrets ---
+*.pem
