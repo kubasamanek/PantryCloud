@@ -55,7 +55,7 @@ public class HouseholdController(IMediator mediator, IMapper mapper) : ApiContro
     [ProducesResponseType(typeof(AcceptHouseholdInvitationResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> SendHouseholdInvitation(AcceptHouseholdInvitationRequestDto request,
+    public async Task<IActionResult> AcceptHouseholdInvitation(AcceptHouseholdInvitationRequestDto request,
         CancellationToken cancellationToken)
     {
         var command = Mapper.Map<AcceptHouseholdInvitationCommand>(request);
