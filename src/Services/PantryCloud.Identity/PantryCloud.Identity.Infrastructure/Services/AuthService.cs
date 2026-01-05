@@ -149,14 +149,13 @@ public class AuthService(
 
         if (config.App.SendEmails)
         {
-            var client = new SmtpClient(config.Email.Host, config.Email.Port);
-            var message = new MailMessage
-            {
-                From = new MailAddress(config.Email.From),
-                Subject = Constants.ResetPasswordEmailSubject,
-                Body = string.Format(Constants.ResetPasswordEmailBodyTemplate, callbackUrl),
-                IsBodyHtml = true
-            };
+            using var client = new SmtpClient(config.Email.Host, config.Email.Port);
+            using var message = new MailMessage();
+            
+            message.From = new MailAddress(config.Email.From);
+            message.Subject = Constants.ResetPasswordEmailSubject;
+            message.Body = string.Format(Constants.ResetPasswordEmailBodyTemplate, callbackUrl);
+            message.IsBodyHtml = true;
             message.To.Add(user.Email);
 
             await client.SendMailAsync(message, cancellationToken);
