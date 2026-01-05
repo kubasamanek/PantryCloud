@@ -8,19 +8,20 @@ using PantryCloud.Identity.Core.Entities;
 
 namespace PantryCloud.Identity.Infrastructure.Services;
 
-public sealed class TokenProvider : ITokenProvider
+public sealed class TokenProvider : ITokenProvider, IDisposable
 {
     private readonly ApiConfiguration _configuration;
     private readonly SigningCredentials _signingCredentials;
+    private readonly RSA  _rsa;
 
     public TokenProvider(ApiConfiguration configuration)
     {
         var privateKeyPath = configuration.Jwt.PrivateKeyPath;
-        var privateRsa = RSA.Create();
+        _rsa = RSA.Create();
         var privateKey = File.ReadAllText(privateKeyPath);
-        privateRsa.ImportFromPem(privateKey.ToCharArray());
+        _rsa.ImportFromPem(privateKey.ToCharArray());
 
-        var rsaSecurityKey = new RsaSecurityKey(privateRsa)
+        var rsaSecurityKey = new RsaSecurityKey(_rsa)
         {
             KeyId = "key-id"
         };
@@ -65,5 +66,10 @@ public sealed class TokenProvider : ITokenProvider
     {
         var randomBytes = RandomNumberGenerator.GetBytes(64);
         return Convert.ToBase64String(randomBytes);
+    }
+
+    public void Dispose()
+    {
+        _rsa.Dispose();
     }
 }

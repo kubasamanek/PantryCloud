@@ -5,7 +5,7 @@
 namespace PantryCloud.IdentityService.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class ChangeConifugrationsAssembly : Migration
+    public partial class ChangeConfigurationsAssembly : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

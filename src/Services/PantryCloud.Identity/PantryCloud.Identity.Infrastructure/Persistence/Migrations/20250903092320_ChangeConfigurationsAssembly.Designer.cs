@@ -14,7 +14,7 @@ namespace PantryCloud.IdentityService.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20250903092320_ChangeConifugrationsAssembly")]
-    partial class ChangeConifugrationsAssembly
+    partial class ChangeConfigurationsAssembly
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
