@@ -14,7 +14,7 @@ namespace PantryCloud.HouseholdService.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(HouseholdDbContext))]
     [Migration("20250904182215_ModifyInvivations")]
-    partial class ModifyInvivations
+    partial class ModifyInvitations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

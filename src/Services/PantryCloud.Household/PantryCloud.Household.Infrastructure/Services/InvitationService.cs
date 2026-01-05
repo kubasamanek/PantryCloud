@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using ErrorOr;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PantryCloud.Household.Application;
 using PantryCloud.Household.Application.Dtos;
@@ -39,12 +40,12 @@ public class InvitationService(ILogger<InvitationService> logger,
             return InvitationErrors.UserNotHouseholdOwner;
         }
         
-        var existingInvitation = dbContext.Invitations
-            .AsEnumerable() 
-            .FirstOrDefault(x =>
+        var existingInvitation = await dbContext.Invitations
+            .FirstOrDefaultAsync(x =>
                 x.Email == request.ToEmail &&
                 x.HouseholdId == invitationHouseholdId &&
-                x is { IsExpired: false, IsUsed: false });
+                !x.IsExpired &&
+                !x.IsUsed, cancellationToken: cancellationToken);
         
         if (existingInvitation != null)
         {
@@ -100,7 +101,6 @@ public class InvitationService(ILogger<InvitationService> logger,
             return InvitationErrors.UsedInvitation;
         }
         
-        var household = dbContext.Households.FirstOrDefault(x => x.Id == invitation.HouseholdId);
         var user = dbContext.Members.FirstOrDefault(u => u.UserId == userContext.UserId);
 
         invitation.UsedAt = DateTime.UtcNow;

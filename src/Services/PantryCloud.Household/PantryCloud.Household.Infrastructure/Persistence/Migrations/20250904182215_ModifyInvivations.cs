@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PantryCloud.HouseholdService.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class ModifyInvivations : Migration
+    public partial class ModifyInvitations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
