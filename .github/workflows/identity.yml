@@ -43,8 +43,15 @@ jobs:
         run: dotnet build ${{ env.SERVICE_PROJECT }} --no-restore --configuration Release
 
       - name: Run Tests
-        run: dotnet test ${{ env.TEST_PROJECT }} --no-build --configuration Release --logger trx
+        run: dotnet test ${{ env.TEST_PROJECT }} --no-build --configuration Release --logger trx --verbosity normal
 
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Identity Tests
+          path: '**/*.trx'
+          reporter: dotnet-trx
   cd:
     name: Build & Push Docker image
     needs: ci
