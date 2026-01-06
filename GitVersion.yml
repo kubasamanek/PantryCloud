@@ -1,0 +1,42 @@
+mode: ContinuousDeployment
+
+branches:
+  develop:
+    regex: ^develop$
+    label: alpha
+    increment: Minor
+    prevent-increment:
+      of-merged-branch: true
+    track-merge-target: false
+    is-source-branch-for:
+      - release
+      - main
+
+  feature:
+    regex: ^feature[/-]
+    label: useBranchName
+    increment: Patch
+    source-branches:
+      - develop
+      - feature
+
+  main:
+    regex: ^main$|^master$
+    increment: Patch
+    label: ''
+    is-main-branch: true
+
+  release:
+    regex: ^release?[/-]
+    label: beta
+    increment: Patch
+    source-branches:
+      - develop
+
+  hotfix:
+    regex: ^hotfix(es)?[/-]
+    label: hotfix
+    increment: Patch
+
+ignore:
+  sha: []
