@@ -22,6 +22,11 @@ env:
   DOCKERFILE_PATH: src/Services/PantryCloud.Identity/PantryCloud.Identity.Presentation/Dockerfile
   IMAGE_NAME: samanekj/identityservice
   
+permissions:
+  checks: write
+  pull-requests: write
+  contents: read
+  
 jobs:
   ci:
     name: Build & Test
@@ -43,8 +48,8 @@ jobs:
         run: dotnet build ${{ env.SERVICE_PROJECT }} --no-restore --configuration Release
 
       - name: Run Tests
-        run: dotnet test ${{ env.TEST_PROJECT }} --no-build --configuration Release --logger trx --verbosity normal
-
+        run: dotnet test ${{ env.TEST_PROJECT }} --no-build --configuration Release --logger "trx;LogFileName=test_results.trx" --results-directory ./TestResults --verbosity normal
+        
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: success() || failure()
