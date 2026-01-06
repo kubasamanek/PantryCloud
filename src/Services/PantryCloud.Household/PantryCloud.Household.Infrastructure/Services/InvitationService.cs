@@ -44,8 +44,8 @@ public class InvitationService(ILogger<InvitationService> logger,
             .FirstOrDefaultAsync(x =>
                 x.Email == request.ToEmail &&
                 x.HouseholdId == invitationHouseholdId &&
-                !x.IsExpired &&
-                !x.IsUsed, cancellationToken: cancellationToken);
+                x.ExpiresAt > DateTime.UtcNow &&
+                x.UsedAt == null, cancellationToken: cancellationToken);
         
         if (existingInvitation != null)
         {
