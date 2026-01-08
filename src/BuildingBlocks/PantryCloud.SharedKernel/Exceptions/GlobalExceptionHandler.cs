@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace PantryCloud.SharedKernel.Exceptions;
 
-internal sealed class GlobalExceptionHandler(
+public sealed class GlobalExceptionHandler(
     ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(

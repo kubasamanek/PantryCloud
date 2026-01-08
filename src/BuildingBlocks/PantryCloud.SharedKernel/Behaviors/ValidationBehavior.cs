@@ -2,7 +2,7 @@ using ErrorOr;
 using FluentValidation;
 using MediatR;
 
-namespace PantryCloud.Identity.Application.Validators;
+namespace PantryCloud.SharedKernel.Behaviors;
 
 public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators)
     : IPipelineBehavior<TRequest, TResponse>
@@ -37,3 +37,4 @@ public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidat
         return await next(cancellationToken);
     }
 }
+
