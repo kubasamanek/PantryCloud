@@ -1,7 +1,8 @@
 using PantryCloud.Household.Application;
 using PantryCloud.Household.Infrastructure;
+using PantryCloud.Household.Infrastructure.Persistence;
 using PantryCloud.Household.Presentation.Extensions;
-using PantryCloud.HouseholdService.Infrastructure;
+using PantryCloud.SharedKernel.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +18,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
     
-    await app.ApplyMigrationsAsync();
+    await app.ApplyMigrationsAsync<HouseholdDbContext>();
 }
 
 app.UseHttpsRedirection();
