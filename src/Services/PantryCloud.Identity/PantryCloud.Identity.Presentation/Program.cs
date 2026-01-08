@@ -1,6 +1,8 @@
 using PantryCloud.Identity.Application;
 using PantryCloud.Identity.Infrastructure;
+using PantryCloud.Identity.Infrastructure.Persistence;
 using PantryCloud.Identity.Presentation.Extensions;
+using PantryCloud.SharedKernel.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +18,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
     
-    await app.ApplyMigrationsAsync();
+    await app.ApplyMigrationsAsync<ApplicationDbContext>();
 }
 
 app.UseHttpsRedirection();

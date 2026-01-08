@@ -2,7 +2,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using PantryCloud.Identity.Application.Commands;
-using PantryCloud.Identity.Application.Validators;
+using PantryCloud.SharedKernel.Behaviors;
 
 namespace PantryCloud.Identity.Application;
 

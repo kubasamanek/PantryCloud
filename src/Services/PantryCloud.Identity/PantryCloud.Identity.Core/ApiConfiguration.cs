@@ -1,10 +1,11 @@
+using PantryCloud.SharedKernel.Configuration;
+
 namespace PantryCloud.Identity.Core;
 
-public class ApiConfiguration
+public class ApiConfiguration : ApiConfigurationBase
 {
     public JwtSettings Jwt { get; set; } = new();
     public AppSettings App { get; set; } = new();
-    public ConnectionStrings ConnectionStrings { get; set; } = new();
     public EmailSettings Email { get; set; } = new();
 }
 
@@ -32,9 +33,4 @@ public class EmailSettings
     public string Username { get; set; } = "admin";
     public string Password { get; set; } = "admin";
     public string From { get; set; } = "admin";
-}
-
-public class ConnectionStrings
-{
-    public string DefaultConnection { get; set; } = "Host=localhost;Port=5432;Database=identitydb;Username=jakubsamanek;";
 }

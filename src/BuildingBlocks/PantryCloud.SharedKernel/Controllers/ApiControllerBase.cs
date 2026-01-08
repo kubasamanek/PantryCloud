@@ -1,10 +1,11 @@
 using AutoMapper;
 using ErrorOr;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace PantryCloud.Household.Presentation.Controllers;
+namespace PantryCloud.SharedKernel.Controllers;
 
 [ApiController]
 public abstract class ApiControllerBase(IMediator mediator, IMapper mapper) : ControllerBase
@@ -53,3 +54,4 @@ public abstract class ApiControllerBase(IMediator mediator, IMapper mapper) : Co
         );
     }
 }
+

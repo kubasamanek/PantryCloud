@@ -1,6 +1,7 @@
+using PantryCloud.SharedKernel.Configuration;
+
 namespace PantryCloud.Household.Core;
 
-public class ApiConfiguration
+public class ApiConfiguration : ApiConfigurationBase
 {
-    
 }

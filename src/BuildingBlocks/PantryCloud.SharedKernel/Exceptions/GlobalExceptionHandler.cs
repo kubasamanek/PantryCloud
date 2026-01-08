@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
-namespace PantryCloud.Identity.Presentation.Exceptions;
+namespace PantryCloud.SharedKernel.Exceptions;
 
-internal sealed class GlobalExceptionHandler(
+public sealed class GlobalExceptionHandler(
     ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
@@ -36,3 +38,4 @@ internal sealed class GlobalExceptionHandler(
         return true;
     }
 }
+

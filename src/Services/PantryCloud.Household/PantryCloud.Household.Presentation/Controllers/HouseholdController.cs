@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using PantryCloud.Household.Application.Commands;
 using PantryCloud.Household.Application.Dtos;
 using PantryCloud.Household.Application.Queries;
+using PantryCloud.SharedKernel.Controllers;
 
 namespace PantryCloud.Household.Presentation.Controllers;
 
