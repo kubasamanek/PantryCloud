@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
-using PantryCloud.Household.Presentation.Exceptions;
+using PantryCloud.SharedKernel.Exceptions;
 
 namespace PantryCloud.Household.Presentation.Extensions;
 
