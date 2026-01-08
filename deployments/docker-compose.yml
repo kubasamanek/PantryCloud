@@ -1,0 +1,84 @@
+name: pantry-cloud-dev
+
+services:
+  # --- INFRASTRUCTURE ---
+  postgres:
+    image: postgres:16-alpine
+    container_name: pantry-postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pantry-network
+
+  # --- SERVICES ---
+  identity-api:
+    container_name: pantry-identity
+    build:
+      context: ../
+      dockerfile: src/Services/PantryCloud.Identity/PantryCloud.Identity.Presentation/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - DOCKER_ENV=true
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=identity_db;Username=admin;Password=password;
+      - Jwt__Issuer=http://localhost:5072
+      - Jwt__Audience=PantryCloud.WebClient
+      - Jwt__ExpirationInMinutes=60
+      - Jwt__PrivateKeyPath=/app/secrets/private.pem
+      - Jwt__PublicKeyPath=/app/secrets/public.pem
+      - App__FrontendUrl=http://localhost:3000
+      - App__ResetPasswordTokenExpirationInMinutes=60
+      - App__VerifyEmailTokenExpirationInMinutes=60
+      - Email__Host=localhost
+      - Email__Port=2525
+      - Email__Username=
+      - Email__Password=
+      - Email__From=admin@pantrycloud.dev
+    ports:
+      - "5072:8080"
+    volumes:
+      - ../src/Services/PantryCloud.Identity/PantryCloud.Identity.Presentation/Secrets:/app/secrets:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - pantry-network
+
+  household-api:
+    container_name: pantry-household
+    build:
+      context: ../
+      dockerfile: src/Services/PantryCloud.Household/PantryCloud.Household.Presentation/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - DOCKER_ENV=true
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=household_db;Username=admin;Password=password;
+    ports:
+      - "5155:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      identity-api:
+        condition: service_started
+    networks:
+      - pantry-network
+
+volumes:
+  postgres-data:
+
+networks:
+  pantry-network:
+    driver: bridge
