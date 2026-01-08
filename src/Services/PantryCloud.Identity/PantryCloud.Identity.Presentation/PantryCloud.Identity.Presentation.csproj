@@ -25,6 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\PantryCloud.Identity.Application\PantryCloud.Identity.Application.csproj" />
     <ProjectReference Include="..\PantryCloud.Identity.Infrastructure\PantryCloud.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\PantryCloud.SharedKernel\PantryCloud.SharedKernel.csproj" />
   </ItemGroup>
 
   <ItemGroup>

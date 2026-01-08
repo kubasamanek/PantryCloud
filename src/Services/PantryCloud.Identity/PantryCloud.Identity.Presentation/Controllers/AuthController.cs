@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PantryCloud.Identity.Application.Commands;
 using PantryCloud.Identity.Application.DTOs;
+using PantryCloud.SharedKernel.Controllers;
 
 namespace PantryCloud.Identity.Presentation.Controllers;
 

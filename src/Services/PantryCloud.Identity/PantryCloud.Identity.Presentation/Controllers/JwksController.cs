@@ -3,6 +3,7 @@ using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using PantryCloud.SharedKernel.Controllers;
 
 namespace PantryCloud.Identity.Presentation.Controllers;
 
