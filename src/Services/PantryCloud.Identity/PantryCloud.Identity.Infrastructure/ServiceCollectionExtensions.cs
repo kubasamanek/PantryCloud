@@ -40,7 +40,7 @@ public static class ServiceCollectionExtensions
                 var publicKeyPath = configuration.Jwt.PublicKeyPath;
                 var publicRsa = RSA.Create();
                 publicRsa.ImportFromPem(File.ReadAllText(publicKeyPath).ToCharArray());
-
+                options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,

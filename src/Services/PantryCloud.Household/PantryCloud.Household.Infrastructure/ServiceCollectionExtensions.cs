@@ -24,17 +24,18 @@ public static class ServiceCollectionExtensions
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.Authority = "https://localhost:5072";
+                var identityUrl = apiConfiguration.App.IdentityUrl;
                 options.Audience = "PantryCloud.WebClient";
-                options.MetadataAddress = "https://localhost:5072/.well-known/openid-configuration";
+                options.MetadataAddress = $"{identityUrl}/.well-known/openid-configuration";
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
-                    ValidIssuer = "https://localhost:5072",
+                    ValidIssuer = apiConfiguration.Jwt.Issuer,
                     ValidateAudience = true,
-                    ValidAudience = "PantryCloud.WebClient",
+                    ValidAudience = apiConfiguration.Jwt.Audience,
                     ValidateLifetime = true,
                 };
+                options.RequireHttpsMetadata = false;
             });
 
         services.AddAuthorization();
@@ -42,7 +43,7 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         
         services.AddScoped<IUserContext, UserContext>();
-        services.AddScoped<IHouseholdManagementService, Services.HouseholdManagementService>();
+        services.AddScoped<IHouseholdManagementService, HouseholdManagementService>();
         services.AddScoped<IInvitationService, InvitationService>();
         
         return services;

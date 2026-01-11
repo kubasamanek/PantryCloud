@@ -3,18 +3,19 @@ using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using PantryCloud.Identity.Core;
 using PantryCloud.SharedKernel.Controllers;
 
 namespace PantryCloud.Identity.Presentation.Controllers;
 
 [ApiController]
 [Route("api/jwks")]
-public class JwksController(IMediator mediator, IMapper mapper, IConfiguration configuration) : ApiControllerBase(mediator, mapper)
+public class JwksController(IMediator mediator, IMapper mapper, ApiConfiguration apiConfiguration) : ApiControllerBase(mediator, mapper)
 {
     [HttpGet("/.well-known/openid-configuration/jwks")]
     public IActionResult GetJwks()
     {
-        var publicKey = System.IO.File.ReadAllText(configuration["Jwt:PublicKeyPath"]!);
+        var publicKey = System.IO.File.ReadAllText(apiConfiguration.Jwt.PublicKeyPath);
 
         using var rsa = RSA.Create();
         rsa.ImportFromPem(publicKey.ToCharArray());
@@ -36,15 +37,16 @@ public class JwksController(IMediator mediator, IMapper mapper, IConfiguration c
     [HttpGet("/.well-known/openid-configuration")]
     public IActionResult GetOpenIdConfiguration()
     {
-        var issuer = configuration["Jwt:Issuer"]!;
-        var jwksUri = $"{issuer}/.well-known/openid-configuration/jwks";
-
+        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        var jwksUri = $"{baseUrl}/.well-known/openid-configuration/jwks";
+        var issuer = apiConfiguration.Jwt.Issuer;
+        
         var discoveryDocument = new
         {
             issuer,
             jwks_uri = jwksUri,
-            token_endpoint = $"{issuer}/api/auth/login",
-            authorization_endpoint = $"{issuer}/api/auth/login", // optional, for OAuth2 compatibility
+            token_endpoint = $"{baseUrl}/api/auth/login",
+            authorization_endpoint = $"{baseUrl}/api/auth/login",
             response_types_supported = new[] { "token" },
             subject_types_supported = new[] { "public" },
             id_token_signing_alg_values_supported = new[] { "RS256" }
