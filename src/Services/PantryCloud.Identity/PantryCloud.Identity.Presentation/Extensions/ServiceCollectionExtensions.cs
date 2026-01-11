@@ -6,7 +6,7 @@ namespace PantryCloud.Identity.Presentation.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    internal static IServiceCollection AddPresentationLayerServices(this IServiceCollection services, IConfiguration configuration)
+    internal static IServiceCollection AddPresentationLayerServices(this IServiceCollection services)
     {
         services.AddSwaggerGenWithAuth();
         services.AddEndpointsApiExplorer();
