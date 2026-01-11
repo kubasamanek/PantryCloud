@@ -31,10 +31,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
-      - DOCKER_ENV=true
+      - IsDevelopment=true
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=identity_db;Username=admin;Password=password;
-      - Jwt__Issuer=http://localhost:5072
-      - Jwt__Audience=PantryCloud.WebClient
+      - Jwt__Issuer=pantry-identity
+      - Jwt__Audience=pantry-cloud
       - Jwt__ExpirationInMinutes=60
       - Jwt__PrivateKeyPath=/app/secrets/private.pem
       - Jwt__PublicKeyPath=/app/secrets/public.pem
@@ -64,8 +64,11 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
-      - DOCKER_ENV=true
+      - IsDevelopment=true
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=household_db;Username=admin;Password=password;
+      - App__IdentityUrl=http://identity-api:8080
+      - Jwt__Issuer=pantry-identity
+      - Jwt__Audience=pantry-cloud
     ports:
       - "5155:8080"
     depends_on:
