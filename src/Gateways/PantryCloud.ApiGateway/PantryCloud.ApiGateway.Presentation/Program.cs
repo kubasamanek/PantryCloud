@@ -22,6 +22,9 @@ if (app.Environment.IsProduction())
 
 app.UseExceptionHandler();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapReverseProxy();
 
 app.MapControllers();
