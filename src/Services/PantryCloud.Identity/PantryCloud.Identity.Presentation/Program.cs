@@ -21,7 +21,10 @@ if (app.Environment.IsDevelopment())
     await app.ApplyMigrationsAsync<ApplicationDbContext>();
 }
 
-app.UseHttpsRedirection();
+if (app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseExceptionHandler();
 
