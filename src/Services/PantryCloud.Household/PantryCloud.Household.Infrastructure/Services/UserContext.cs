@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using PantryCloud.Household.Application;
 
@@ -5,49 +7,24 @@ namespace PantryCloud.Household.Infrastructure.Services;
 
 public sealed class UserContext : IUserContext
 {
-    private readonly HttpContext _context;
+    private readonly ClaimsPrincipal _user;
 
     public UserContext(IHttpContextAccessor httpContextAccessor)
     {
-        _context = httpContextAccessor.HttpContext
-                   ?? throw new UnauthorizedAccessException("No HttpContext found");
+        var context = httpContextAccessor.HttpContext
+                      ?? throw new UnauthorizedAccessException("No HttpContext found");
+
+        _user = context.User ?? throw new UnauthorizedAccessException("User not authenticated");
     }
 
-    public Guid UserId
-    {
-        get
-        {
-            if (!_context.Request.Headers.TryGetValue("X-User-Id", out var userIdHeader))
-            {
-                throw new UnauthorizedAccessException("X-User-Id header not found. Request must come through the API Gateway.");
-            }
+    public Guid UserId =>
+        Guid.TryParse(_user.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                      _user.FindFirstValue(JwtRegisteredClaimNames.Sub), out var id)
+            ? id
+            : throw new UnauthorizedAccessException("User ID not found in token");
 
-            var userIdValue = userIdHeader.ToString();
-            if (!Guid.TryParse(userIdValue, out var userId))
-            {
-                throw new UnauthorizedAccessException($"Invalid user ID format in X-User-Id header: {userIdValue}");
-            }
-
-            return userId;
-        }
-    }
-
-    public string Email
-    {
-        get
-        {
-            if (!_context.Request.Headers.TryGetValue("X-User-Email", out var emailHeader))
-            {
-                throw new UnauthorizedAccessException("X-User-Email header not found. Request must come through the API Gateway.");
-            }
-
-            var email = emailHeader.ToString();
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                throw new UnauthorizedAccessException("Email header is empty.");
-            }
-
-            return email;
-        }
-    }
+    public string Email =>
+        _user.FindFirstValue(ClaimTypes.Email)
+        ?? _user.FindFirstValue(JwtRegisteredClaimNames.Email)
+        ?? throw new UnauthorizedAccessException("Email not found in token");
 }

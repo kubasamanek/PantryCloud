@@ -1,5 +1,6 @@
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PantryCloud.Household.Application.Commands;
 using PantryCloud.Household.Application.Dtos;
@@ -12,6 +13,7 @@ namespace PantryCloud.Household.Presentation.Controllers;
 [Route("api/households")]
 public class HouseholdController(IMediator mediator, IMapper mapper) : ApiControllerBase(mediator, mapper)
 {
+    [Authorize]
     [HttpPost("")]
     [ProducesResponseType(typeof(CreateHouseholdResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -23,6 +25,7 @@ public class HouseholdController(IMediator mediator, IMapper mapper) : ApiContro
         return FromResult(result, StatusCodes.Status201Created);
     }
     
+    [Authorize]
     [HttpGet("me")]
     [ProducesResponseType(typeof(GetCurrentHouseholdResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -34,6 +37,7 @@ public class HouseholdController(IMediator mediator, IMapper mapper) : ApiContro
         return FromResult(result, StatusCodes.Status200OK);
     }
 
+    [Authorize]
     [HttpPost("invite")]
     [ProducesResponseType(typeof(SendHouseholdInvitationResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -47,6 +51,7 @@ public class HouseholdController(IMediator mediator, IMapper mapper) : ApiContro
         return FromResult(result, StatusCodes.Status200OK);
     }
     
+    [Authorize]
     [HttpPost("join")]
     [ProducesResponseType(typeof(AcceptHouseholdInvitationResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -60,6 +65,7 @@ public class HouseholdController(IMediator mediator, IMapper mapper) : ApiContro
         return FromResult(result, StatusCodes.Status200OK);
     }
     
+    [Authorize]
     [HttpPost("leave")]
     [ProducesResponseType(typeof(LeaveHouseholdResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
