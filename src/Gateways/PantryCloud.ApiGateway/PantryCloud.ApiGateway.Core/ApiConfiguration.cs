@@ -31,6 +31,7 @@ public class ResilienceSettings
     public int RequestTimeoutSeconds { get; set; } = 30;
     public CircuitBreakerSettings CircuitBreaker { get; set; } = new();
     public RetrySettings Retry { get; set; } = new();
+    public HealthCheckSettings HealthCheck { get; set; } = new();
 }
 
 public class CircuitBreakerSettings
@@ -47,6 +48,16 @@ public class RetrySettings
     public bool Enabled { get; set; } = true;
     public int MaxRetryAttempts { get; set; } = 3;
     public int BaseDelayMilliseconds { get; set; } = 1000;
+}
+
+public class HealthCheckSettings
+{
+    public bool Enabled { get; set; } = true;
+    public int IntervalSeconds { get; set; } = 30;
+    public int TimeoutSeconds { get; set; } = 5;
+    public string Path { get; set; } = "/health";
+    public string Policy { get; set; } = "ConsecutiveFailures";
+    public int ConsecutiveFailureThreshold { get; set; } = 3;
 }
 
 public class ServiceEndpoints

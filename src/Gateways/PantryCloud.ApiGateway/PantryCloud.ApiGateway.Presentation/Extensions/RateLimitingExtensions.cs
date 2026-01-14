@@ -8,6 +8,9 @@ namespace PantryCloud.ApiGateway.Presentation.Extensions;
 
 public static class RateLimitingExtensions
 {
+    /// <summary>
+    /// Configures rate limiting policies to protect downstream services from excessive traffic and DoS attacks.
+    /// </summary>
     public static IServiceCollection AddRateLimiting(
         this IServiceCollection services,
         ApiConfiguration apiConfiguration)
@@ -16,6 +19,7 @@ public static class RateLimitingExtensions
         {
             services.AddRateLimiter(options =>
             {
+                // Define the Global Limiter applied to all requests
                 options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
                     RateLimitPartition.GetFixedWindowLimiter(
                         partitionKey: context.User.Identity?.IsAuthenticated == true

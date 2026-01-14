@@ -1,12 +1,15 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using PantryCloud.ApiGateway.Core;
+using PantryCloud.ApiGateway.Infrastructure.Transforms;
 using Polly;
 using Polly.Extensions.Http;
 using Polly.Registry;
 using Yarp.ReverseProxy.Configuration;
+using Yarp.ReverseProxy.Forwarder;
 
 namespace PantryCloud.ApiGateway.Infrastructure;
 
@@ -41,10 +44,6 @@ public static class ServiceCollectionExtensions
 
         services.AddAuthorization();
 
-        // Add Resilience Policies (Polly)
-        // Note: These policies are registered for potential use with custom HttpClient instances.
-        // YARP manages its own HttpClient instances, so timeouts are configured via ClusterConfig.HttpClient.RequestTimeout.
-        // For full Polly integration with YARP, consider using a custom IForwarderHttpClientFactory.
         var resilienceSettings = apiConfiguration.Gateway.Resilience;
         
         if (resilienceSettings.Retry.Enabled || resilienceSettings.CircuitBreaker.Enabled)
@@ -68,11 +67,11 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IReadOnlyPolicyRegistry<string>>(policyRegistry);
             if (resilienceSettings.Retry.Enabled)
             {
-                policyRegistry.Add("RetryPolicy", retryPolicy);
+                policyRegistry.Add(Constants.RetryPolicyName, retryPolicy);
             }
             if (resilienceSettings.CircuitBreaker.Enabled)
             {
-                policyRegistry.Add("CircuitBreakerPolicy", circuitBreakerPolicy);
+                policyRegistry.Add(Constants.CircuitBreakerPolicyName, circuitBreakerPolicy);
             }
         }
 
@@ -81,8 +80,10 @@ public static class ServiceCollectionExtensions
                 GetRoutes(apiConfiguration.Services),
                 GetClusters(apiConfiguration.Services, resilienceSettings)));
 
+        services.AddSingleton<IForwarderHttpClientFactory, ResilientForwarderHttpClientFactory>();
+
         services.AddReverseProxy()
-            .AddTransforms<Transforms.CorrelationIdTransformProvider>();
+            .AddTransforms<CorrelationIdTransformProvider>();
 
         return services;
     }
@@ -176,66 +177,62 @@ public static class ServiceCollectionExtensions
 
     private static ClusterConfig[] GetClusters(ServiceEndpoints services, ResilienceSettings resilienceSettings)
     {
-        // Note: Request timeout configuration can be added via IForwarderHttpClientFactory if needed
-        // For now, using default HttpClient timeout settings
-        
+        // Set request timeout
+        var forwarderRequestConfig = new ForwarderRequestConfig
+        {
+            ActivityTimeout = TimeSpan.FromSeconds(resilienceSettings.RequestTimeoutSeconds)
+        };
+
+        // Add policies to metadata
+        var metadata = new Dictionary<string, string>();
+        if (resilienceSettings.Retry.Enabled)
+        {
+            metadata[Constants.RetryPolicyName] = Constants.RetryPolicyName;
+        }
+        if (resilienceSettings.CircuitBreaker.Enabled)
+        {
+            metadata[Constants.CircuitBreakerPolicyName] = Constants.CircuitBreakerPolicyName;
+        }
+
         return
         [
-            new ClusterConfig
-            {
-                ClusterId = RouteConfiguration.IdentityClusterId,
-                Destinations = new Dictionary<string, DestinationConfig>
-                {
-                    ["default"] = new DestinationConfig
-                    {
-                        Address = services.IdentityService
-                    }
-                }
-            },
-            new ClusterConfig
-            {
-                ClusterId = RouteConfiguration.HouseholdClusterId,
-                Destinations = new Dictionary<string, DestinationConfig>
-                {
-                    ["default"] = new DestinationConfig
-                    {
-                        Address = services.HouseholdService
-                    }
-                }
-            },
-            new ClusterConfig
-            {
-                ClusterId = RouteConfiguration.PantryClusterId,
-                Destinations = new Dictionary<string, DestinationConfig>
-                {
-                    ["default"] = new DestinationConfig
-                    {
-                        Address = services.PantryService
-                    }
-                }
-            },
-            new ClusterConfig
-            {
-                ClusterId = RouteConfiguration.RecipeClusterId,
-                Destinations = new Dictionary<string, DestinationConfig>
-                {
-                    ["default"] = new DestinationConfig
-                    {
-                        Address = services.RecipeService
-                    }
-                }
-            },
-            new ClusterConfig
-            {
-                ClusterId = RouteConfiguration.ShoppingListClusterId,
-                Destinations = new Dictionary<string, DestinationConfig>
-                {
-                    ["default"] = new DestinationConfig
-                    {
-                        Address = services.ShoppingListService
-                    }
-                }
-            }
+            CreateClusterConfig(RouteConfiguration.IdentityClusterId, services.IdentityService),
+            CreateClusterConfig(RouteConfiguration.HouseholdClusterId, services.HouseholdService),
+            //CreateClusterConfig(RouteConfiguration.PantryClusterId, services.PantryService),
+            //CreateClusterConfig(RouteConfiguration.RecipeClusterId, services.RecipeService),
+            //CreateClusterConfig(RouteConfiguration.ShoppingListClusterId, services.ShoppingListService)
         ];
+
+        ClusterConfig CreateClusterConfig(string clusterId, string serviceAddress)
+        {
+            var cluster = new ClusterConfig
+            {
+                ClusterId = clusterId,
+                HttpRequest = forwarderRequestConfig,
+                Destinations = new Dictionary<string, DestinationConfig>
+                {
+                    ["default"] = new()
+                    {
+                        Address = serviceAddress
+                    }
+                },
+                Metadata = metadata.Count > 0 ? metadata : null,
+                HealthCheck = resilienceSettings.HealthCheck.Enabled
+                    ? new HealthCheckConfig
+                    {
+                        Active = new ActiveHealthCheckConfig
+                        {
+                            Enabled = true,
+                            Interval = TimeSpan.FromSeconds(resilienceSettings.HealthCheck.IntervalSeconds),
+                            Timeout = TimeSpan.FromSeconds(resilienceSettings.HealthCheck.TimeoutSeconds),
+                            Path = resilienceSettings.HealthCheck.Path,
+                            Policy = resilienceSettings.HealthCheck.Policy
+                        }
+                    }
+                    : null
+            };
+
+            return cluster;
+        }
     }
 }

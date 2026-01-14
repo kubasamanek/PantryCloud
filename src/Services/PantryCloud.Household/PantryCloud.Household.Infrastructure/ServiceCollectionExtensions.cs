@@ -18,9 +18,13 @@ public static class ServiceCollectionExtensions
         configuration.Bind(apiConfiguration);
         services.AddSingleton(apiConfiguration);
         
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+
         services.AddDbContext<HouseholdDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(connectionString));
         
+        services.AddHealthChecks().AddNpgSql(connectionString!);
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
