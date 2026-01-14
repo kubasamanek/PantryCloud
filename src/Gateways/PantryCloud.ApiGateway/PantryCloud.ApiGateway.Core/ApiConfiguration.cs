@@ -14,6 +14,39 @@ public class GatewaySettings
 {
     public int Port { get; set; } = 5000;
     public bool EnableSwagger { get; set; } = true;
+    public RateLimitSettings RateLimit { get; set; } = new();
+    public ResilienceSettings Resilience { get; set; } = new();
+}
+
+public class RateLimitSettings
+{
+    public bool Enabled { get; set; } = true;
+    public int PermitLimit { get; set; } = 100;
+    public int WindowSeconds { get; set; } = 60;
+    public int QueueLimit { get; set; } = 0;
+}
+
+public class ResilienceSettings
+{
+    public int RequestTimeoutSeconds { get; set; } = 30;
+    public CircuitBreakerSettings CircuitBreaker { get; set; } = new();
+    public RetrySettings Retry { get; set; } = new();
+}
+
+public class CircuitBreakerSettings
+{
+    public bool Enabled { get; set; } = true;
+    public int FailureThreshold { get; set; } = 5;
+    public int DurationOfBreakSeconds { get; set; } = 30;
+    public int SamplingDurationSeconds { get; set; } = 60;
+    public int MinimumThroughput { get; set; } = 10;
+}
+
+public class RetrySettings
+{
+    public bool Enabled { get; set; } = true;
+    public int MaxRetryAttempts { get; set; } = 3;
+    public int BaseDelayMilliseconds { get; set; } = 1000;
 }
 
 public class ServiceEndpoints

@@ -1,8 +1,13 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using PantryCloud.ApiGateway.Core;
+using PantryCloud.ApiGateway.Infrastructure.Transforms;
+using Polly;
+using Polly.Extensions.Http;
+using Polly.Registry;
 using Yarp.ReverseProxy.Configuration;
 
 namespace PantryCloud.ApiGateway.Infrastructure;
@@ -38,12 +43,48 @@ public static class ServiceCollectionExtensions
 
         services.AddAuthorization();
 
+        // Add Resilience Policies (Polly)
+        // Note: These policies are registered for potential use with custom HttpClient instances.
+        // YARP manages its own HttpClient instances, so timeouts are configured via ClusterConfig.HttpClient.RequestTimeout.
+        // For full Polly integration with YARP, consider using a custom IForwarderHttpClientFactory.
+        var resilienceSettings = apiConfiguration.Gateway.Resilience;
+        
+        if (resilienceSettings.Retry.Enabled || resilienceSettings.CircuitBreaker.Enabled)
+        {
+            var retryPolicy = HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .WaitAndRetryAsync(
+                    retryCount: resilienceSettings.Retry.Enabled ? resilienceSettings.Retry.MaxRetryAttempts : 0,
+                    sleepDurationProvider: retryAttempt => TimeSpan.FromMilliseconds(
+                        resilienceSettings.Retry.BaseDelayMilliseconds * Math.Pow(2, retryAttempt)));
+
+            var circuitBreakerPolicy = HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .CircuitBreakerAsync(
+                    handledEventsAllowedBeforeBreaking: resilienceSettings.CircuitBreaker.Enabled 
+                        ? resilienceSettings.CircuitBreaker.FailureThreshold 
+                        : int.MaxValue,
+                    durationOfBreak: TimeSpan.FromSeconds(resilienceSettings.CircuitBreaker.DurationOfBreakSeconds));
+
+            var policyRegistry = new PolicyRegistry();
+            services.AddSingleton<IReadOnlyPolicyRegistry<string>>(policyRegistry);
+            if (resilienceSettings.Retry.Enabled)
+            {
+                policyRegistry.Add("RetryPolicy", retryPolicy);
+            }
+            if (resilienceSettings.CircuitBreaker.Enabled)
+            {
+                policyRegistry.Add("CircuitBreakerPolicy", circuitBreakerPolicy);
+            }
+        }
+
         services.AddSingleton<IProxyConfigProvider>(_ => 
             new InMemoryConfigProvider(
                 GetRoutes(apiConfiguration.Services),
-                GetClusters(apiConfiguration.Services)));
+                GetClusters(apiConfiguration.Services, resilienceSettings)));
 
-        services.AddReverseProxy();
+        services.AddReverseProxy()
+            .AddTransforms<Transforms.CorrelationIdTransformProvider>();
 
         return services;
     }
@@ -135,8 +176,11 @@ public static class ServiceCollectionExtensions
         ];
     }
 
-    private static ClusterConfig[] GetClusters(ServiceEndpoints services)
+    private static ClusterConfig[] GetClusters(ServiceEndpoints services, ResilienceSettings resilienceSettings)
     {
+        // Note: Request timeout configuration can be added via IForwarderHttpClientFactory if needed
+        // For now, using default HttpClient timeout settings
+        
         return
         [
             new ClusterConfig
