@@ -54,7 +54,7 @@ jobs:
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
-          name: [REPORT] API Gateway tests
+          name: REPORT - API Gateway tests
           path: '**/*.trx'
           reporter: dotnet-trx
 
