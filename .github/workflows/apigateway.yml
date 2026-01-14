@@ -29,7 +29,7 @@ permissions:
 
 jobs:
   ci:
-    name: Build
+    name: Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -54,7 +54,7 @@ jobs:
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
-          name: Api Gateway Tests
+          name: [REPORT] API Gateway tests
           path: '**/*.trx'
           reporter: dotnet-trx
 

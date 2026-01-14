@@ -54,7 +54,7 @@ jobs:
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
-          name: Household Tests
+          name: [REPORT] Household tests
           path: '**/*.trx'
           reporter: dotnet-trx
   cd:
