@@ -4,29 +4,26 @@ using Microsoft.Extensions.Logging;
 
 namespace PantryCloud.ApiGateway.Infrastructure.Middleware;
 
-public class CorrelationIdMiddleware
+/// <summary>
+/// Establishes a unique tracking identifier (Correlation ID) for the current request lifecycle.
+/// Ensures that all logs generated during the processing of this request are tagged with the same ID,
+/// enabling effective distributed tracing across the system.
+/// </summary>
+public class CorrelationIdMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-    private const string CorrelationIdHeader = "X-Correlation-Id";
-
-    public CorrelationIdMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
-        var correlationId = context.Request.Headers[CorrelationIdHeader].FirstOrDefault()
+        var correlationId = context.Request.Headers[Constants.CorrelationIdHeader].FirstOrDefault()
                            ?? Guid.NewGuid().ToString();
 
-        context.Request.Headers[CorrelationIdHeader] = correlationId;
-        context.Response.Headers[CorrelationIdHeader] = correlationId;
-        context.Items["CorrelationId"] = correlationId;
+        context.Request.Headers[Constants.CorrelationIdHeader] = correlationId;
+        context.Response.Headers[Constants.CorrelationIdHeader] = correlationId;
+        context.Items[Constants.CorrelationIdItem] = correlationId;
 
         using (context.RequestServices.GetRequiredService<ILogger<CorrelationIdMiddleware>>()
-            .BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+            .BeginScope(new Dictionary<string, object> { [Constants.CorrelationIdItem] = correlationId }))
         {
-            await _next(context);
+            await next(context);
         }
     }
 }

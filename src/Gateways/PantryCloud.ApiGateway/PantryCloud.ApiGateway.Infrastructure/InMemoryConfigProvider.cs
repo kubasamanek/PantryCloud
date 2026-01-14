@@ -3,6 +3,11 @@ using Yarp.ReverseProxy.Configuration;
 
 namespace PantryCloud.ApiGateway.Infrastructure;
 
+/// <summary>
+/// Provides an in-memory storage mechanism for YARP configuration (Routes and Clusters).
+/// Implements the IProxyConfigProvider to allow for dynamic, zero-downtime updates 
+/// to the reverse proxy configuration without restarting the application.
+/// </summary>
 public class InMemoryConfigProvider(RouteConfig[] routes, ClusterConfig[] clusters) : IProxyConfigProvider
 {
     private volatile InMemoryConfig _config = new(routes, clusters);

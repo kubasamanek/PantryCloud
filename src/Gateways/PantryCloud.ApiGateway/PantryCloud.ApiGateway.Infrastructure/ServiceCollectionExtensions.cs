@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using PantryCloud.ApiGateway.Core;
-using PantryCloud.ApiGateway.Infrastructure.Transforms;
 using Polly;
 using Polly.Extensions.Http;
 using Polly.Registry;
