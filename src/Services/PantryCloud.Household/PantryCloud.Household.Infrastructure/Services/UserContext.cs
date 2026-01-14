@@ -25,5 +25,6 @@ public sealed class UserContext : IUserContext
 
     public string Email =>
         _user.FindFirstValue(ClaimTypes.Email)
+        ?? _user.FindFirstValue(JwtRegisteredClaimNames.Email)
         ?? throw new UnauthorizedAccessException("Email not found in token");
 }

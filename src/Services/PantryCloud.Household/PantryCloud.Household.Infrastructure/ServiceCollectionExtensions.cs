@@ -18,14 +18,18 @@ public static class ServiceCollectionExtensions
         configuration.Bind(apiConfiguration);
         services.AddSingleton(apiConfiguration);
         
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+
         services.AddDbContext<HouseholdDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(connectionString));
         
+        services.AddHealthChecks().AddNpgSql(connectionString!);
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
                 var identityUrl = apiConfiguration.App.IdentityUrl;
-                options.Audience = "PantryCloud.WebClient";
+                options.Audience = apiConfiguration.Jwt.Audience;
                 options.MetadataAddress = $"{identityUrl}/.well-known/openid-configuration";
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -34,6 +38,7 @@ public static class ServiceCollectionExtensions
                     ValidateAudience = true,
                     ValidAudience = apiConfiguration.Jwt.Audience,
                     ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
                 };
                 options.RequireHttpsMetadata = false;
             });

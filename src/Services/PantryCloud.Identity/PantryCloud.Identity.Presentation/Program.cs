@@ -7,7 +7,7 @@ using PantryCloud.SharedKernel.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
-    .AddPresentationLayerServices(builder.Configuration)
+    .AddPresentationLayerServices()
     .AddInfrastructureLayerServices(builder.Configuration)
     .AddApplicationLayerServices();
 
@@ -31,6 +31,7 @@ app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHealthChecks("/health");
 app.MapControllers();
 
 app.Run();

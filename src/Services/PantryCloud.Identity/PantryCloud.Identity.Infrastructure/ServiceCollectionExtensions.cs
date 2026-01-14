@@ -22,8 +22,12 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ITokenProvider, TokenProvider>();
         services.AddScoped<IAuthService, AuthService>();
         
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(connectionString));
+        
+        services.AddHealthChecks().AddNpgSql(connectionString!);
         
         services.AddAuthorization();
         services.AddJwtAuthentification(apiConfiguration);
