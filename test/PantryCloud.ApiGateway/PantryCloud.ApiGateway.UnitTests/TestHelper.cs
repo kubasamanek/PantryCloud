@@ -18,10 +18,15 @@ internal static class TestHelper
         bool isAuthenticated = false,
         string? userId = null)
     {
-        var context = new DefaultHttpContext();
-        context.Request.Method = method ?? "GET";
-        context.Request.Path = path ?? "/api/test";
-        
+        var context = new DefaultHttpContext
+        {
+            Request =
+            {
+                Method = method ?? "GET",
+                Path = path ?? "/api/test"
+            }
+        };
+
         if (correlationId != null)
         {
             context.Request.Headers["X-Correlation-Id"] = correlationId;
@@ -31,13 +36,12 @@ internal static class TestHelper
         services.AddSingleton(MockLogger<CorrelationIdMiddleware>());
         context.RequestServices = services.BuildServiceProvider();
 
-        if (isAuthenticated && userId != null)
-        {
-            var identity = new System.Security.Claims.ClaimsIdentity("test");
-            identity.AddClaim(new System.Security.Claims.Claim(
-                System.Security.Claims.ClaimTypes.NameIdentifier, userId));
-            context.User = new System.Security.Claims.ClaimsPrincipal(identity);
-        }
+        if (!isAuthenticated || userId == null) return context;
+        
+        var identity = new System.Security.Claims.ClaimsIdentity("test");
+        identity.AddClaim(new System.Security.Claims.Claim(
+            System.Security.Claims.ClaimTypes.NameIdentifier, userId));
+        context.User = new System.Security.Claims.ClaimsPrincipal(identity);
 
         return context;
     }
