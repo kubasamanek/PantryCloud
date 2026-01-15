@@ -123,6 +123,6 @@ public class HouseholdManagementService(HouseholdDbContext dbContext, IUserConte
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new LeaveHouseholdResponseDto();
+        return new LeaveHouseholdResponseDto(householdId, userContext.Email, DateTime.Now);
     }
 }
