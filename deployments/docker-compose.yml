@@ -22,6 +22,25 @@ services:
     networks:
       - pantry-network
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: pantry-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - pantry-network
+
   # --- GATEWAY ---
   api-gateway:
     container_name: pantry-gateway
@@ -95,6 +114,9 @@ services:
       - App__IdentityUrl=http://identity-api:8080
       - Jwt__Issuer=pantry-identity
       - Jwt__Audience=pantry-cloud
+      - Messaging__RabbitMQ__Host=rabbitmq
+      - Messaging__RabbitMQ__Username=admin
+      - Messaging__RabbitMQ__Password=password
     ports:
       - "5155:8080"
     depends_on:
@@ -102,11 +124,14 @@ services:
         condition: service_healthy
       identity-api:
         condition: service_started
+      rabbitmq:
+        condition: service_healthy
     networks:
       - pantry-network
 
 volumes:
   postgres-data:
+  rabbitmq-data:
 
 networks:
   pantry-network:

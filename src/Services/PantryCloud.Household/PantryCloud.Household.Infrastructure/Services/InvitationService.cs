@@ -109,10 +109,15 @@ public class InvitationService(ILogger<InvitationService> logger,
         {
             logger.LogInformation("User left household and joined another one.");
             user.HouseholdId = invitation.HouseholdId;
+            await dbContext.SaveChangesAsync(cancellationToken);
             // LEAVE CURRENT HOUSEHOLD
             // TODO: Can't when owner
             // TODO: other constraints
-            return new AcceptHouseholdInvitationResponseDto();
+            return new AcceptHouseholdInvitationResponseDto(
+                HouseholdId: invitation.HouseholdId,
+                MemberId: userId,
+                MemberEmail: invitation.Email,
+                JoinedAt: DateTime.UtcNow);
         }
 
         var newMember = new HouseholdMember
@@ -127,6 +132,10 @@ public class InvitationService(ILogger<InvitationService> logger,
         await dbContext.SaveChangesAsync(cancellationToken);
         
         logger.LogInformation("User joined a new household.");
-        return new AcceptHouseholdInvitationResponseDto();
+        return new AcceptHouseholdInvitationResponseDto(
+            HouseholdId: invitation.HouseholdId,
+            MemberId: userId,
+            MemberEmail: invitation.Email,
+            JoinedAt: newMember.JoinedAt);
     }
 }

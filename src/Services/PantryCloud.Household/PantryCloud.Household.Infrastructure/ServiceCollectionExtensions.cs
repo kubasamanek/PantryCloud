@@ -4,9 +4,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using PantryCloud.Household.Application;
+using PantryCloud.Household.Application.Commands;
 using PantryCloud.Household.Core;
 using PantryCloud.Household.Infrastructure.Persistence;
 using PantryCloud.Household.Infrastructure.Services;
+using PantryCloud.SharedKernel.Messaging;
 
 namespace PantryCloud.Household.Infrastructure;
 
@@ -22,6 +24,8 @@ public static class ServiceCollectionExtensions
 
         services.AddDbContext<HouseholdDbContext>(options =>
             options.UseNpgsql(connectionString));
+        
+        services.AddMessaging(configuration, typeof(CreateHouseholdCommand).Assembly);
         
         services.AddHealthChecks().AddNpgSql(connectionString!);
 
