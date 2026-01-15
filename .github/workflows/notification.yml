@@ -1,0 +1,98 @@
+name: CI/CD - NotificationService
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.Notification/**'
+      - 'src/BuildingBlocks/**'
+      - '.github/workflows/notification.yml'
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.Notification/**'
+      - 'src/BuildingBlocks/**'
+  workflow_dispatch:
+
+env:
+  SERVICE_PROJECT: src/Services/PantryCloud.Notification/PantryCloud.Notification.Presentation/PantryCloud.Notification.Presentation.csproj
+  TEST_PROJECT: test/PantryCloud.Notification/PantryCloud.Notification.UnitTests/PantryCloud.Notification.UnitTests.csproj
+  DOCKERFILE_PATH: src/Services/PantryCloud.Notification/PantryCloud.Notification.Presentation/Dockerfile
+  IMAGE_NAME: samanekj/notificationservice
+
+permissions:
+  checks: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  ci:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SERVICE_PROJECT }}
+
+      - name: Build
+        run: dotnet build ${{ env.SERVICE_PROJECT }} --no-restore --configuration Release
+
+      - name: Run Tests
+        run: dotnet test ${{ env.TEST_PROJECT }} --configuration Release --logger "trx;LogFileName=test_results.trx" --verbosity normal
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: REPORT - Notification tests
+          path: '**/*.trx'
+          reporter: dotnet-trx
+  cd:
+    name: Build & Push Docker image
+    needs: ci
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Build
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v4.1.0
+        with:
+          versionSpec: '6.3.x'
+
+      - name: Generate GitVersion variables
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v4.1.0
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ env.DOCKERFILE_PATH }}
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.gitversion.outputs.semVer }}
+            ${{ env.IMAGE_NAME }}:latest
