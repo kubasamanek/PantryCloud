@@ -6,8 +6,6 @@ using PantryCloud.Notification.Application;
 using PantryCloud.Notification.Application.Consumers;
 using PantryCloud.Notification.Core.Dtos;
 using PantryCloud.Notification.Core.Enums;
-using Shouldly;
-using Xunit;
 
 namespace PantryCloud.Notification.UnitTests.Consumers;
 
