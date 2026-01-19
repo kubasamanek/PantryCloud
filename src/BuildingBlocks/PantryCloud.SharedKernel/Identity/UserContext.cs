@@ -1,9 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
-using PantryCloud.Household.Application;
 
-namespace PantryCloud.Household.Infrastructure.Services;
+namespace PantryCloud.SharedKernel.Identity;
 
 public sealed class UserContext : IUserContext
 {
@@ -28,3 +27,4 @@ public sealed class UserContext : IUserContext
         ?? _user.FindFirstValue(JwtRegisteredClaimNames.Email)
         ?? throw new UnauthorizedAccessException("Email not found in token");
 }
+

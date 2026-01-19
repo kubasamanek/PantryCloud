@@ -2,6 +2,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PantryCloud.Pantry.Core\PantryCloud.Pantry.Core.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\PantryCloud.SharedKernel\PantryCloud.SharedKernel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ErrorOr" Version="2.0.1" />
+    <PackageReference Include="MediatR" Version="14.0.0" />
   </ItemGroup>
 
   <PropertyGroup>

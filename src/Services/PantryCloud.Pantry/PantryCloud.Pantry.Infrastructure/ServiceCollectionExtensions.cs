@@ -3,15 +3,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using PantryCloud.Household.Application;
-using PantryCloud.Household.Application.Commands;
-using PantryCloud.Household.Core;
-using PantryCloud.Household.Infrastructure.Persistence;
-using PantryCloud.Household.Infrastructure.Services;
+using PantryCloud.Pantry.Application;
+using PantryCloud.Pantry.Application.Commands;
+using PantryCloud.Pantry.Core;
+using PantryCloud.Pantry.Infrastructure.Persistence;
+using PantryCloud.Pantry.Infrastructure.Services;
 using PantryCloud.SharedKernel.Identity;
 using PantryCloud.SharedKernel.Messaging;
 
-namespace PantryCloud.Household.Infrastructure;
+namespace PantryCloud.Pantry.Infrastructure;
 
 public static class ServiceCollectionExtensions
 {
@@ -23,10 +23,10 @@ public static class ServiceCollectionExtensions
         
         var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-        services.AddDbContext<HouseholdDbContext>(options =>
+        services.AddDbContext<PantryDbContext>(options =>
             options.UseNpgsql(connectionString));
         
-        services.AddMessaging(configuration, typeof(CreateHouseholdCommand).Assembly);
+        services.AddMessaging(configuration, typeof(ServiceCollectionExtensions).Assembly);
         
         services.AddHealthChecks().AddNpgSql(connectionString!);
 
@@ -53,9 +53,12 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         
         services.AddScoped<IUserContext, UserContext>();
-        services.AddScoped<IHouseholdManagementService, HouseholdManagementService>();
-        services.AddScoped<IInvitationService, InvitationService>();
+        services.AddScoped<IPantryManagementService, PantryManagementService>();
+        services.AddScoped<IHouseholdCacheHydrationService, HouseholdCacheHydrationService>();
+        
+        services.AddHttpClient<HouseholdCacheHydrationService>();
         
         return services;
     }
 }
+
