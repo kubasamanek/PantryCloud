@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PantryCloud.Household.Application;
 using PantryCloud.Household.Application.Dtos;
+using PantryCloud.SharedKernel.Identity;
 using PantryCloud.Household.Core.Entities;
 using PantryCloud.Household.Core.Enums;
 using PantryCloud.Household.Core.Errors;
@@ -31,6 +32,25 @@ public class HouseholdManagementService(HouseholdDbContext dbContext, IUserConte
         logger.LogInformation("Got current household for {UserId}", userId);
 
         return new GetCurrentHouseholdResponseDto(household.Id, household.Name);
+    }
+
+    public async Task<ErrorOr<GetHouseholdByUserIdResponseDto>> GetHouseholdByUserId(GetHouseholdByUserIdRequestDto request, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Getting household for user {UserId}", request.UserId);
+        
+        var household = await dbContext.Households
+            .Where(h => h.Members.Any(m => m.UserId == request.UserId))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (household is null)
+        {
+            logger.LogInformation("Household for user {UserId} not found", request.UserId);
+            return Error.NotFound("Household.NotFound", "Household not found");
+        }
+        
+        logger.LogInformation("Got household for user {UserId}", request.UserId);
+
+        return new GetHouseholdByUserIdResponseDto(household.Id, household.Name);
     }
 
     public async Task<ErrorOr<CreateHouseholdResponseDto>> CreateHousehold(CreateHouseholdRequestDto request, CancellationToken cancellationToken)
@@ -71,7 +91,12 @@ public class HouseholdManagementService(HouseholdDbContext dbContext, IUserConte
         
         logger.LogInformation("Created household for {UserId}", userId);
 
-        return new CreateHouseholdResponseDto(household.Id, household.Name);
+        return new CreateHouseholdResponseDto(
+            household.Id, 
+            household.Name, 
+            member.UserId, 
+            userContext.Email, 
+            member.JoinedAt);
     }
     
     public async Task<ErrorOr<LeaveHouseholdResponseDto>> LeaveHousehold(LeaveHouseholdRequestDto request, CancellationToken cancellationToken)

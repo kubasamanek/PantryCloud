@@ -5,18 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace PantryCloud.SharedKernel.Messaging;
 
-/// <summary>
-/// Extension methods for configuring MassTransit messaging with RabbitMQ.
-/// </summary>
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    /// Adds MassTransit with RabbitMQ configuration to the service collection.
-    /// </summary>
-    /// <param name="services">The service collection</param>
-    /// <param name="configuration">The configuration containing RabbitMQ settings</param>
-    /// <param name="consumerAssemblies">Assemblies to scan for MassTransit consumers (IConsumer&lt;T&gt; implementations)</param>
-    /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddMessaging(
         this IServiceCollection services,
         IConfiguration configuration,

@@ -3,10 +3,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using PantryCloud.Household.Application;
 using PantryCloud.Household.Core;
 using PantryCloud.Household.Infrastructure.Persistence;
-using PantryCloud.Household.Infrastructure.Services;
+using PantryCloud.SharedKernel.Identity;
 
 namespace PantryCloud.Household.UnitTests;
 

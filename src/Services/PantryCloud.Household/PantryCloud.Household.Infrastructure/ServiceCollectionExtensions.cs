@@ -8,6 +8,7 @@ using PantryCloud.Household.Application.Commands;
 using PantryCloud.Household.Core;
 using PantryCloud.Household.Infrastructure.Persistence;
 using PantryCloud.Household.Infrastructure.Services;
+using PantryCloud.SharedKernel.Identity;
 using PantryCloud.SharedKernel.Messaging;
 
 namespace PantryCloud.Household.Infrastructure;

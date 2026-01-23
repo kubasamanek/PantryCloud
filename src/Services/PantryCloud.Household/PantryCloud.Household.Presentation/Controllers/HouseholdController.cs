@@ -79,4 +79,15 @@ public class HouseholdController(IMediator mediator, IMapper mapper) : ApiContro
         return FromResult(result, StatusCodes.Status200OK);
     }
 
+    [HttpGet("internal/by-user-id/{userId}")]
+    [ProducesResponseType(typeof(GetHouseholdByUserIdResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetHouseholdByUserId(Guid userId, CancellationToken cancellationToken)
+    {
+        var query = new GetHouseholdByUserIdQuery(new GetHouseholdByUserIdRequestDto(userId));
+        var result = await Mediator.Send(query, cancellationToken);
+        
+        return FromResult(result, StatusCodes.Status200OK);
+    }
+
 }

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PantryCloud.Household.Application;
 using PantryCloud.Household.Application.Dtos;
+using PantryCloud.SharedKernel.Identity;
 using PantryCloud.Household.Core.Entities;
 using PantryCloud.Household.Core.Enums;
 using PantryCloud.Household.Core.Errors;
