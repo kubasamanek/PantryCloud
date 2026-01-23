@@ -221,7 +221,8 @@ public class PantryManagementService(
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
-            query = query.Where(p => p.Name.Contains(request.SearchTerm));
+            var searchTermLower = request.SearchTerm.ToLower();
+            query = query.Where(p => p.Name.ToLower().Contains(searchTermLower));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);

@@ -26,30 +26,26 @@ public class MemberJoinedHouseholdConsumer(
 
         if (existingMembership != null)
         {
+            // User switching households - update existing membership
             if (existingMembership.HouseholdId != @event.HouseholdId)
             {
-                existingMembership.LeftAt = @event.JoinedAt;
-                await dbContext.SaveChangesAsync(context.CancellationToken);
-                
-                var newMembership = new UserHouseholdMembership
-                {
-                    UserId = @event.NewMemberId,
-                    HouseholdId = @event.HouseholdId,
-                    JoinedAt = @event.JoinedAt
-                };
-                await dbContext.UserHouseholdMemberships.AddAsync(newMembership, context.CancellationToken);
+                existingMembership.HouseholdId = @event.HouseholdId;
+                existingMembership.JoinedAt = @event.JoinedAt;
+                existingMembership.LeftAt = null;
             }
             else
             {
+                // User is rejoining the same household
                 if (existingMembership.LeftAt != null)
                 {
                     existingMembership.LeftAt = null;
-                    existingMembership.HouseholdId = @event.HouseholdId;
+                    existingMembership.JoinedAt = @event.JoinedAt;
                 }
             }
         }
         else
         {
+            // New membership
             var membership = new UserHouseholdMembership
             {
                 UserId = @event.NewMemberId,
