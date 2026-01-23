@@ -12,7 +12,7 @@ using PantryCloud.Pantry.Infrastructure.Persistence;
 namespace PantryCloud.Pantry.Infrastructure.Migrations
 {
     [DbContext(typeof(PantryDbContext))]
-    [Migration("20260116204412_InitialCreate")]
+    [Migration("20260120062335_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -88,6 +88,30 @@ namespace PantryCloud.Pantry.Infrastructure.Migrations
                     b.HasIndex("HouseholdId", "Name");
 
                     b.ToTable("PantryItems");
+                });
+
+            modelBuilder.Entity("PantryCloud.Pantry.Core.Entities.UserHouseholdMembership", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("HouseholdId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LeftAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId");
+
+                    b.HasIndex("HouseholdId");
+
+                    b.HasIndex("HouseholdId", "LeftAt");
+
+                    b.ToTable("UserHouseholdMemberships");
                 });
 #pragma warning restore 612, 618
         }

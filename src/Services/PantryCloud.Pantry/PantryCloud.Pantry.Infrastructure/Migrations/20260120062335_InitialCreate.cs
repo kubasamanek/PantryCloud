@@ -11,6 +11,9 @@ namespace PantryCloud.Pantry.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // Enable pgcrypto extension for gen_random_bytes function
+            migrationBuilder.Sql("CREATE EXTENSION IF NOT EXISTS pgcrypto;");
+            
             migrationBuilder.CreateTable(
                 name: "PantryItems",
                 columns: table => new
@@ -28,11 +31,25 @@ namespace PantryCloud.Pantry.Infrastructure.Migrations
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    RowVersion = table.Column<byte[]>(type: "bytea", rowVersion: true, nullable: false)
+                    RowVersion = table.Column<byte[]>(type: "bytea", rowVersion: true, nullable: false, defaultValueSql: "gen_random_bytes(8)")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PantryItems", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserHouseholdMemberships",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    HouseholdId = table.Column<Guid>(type: "uuid", nullable: false),
+                    JoinedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LeftAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserHouseholdMemberships", x => x.UserId);
                 });
 
             migrationBuilder.CreateIndex(
@@ -49,13 +66,49 @@ namespace PantryCloud.Pantry.Infrastructure.Migrations
                 name: "IX_PantryItems_HouseholdId_Name",
                 table: "PantryItems",
                 columns: new[] { "HouseholdId", "Name" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserHouseholdMemberships_HouseholdId",
+                table: "UserHouseholdMemberships",
+                column: "HouseholdId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserHouseholdMemberships_HouseholdId_LeftAt",
+                table: "UserHouseholdMemberships",
+                columns: new[] { "HouseholdId", "LeftAt" });
+            
+            // Create trigger to ensure RowVersion is always set, even if EF Core tries to insert NULL
+            migrationBuilder.Sql(@"
+                CREATE OR REPLACE FUNCTION set_pantry_item_rowversion()
+                RETURNS TRIGGER AS $$
+                BEGIN
+                    IF NEW.""RowVersion"" IS NULL THEN
+                        NEW.""RowVersion"" := gen_random_bytes(8);
+                    END IF;
+                    RETURN NEW;
+                END;
+                $$ LANGUAGE plpgsql;
+                
+                CREATE TRIGGER trg_set_pantry_item_rowversion
+                    BEFORE INSERT OR UPDATE ON ""PantryItems""
+                    FOR EACH ROW
+                    EXECUTE FUNCTION set_pantry_item_rowversion();
+            ");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql(@"
+                DROP TRIGGER IF EXISTS trg_set_pantry_item_rowversion ON ""PantryItems"";
+                DROP FUNCTION IF EXISTS set_pantry_item_rowversion();
+            ");
+            
             migrationBuilder.DropTable(
                 name: "PantryItems");
+
+            migrationBuilder.DropTable(
+                name: "UserHouseholdMemberships");
         }
     }
 }

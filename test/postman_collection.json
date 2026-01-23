@@ -1,0 +1,923 @@
+{
+  "info": {
+    "_postman_id": "89fcce37-9ee5-41c5-a4e9-a4038e7a104b",
+    "name": "PantryCloud API Gateway",
+    "description": "Complete API collection for PantryCloud microservices through the API Gateway. Tokens and IDs are automatically saved to collection variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "29837299"
+  },
+  "item": [
+    {
+      "name": "Gateway",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            },
+            "description": "Check if the API Gateway is healthy and running"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Identity Service",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Register",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200 || pm.response.code === 201) {",
+                      "    var jsonData = pm.response.json();",
+                      "    if (jsonData.value && jsonData.value.userId) {",
+                      "        pm.collectionVariables.set(\"user_id\", jsonData.value.userId);",
+                      "        console.log(\"User ID saved: \" + jsonData.value.userId);",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"Test123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/identity/api/auth/register",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "identity",
+                    "api",
+                    "auth",
+                    "register"
+                  ]
+                },
+                "description": "Register a new user account. User ID is automatically saved to collection variables."
+              },
+              "response": []
+            },
+            {
+              "name": "Login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var jsonData = pm.response.json();",
+                      "    if (jsonData.value && jsonData.value.accessToken) {",
+                      "        pm.collectionVariables.set(\"access_token\", jsonData.value.accessToken);",
+                      "        pm.collectionVariables.set(\"refresh_token\", jsonData.value.refreshToken);",
+                      "        console.log(\"Access token saved successfully\");",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"Test123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/identity/api/auth/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "identity",
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "description": "Login and get access/refresh tokens. Tokens are automatically saved to collection variables."
+              },
+              "response": []
+            },
+            {
+              "name": "Refresh Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var jsonData = pm.response.json();",
+                      "    if (jsonData.value && jsonData.value.accessToken) {",
+                      "        pm.collectionVariables.set(\"access_token\", jsonData.value.accessToken);",
+                      "        pm.collectionVariables.set(\"refresh_token\", jsonData.value.refreshToken);",
+                      "        console.log(\"Tokens refreshed and saved successfully\");",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/identity/api/auth/refresh",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "identity",
+                    "api",
+                    "auth",
+                    "refresh"
+                  ]
+                },
+                "description": "Refresh the access token using the refresh token. New tokens are automatically saved."
+              },
+              "response": []
+            },
+            {
+              "name": "Forgot Password",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"test@example.com\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/identity/api/auth/forgot-password",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "identity",
+                    "api",
+                    "auth",
+                    "forgot-password"
+                  ]
+                },
+                "description": "Request a password reset token"
+              },
+              "response": []
+            },
+            {
+              "name": "Reset Password",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"test@example.com\",\n    \"token\": \"reset-token-here\",\n    \"newPassword\": \"NewPassword123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/identity/api/auth/reset-password",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "identity",
+                    "api",
+                    "auth",
+                    "reset-password"
+                  ]
+                },
+                "description": "Reset password using the token from forgot-password"
+              },
+              "response": []
+            },
+            {
+              "name": "Verify Email",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"test@example.com\",\n    \"token\": \"verification-token-here\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/identity/api/auth/verify-email",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "identity",
+                    "api",
+                    "auth",
+                    "verify-email"
+                  ]
+                },
+                "description": "Verify user email address"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Test",
+          "item": [
+            {
+              "name": "Public Endpoint",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/identity/api/test/public",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "identity",
+                    "api",
+                    "test",
+                    "public"
+                  ]
+                },
+                "description": "Public test endpoint - no authentication required"
+              },
+              "response": []
+            },
+            {
+              "name": "Secure Endpoint",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/identity/api/test/secure",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "identity",
+                    "api",
+                    "test",
+                    "secure"
+                  ]
+                },
+                "description": "Secure test endpoint - requires authentication"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "OpenID Configuration",
+          "item": [
+            {
+              "name": "Get OpenID Configuration",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/identity/.well-known/openid-configuration",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "identity",
+                    ".well-known",
+                    "openid-configuration"
+                  ]
+                },
+                "description": "Get OpenID Connect discovery document"
+              },
+              "response": []
+            },
+            {
+              "name": "Get JWKS",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/identity/.well-known/openid-configuration/jwks",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "identity",
+                    ".well-known",
+                    "openid-configuration",
+                    "jwks"
+                  ]
+                },
+                "description": "Get JSON Web Key Set for token verification"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Household Service",
+      "item": [
+        {
+          "name": "Get Current Household",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.value && jsonData.value.id) {",
+                  "        pm.collectionVariables.set(\"household_id\", jsonData.value.id);",
+                  "        console.log(\"Household ID saved: \" + jsonData.value.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/household/api/households/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "household",
+                "api",
+                "households",
+                "me"
+              ]
+            },
+            "description": "Get the current user's household. Requires authentication. Household ID is automatically saved."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Household",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.value && jsonData.value.id) {",
+                  "        pm.collectionVariables.set(\"household_id\", jsonData.value.id);",
+                  "        console.log(\"Household ID saved: \" + jsonData.value.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"My Household\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/household/api/households",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "household",
+                "api",
+                "households"
+              ]
+            },
+            "description": "Create a new household. Requires authentication. Household ID is automatically saved."
+          },
+          "response": []
+        },
+        {
+          "name": "Send Invitation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"toEmail\": \"invite@example.com\",\n    \"householdId\": \"{{household_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/household/api/households/invite",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "household",
+                "api",
+                "households",
+                "invite"
+              ]
+            },
+            "description": "Send an invitation to join a household. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Accept Invitation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"code\": \"invitation-code-here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/household/api/households/join",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "household",
+                "api",
+                "households",
+                "join"
+              ]
+            },
+            "description": "Accept a household invitation using the invitation code. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Leave Household",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/household/api/households/leave",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "household",
+                "api",
+                "households",
+                "leave"
+              ]
+            },
+            "description": "Leave the current household. Requires authentication."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pantry Service",
+      "item": [
+        {
+          "name": "Items",
+          "item": [
+            {
+              "name": "Create Pantry Item",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    var jsonData = pm.response.json();",
+                      "    if (jsonData.value && jsonData.value.id) {",
+                      "        pm.collectionVariables.set(\"pantry_item_id\", jsonData.value.id);",
+                      "        console.log(\"Pantry Item ID saved: \" + jsonData.value.id);",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Milk\",\n    \"quantity\": 2.5,\n    \"unit\": 3,\n    \"expirationDate\": \"2024-12-31T00:00:00Z\",\n    \"category\": \"Dairy\",\n    \"notes\": \"Whole milk\",\n    \"imageUrl\": null\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/pantry/api/pantry/items",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "pantry",
+                    "api",
+                    "pantry",
+                    "items"
+                  ]
+                },
+                "description": "Create a new pantry item. Requires authentication and household membership.\n\nUnit values:\n- 0: Piece\n- 1: Kilogram\n- 2: Gram\n- 3: Liter\n- 4: Milliliter\n- 5: Pound\n- 6: Ounce\n- 7: Cup\n- 8: Tablespoon\n- 9: Teaspoon\n\nItem ID is automatically saved."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Pantry Item",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/pantry/api/pantry/items/{{pantry_item_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "pantry",
+                    "api",
+                    "pantry",
+                    "items",
+                    "{{pantry_item_id}}"
+                  ]
+                },
+                "description": "Get a specific pantry item by ID. Requires authentication."
+              },
+              "response": []
+            },
+            {
+              "name": "Update Pantry Item",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Milk (Updated)\",\n    \"quantity\": 3.0,\n    \"unit\": 3,\n    \"expirationDate\": \"2025-01-15T00:00:00Z\",\n    \"category\": \"Dairy\",\n    \"notes\": \"Updated notes\",\n    \"imageUrl\": null,\n    \"rowVersion\": []\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/pantry/api/pantry/items/{{pantry_item_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "pantry",
+                    "api",
+                    "pantry",
+                    "items",
+                    "{{pantry_item_id}}"
+                  ]
+                },
+                "description": "Update an existing pantry item. Requires authentication and rowVersion for optimistic concurrency control.\n\nNote: Get the item first to obtain the rowVersion value."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Pantry Item",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/pantry/api/pantry/items/{{pantry_item_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "pantry",
+                    "api",
+                    "pantry",
+                    "items",
+                    "{{pantry_item_id}}"
+                  ]
+                },
+                "description": "Delete a pantry item. Requires authentication."
+              },
+              "response": []
+            },
+            {
+              "name": "List Pantry Items",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/pantry/api/pantry/items?category=&searchTerm=&page=1&pageSize=50",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "pantry",
+                    "api",
+                    "pantry",
+                    "items"
+                  ],
+                  "query": [
+                    {
+                      "key": "category",
+                      "value": "",
+                      "description": "Filter by category (optional)"
+                    },
+                    {
+                      "key": "searchTerm",
+                      "value": "",
+                      "description": "Search term for item name (optional)"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number (default: 1)"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "50",
+                      "description": "Items per page (default: 50)"
+                    }
+                  ]
+                },
+                "description": "List all pantry items with optional filtering and pagination. Requires authentication."
+              },
+              "response": []
+            },
+            {
+              "name": "List Pantry Items - Filter by Category",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/pantry/api/pantry/items?category=Dairy&page=1&pageSize=50",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "pantry",
+                    "api",
+                    "pantry",
+                    "items"
+                  ],
+                  "query": [
+                    {
+                      "key": "category",
+                      "value": "Dairy",
+                      "description": "Filter by category"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "List pantry items filtered by category. Requires authentication."
+              },
+              "response": []
+            },
+            {
+              "name": "List Pantry Items - Search",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/pantry/api/pantry/items?searchTerm=milk&page=1&pageSize=50",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "pantry",
+                    "api",
+                    "pantry",
+                    "items"
+                  ],
+                  "query": [
+                    {
+                      "key": "searchTerm",
+                      "value": "milk",
+                      "description": "Search term"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "Search pantry items by name. Requires authentication."
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5050",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "household_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pantry_item_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

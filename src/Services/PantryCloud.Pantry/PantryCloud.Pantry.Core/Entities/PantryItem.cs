@@ -17,6 +17,6 @@ public class PantryItem
     public DateTime CreatedAt { get; init; }
     public Guid? ModifiedBy { get; set; }
     public DateTime? ModifiedAt { get; set; }
-    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+    public byte[] RowVersion { get; set; } = null!;
 }
 

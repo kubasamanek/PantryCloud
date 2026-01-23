@@ -43,7 +43,9 @@ public class PantryItemConfiguration : IEntityTypeConfiguration<PantryItem>
 
         builder.Property(p => p.RowVersion)
             .IsRowVersion()
-            .IsRequired();
+            .IsRequired()
+            .ValueGeneratedOnAddOrUpdate()
+            .IsConcurrencyToken();
 
         builder.HasIndex(p => p.HouseholdId);
         builder.HasIndex(p => new { p.HouseholdId, p.Category });
