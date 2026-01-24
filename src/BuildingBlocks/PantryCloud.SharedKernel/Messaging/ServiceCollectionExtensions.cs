@@ -28,7 +28,7 @@ public static class ServiceCollectionExtensions
 
         services.AddMassTransit(busConfig =>
         {
-            busConfig.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter(false));
+            busConfig.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter(true));
             
             if (consumerAssemblies.Length > 0)
             {

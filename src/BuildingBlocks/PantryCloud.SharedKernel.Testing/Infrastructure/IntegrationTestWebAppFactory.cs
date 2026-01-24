@@ -52,7 +52,6 @@ public class IntegrationTestWebAppFactory<TProgram, TDbContext> : WebApplication
     protected virtual void ConfigureTestServices(IServiceCollection services)
     {
         // Default: No additional configuration
-        // Services can override to disable emails, mock external APIs, etc.
     }
 
     public async Task InitializeAsync()

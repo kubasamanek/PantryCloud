@@ -55,9 +55,6 @@ public static class ServiceCollectionExtensions
         
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<IPantryManagementService, PantryManagementService>();
-        services.AddScoped<IHouseholdCacheHydrationService, HouseholdCacheHydrationService>();
-        
-        services.AddHttpClient<HouseholdCacheHydrationService>();
         
         return services;
     }

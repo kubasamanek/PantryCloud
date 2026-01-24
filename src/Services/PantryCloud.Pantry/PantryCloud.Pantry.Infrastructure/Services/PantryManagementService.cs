@@ -15,7 +15,6 @@ namespace PantryCloud.Pantry.Infrastructure.Services;
 public class PantryManagementService(
     PantryDbContext dbContext,
     IUserContext userContext,
-    IHouseholdCacheHydrationService cacheHydrationService,
     ILogger<PantryManagementService> logger) : BaseDbContextService<PantryManagementService, PantryDbContext>(dbContext, userContext, logger), IPantryManagementService
 {
     public async Task<ErrorOr<CreatePantryItemResponseDto>> CreatePantryItemAsync(CreatePantryItemRequestDto request, CancellationToken cancellationToken)
@@ -260,28 +259,11 @@ public class PantryManagementService(
 
         if (membership != null)
         {
-            Logger.LogDebug("Household ID resolved from cache for user {UserId}: {HouseholdId}", UserId, membership.HouseholdId);
+            Logger.LogDebug("Household ID resolved for user {UserId}: {HouseholdId}", UserId, membership.HouseholdId);
             return membership.HouseholdId;
         }
-
-        Logger.LogInformation("Cache miss for user {UserId}. Attempting to hydrate cache from Household service.", UserId);
         
-        var hydrated = await cacheHydrationService.HydrateCacheForUserAsync(UserId, cancellationToken);
-        if (hydrated)
-        {
-            membership = await DbContext.UserHouseholdMemberships
-                .FirstOrDefaultAsync(
-                    m => m.UserId == UserId && m.LeftAt == null,
-                    cancellationToken);
-            
-            if (membership != null)
-            {
-                Logger.LogInformation("Cache hydrated successfully for user {UserId}: {HouseholdId}", UserId, membership.HouseholdId);
-                return membership.HouseholdId;
-            }
-        }
-
-        Logger.LogWarning("User {UserId} does not belong to any household", UserId);
+        Logger.LogWarning("User {UserId} has no active household membership (cache miss - no fallback)", UserId);
         return PantryErrors.HouseholdNotFound;
     }
 }
