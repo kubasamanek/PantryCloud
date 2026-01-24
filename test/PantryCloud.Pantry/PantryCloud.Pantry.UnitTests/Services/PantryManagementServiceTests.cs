@@ -17,7 +17,6 @@ public class PantryManagementServiceTests
     {
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
         await using var db = TestHelper.CreateInMemoryContext(nameof(CreatePantryItemAsync_ShouldCreateItem_WhenUserHasHousehold), userContext);
-        var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
         {
@@ -27,7 +26,7 @@ public class PantryManagementServiceTests
         });
         await db.SaveChangesAsync();
 
-        var service = new PantryManagementService(db, userContext, cacheService, _logger);
+        var service = new PantryManagementService(db, userContext, _logger);
 
         var request = new CreatePantryItemRequestDto(
             Constants.PantryItemName,
@@ -57,9 +56,8 @@ public class PantryManagementServiceTests
     {
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
         await using var db = TestHelper.CreateInMemoryContext(nameof(CreatePantryItemAsync_ShouldReturnError_WhenUserNotInHousehold), userContext);
-        var cacheService = TestHelper.MockCacheHydrationService(shouldHydrate: false);
 
-        var service = new PantryManagementService(db, userContext, cacheService, _logger);
+        var service = new PantryManagementService(db, userContext, _logger);
 
         var request = new CreatePantryItemRequestDto(
             Constants.PantryItemName,
@@ -81,7 +79,6 @@ public class PantryManagementServiceTests
     {
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
         await using var db = TestHelper.CreateInMemoryContext(nameof(GetPantryItemAsync_ShouldReturnItem_WhenItemExists), userContext);
-        var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
         {
@@ -109,7 +106,7 @@ public class PantryManagementServiceTests
         db.PantryItems.Add(pantryItem);
         await db.SaveChangesAsync();
 
-        var service = new PantryManagementService(db, userContext, cacheService, _logger);
+        var service = new PantryManagementService(db, userContext, _logger);
 
         var request = new GetPantryItemRequestDto(Constants.PantryItemId);
         var result = await service.GetPantryItemAsync(request, CancellationToken.None);
@@ -125,7 +122,6 @@ public class PantryManagementServiceTests
     {
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
         await using var db = TestHelper.CreateInMemoryContext(nameof(GetPantryItemAsync_ShouldReturnError_WhenItemNotFound), userContext);
-        var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
         {
@@ -135,7 +131,7 @@ public class PantryManagementServiceTests
         });
         await db.SaveChangesAsync();
 
-        var service = new PantryManagementService(db, userContext, cacheService, _logger);
+        var service = new PantryManagementService(db, userContext, _logger);
 
         var nonExistentItemId = Guid.NewGuid();
         var request = new GetPantryItemRequestDto(nonExistentItemId);
@@ -150,7 +146,6 @@ public class PantryManagementServiceTests
     {
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
         await using var db = TestHelper.CreateInMemoryContext(nameof(UpdatePantryItemAsync_ShouldUpdateItem_WhenItemExists), userContext);
-        var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
         {
@@ -174,7 +169,7 @@ public class PantryManagementServiceTests
         db.PantryItems.Add(pantryItem);
         await db.SaveChangesAsync();
 
-        var service = new PantryManagementService(db, userContext, cacheService, _logger);
+        var service = new PantryManagementService(db, userContext, _logger);
 
         var request = new UpdatePantryItemRequestDto(
             Constants.UpdatedItemName,
@@ -205,7 +200,6 @@ public class PantryManagementServiceTests
     {
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
         await using var db = TestHelper.CreateInMemoryContext(nameof(UpdatePantryItemAsync_ShouldReturnError_WhenItemNotFound), userContext);
-        var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
         {
@@ -215,7 +209,7 @@ public class PantryManagementServiceTests
         });
         await db.SaveChangesAsync();
 
-        var service = new PantryManagementService(db, userContext, cacheService, _logger);
+        var service = new PantryManagementService(db, userContext, _logger);
 
         var nonExistentItemId = Guid.NewGuid();
         var request = new UpdatePantryItemRequestDto(
@@ -239,7 +233,6 @@ public class PantryManagementServiceTests
     {
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
         await using var db = TestHelper.CreateInMemoryContext(nameof(DeletePantryItemAsync_ShouldDeleteItem_WhenItemExists), userContext);
-        var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
         {
@@ -263,7 +256,7 @@ public class PantryManagementServiceTests
         db.PantryItems.Add(pantryItem);
         await db.SaveChangesAsync();
 
-        var service = new PantryManagementService(db, userContext, cacheService, _logger);
+        var service = new PantryManagementService(db, userContext, _logger);
 
         var request = new DeletePantryItemRequestDto(Constants.PantryItemId);
         var result = await service.DeletePantryItemAsync(request, CancellationToken.None);
@@ -280,7 +273,6 @@ public class PantryManagementServiceTests
     {
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
         await using var db = TestHelper.CreateInMemoryContext(nameof(DeletePantryItemAsync_ShouldReturnError_WhenItemNotFound), userContext);
-        var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
         {
@@ -290,7 +282,7 @@ public class PantryManagementServiceTests
         });
         await db.SaveChangesAsync();
 
-        var service = new PantryManagementService(db, userContext, cacheService, _logger);
+        var service = new PantryManagementService(db, userContext, _logger);
 
         var nonExistentItemId = Guid.NewGuid();
         var request = new DeletePantryItemRequestDto(nonExistentItemId);
@@ -305,7 +297,6 @@ public class PantryManagementServiceTests
     {
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
         await using var db = TestHelper.CreateInMemoryContext(nameof(ListPantryItemsAsync_ShouldReturnItems_WhenItemsExist), userContext);
-        var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
         {
@@ -340,7 +331,7 @@ public class PantryManagementServiceTests
 
         await db.SaveChangesAsync();
 
-        var service = new PantryManagementService(db, userContext, cacheService, _logger);
+        var service = new PantryManagementService(db, userContext, _logger);
 
         var request = new ListPantryItemsRequestDto(null, null, 1, 50);
         var result = await service.ListPantryItemsAsync(request, CancellationToken.None);
@@ -355,7 +346,6 @@ public class PantryManagementServiceTests
     {
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
         await using var db = TestHelper.CreateInMemoryContext(nameof(ListPantryItemsAsync_ShouldFilterByCategory_WhenCategoryProvided), userContext);
-        var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
         {
@@ -392,7 +382,7 @@ public class PantryManagementServiceTests
 
         await db.SaveChangesAsync();
 
-        var service = new PantryManagementService(db, userContext, cacheService, _logger);
+        var service = new PantryManagementService(db, userContext, _logger);
 
         var request = new ListPantryItemsRequestDto(Constants.TestFruitsCategory, null, 1, 50);
         var result = await service.ListPantryItemsAsync(request, CancellationToken.None);
@@ -407,7 +397,6 @@ public class PantryManagementServiceTests
     {
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
         await using var db = TestHelper.CreateInMemoryContext(nameof(ListPantryItemsAsync_ShouldFilterBySearchTerm_WhenSearchTermProvided), userContext);
-        var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
         {
@@ -442,7 +431,7 @@ public class PantryManagementServiceTests
 
         await db.SaveChangesAsync();
 
-        var service = new PantryManagementService(db, userContext, cacheService, _logger);
+        var service = new PantryManagementService(db, userContext, _logger);
 
         var request = new ListPantryItemsRequestDto(null, Constants.TestAppleName, 1, 50);
         var result = await service.ListPantryItemsAsync(request, CancellationToken.None);
@@ -457,7 +446,6 @@ public class PantryManagementServiceTests
     {
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
         await using var db = TestHelper.CreateInMemoryContext(nameof(ListPantryItemsAsync_ShouldBeCaseInsensitive_WhenSearchTermProvided), userContext);
-        var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
         {
@@ -492,7 +480,7 @@ public class PantryManagementServiceTests
 
         await db.SaveChangesAsync();
 
-        var service = new PantryManagementService(db, userContext, cacheService, _logger);
+        var service = new PantryManagementService(db, userContext, _logger);
 
         // Search with lowercase should find "Milk"
         var request = new ListPantryItemsRequestDto(null, "milk", 1, 50);

@@ -164,8 +164,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Src", "Src", "{77C7F0F3-267C-464E-82B6-B48551FBAE9A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{64D7EDE9-1B1C-4D13-A7DC-7D2A80B597A7}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PantryCloud.SharedKernel.UnitTests", "test\PantryCloud.SharedKernel\PantryCloud.SharedKernel.UnitTests\PantryCloud.SharedKernel.UnitTests.csproj", "{0F9639D1-87B5-4DA2-AB1B-097A27178596}"
+	ProjectSection(SolutionItems) = preProject
+		test\PantryCloud.SharedKernel\PantryCloud.SharedKernel.UnitTests\PantryCloud.SharedKernel.UnitTests.csproj = test\PantryCloud.SharedKernel\PantryCloud.SharedKernel.UnitTests\PantryCloud.SharedKernel.UnitTests.csproj
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -693,18 +694,6 @@ Global
 		{662D3FB7-13BE-4B2C-B9F9-580674260F40}.Release|x64.Build.0 = Release|Any CPU
 		{662D3FB7-13BE-4B2C-B9F9-580674260F40}.Release|x86.ActiveCfg = Release|Any CPU
 		{662D3FB7-13BE-4B2C-B9F9-580674260F40}.Release|x86.Build.0 = Release|Any CPU
-		{0F9639D1-87B5-4DA2-AB1B-097A27178596}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F9639D1-87B5-4DA2-AB1B-097A27178596}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0F9639D1-87B5-4DA2-AB1B-097A27178596}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{0F9639D1-87B5-4DA2-AB1B-097A27178596}.Debug|x64.Build.0 = Debug|Any CPU
-		{0F9639D1-87B5-4DA2-AB1B-097A27178596}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{0F9639D1-87B5-4DA2-AB1B-097A27178596}.Debug|x86.Build.0 = Debug|Any CPU
-		{0F9639D1-87B5-4DA2-AB1B-097A27178596}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0F9639D1-87B5-4DA2-AB1B-097A27178596}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0F9639D1-87B5-4DA2-AB1B-097A27178596}.Release|x64.ActiveCfg = Release|Any CPU
-		{0F9639D1-87B5-4DA2-AB1B-097A27178596}.Release|x64.Build.0 = Release|Any CPU
-		{0F9639D1-87B5-4DA2-AB1B-097A27178596}.Release|x86.ActiveCfg = Release|Any CPU
-		{0F9639D1-87B5-4DA2-AB1B-097A27178596}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -777,6 +766,5 @@ Global
 		{880E78F2-1516-4C84-A20F-9F469B48D55D} = {77C7F0F3-267C-464E-82B6-B48551FBAE9A}
 		{662D3FB7-13BE-4B2C-B9F9-580674260F40} = {77C7F0F3-267C-464E-82B6-B48551FBAE9A}
 		{64D7EDE9-1B1C-4D13-A7DC-7D2A80B597A7} = {7266C4A9-E384-DC00-0EB6-47F6002CFBA7}
-		{0F9639D1-87B5-4DA2-AB1B-097A27178596} = {64D7EDE9-1B1C-4D13-A7DC-7D2A80B597A7}
 	EndGlobalSection
 EndGlobal

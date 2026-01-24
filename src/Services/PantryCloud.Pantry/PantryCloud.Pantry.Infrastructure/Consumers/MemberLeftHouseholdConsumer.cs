@@ -14,7 +14,13 @@ public class MemberLeftHouseholdConsumer(
 {
     protected override async Task HandleAsync(MemberLeftHouseholdEvent @event, ConsumeContext context)
     {
-        // Use MemberId for more efficient and accurate lookup
+        Logger.LogInformation(
+            "Received MemberLeftHouseholdEvent - UserId: {UserId}, HouseholdId: {HouseholdId}, LeftAt: {LeftAt}, MessageId: {MessageId}",
+            @event.MemberId,
+            @event.HouseholdId,
+            @event.LeftAt,
+            context.MessageId);
+
         var membership = await DbContext.UserHouseholdMemberships
             .FirstOrDefaultAsync(
                 m => m.UserId == @event.MemberId && m.HouseholdId == @event.HouseholdId && m.LeftAt == null,
@@ -22,12 +28,18 @@ public class MemberLeftHouseholdConsumer(
 
         if (membership != null)
         {
+            Logger.LogInformation(
+                "Found active membership - MembershipId: {MembershipId}, JoinedAt: {JoinedAt}",
+                membership.Id,
+                membership.JoinedAt);
+
             membership.LeftAt = @event.LeftAt;
             
             Logger.LogInformation(
-                "Updated household membership - UserId: {UserId} left HouseholdId: {HouseholdId}",
+                "Updated household membership - UserId: {UserId} left HouseholdId: {HouseholdId} at {LeftAt}",
                 @event.MemberId,
-                @event.HouseholdId);
+                @event.HouseholdId,
+                @event.LeftAt);
         }
         else
         {

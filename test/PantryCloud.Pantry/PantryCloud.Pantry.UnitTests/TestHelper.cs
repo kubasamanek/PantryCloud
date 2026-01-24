@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using PantryCloud.Pantry.Application;
 using PantryCloud.Pantry.Infrastructure.Persistence;
 using PantryCloud.SharedKernel.Identity;
 
@@ -42,14 +41,6 @@ internal static class TestHelper
         accessor.HttpContext.Returns(context);
 
         return new UserContext(accessor);
-    }
-
-    public static IHouseholdCacheHydrationService MockCacheHydrationService(bool shouldHydrate = true)
-    {
-        var mock = Substitute.For<IHouseholdCacheHydrationService>();
-        mock.HydrateCacheForUserAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(shouldHydrate);
-        return mock;
     }
 }
 
