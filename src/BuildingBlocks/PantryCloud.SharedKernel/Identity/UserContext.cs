@@ -16,7 +16,11 @@ public sealed class UserContext(IHttpContextAccessor httpContextAccessor) : IUse
             var context = httpContextAccessor.HttpContext
                           ?? throw new UnauthorizedAccessException("No HttpContext found");
 
-            return context.User ?? throw new UnauthorizedAccessException("User not authenticated");
+            var user = context.User;
+            if (user == null || user.Identity?.IsAuthenticated != true)
+                throw new UnauthorizedAccessException("User not authenticated");
+
+            return user;
         }
     }
 
