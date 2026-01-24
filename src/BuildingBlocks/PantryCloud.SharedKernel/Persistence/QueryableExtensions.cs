@@ -24,15 +24,22 @@ public static class QueryableExtensions
         if (string.IsNullOrWhiteSpace(searchTerm))
             return queryable;
 
+        // Build expression: property.ToLower().Contains(searchTerm.ToLower())
         var searchTermLower = searchTerm.ToLower();
         var parameter = propertySelector.Parameters[0];
         var property = propertySelector.Body;
+        
+        // property.ToLower()
         var toLowerMethod = typeof(string).GetMethod(nameof(string.ToLower), Type.EmptyTypes)!;
-        var toLowerCall = Expression.Call(property, toLowerMethod);
+        var propertyToLower = Expression.Call(property, toLowerMethod);
+        
+        // .Contains(searchTermLower)
         var containsMethod = typeof(string).GetMethod(nameof(string.Contains), new[] { typeof(string) })!;
-        var constant = Expression.Constant(searchTermLower);
-        var containsCall = Expression.Call(toLowerCall, containsMethod, constant);
-        var lambda = Expression.Lambda<Func<T, bool>>(containsCall, parameter);
+        var searchTermConstant = Expression.Constant(searchTermLower);
+        var containsExpression = Expression.Call(propertyToLower, containsMethod, searchTermConstant);
+        
+        // Build the final lambda: x => x.Property.ToLower().Contains(searchTermLower)
+        var lambda = Expression.Lambda<Func<T, bool>>(containsExpression, parameter);
 
         return queryable.Where(lambda);
     }
