@@ -4,27 +4,31 @@ using Microsoft.AspNetCore.Http;
 
 namespace PantryCloud.SharedKernel.Identity;
 
-public sealed class UserContext : IUserContext
+/// <summary>
+/// Implementation of <see cref="IUserContext"/> that extracts user information from JWT claims.
+/// </summary>
+public sealed class UserContext(IHttpContextAccessor httpContextAccessor) : IUserContext
 {
-    private readonly ClaimsPrincipal _user;
-
-    public UserContext(IHttpContextAccessor httpContextAccessor)
+    private ClaimsPrincipal User
     {
-        var context = httpContextAccessor.HttpContext
-                      ?? throw new UnauthorizedAccessException("No HttpContext found");
+        get
+        {
+            var context = httpContextAccessor.HttpContext
+                          ?? throw new UnauthorizedAccessException("No HttpContext found");
 
-        _user = context.User ?? throw new UnauthorizedAccessException("User not authenticated");
+            return context.User ?? throw new UnauthorizedAccessException("User not authenticated");
+        }
     }
 
     public Guid UserId =>
-        Guid.TryParse(_user.FindFirstValue(ClaimTypes.NameIdentifier) ??
-                      _user.FindFirstValue(JwtRegisteredClaimNames.Sub), out var id)
+        Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                      User.FindFirstValue(JwtRegisteredClaimNames.Sub), out var id)
             ? id
             : throw new UnauthorizedAccessException("User ID not found in token");
 
     public string Email =>
-        _user.FindFirstValue(ClaimTypes.Email)
-        ?? _user.FindFirstValue(JwtRegisteredClaimNames.Email)
+        User.FindFirstValue(ClaimTypes.Email)
+        ?? User.FindFirstValue(JwtRegisteredClaimNames.Email)
         ?? throw new UnauthorizedAccessException("Email not found in token");
 }
 

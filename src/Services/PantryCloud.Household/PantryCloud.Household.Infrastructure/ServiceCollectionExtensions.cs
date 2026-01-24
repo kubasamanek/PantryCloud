@@ -8,8 +8,10 @@ using PantryCloud.Household.Application.Commands;
 using PantryCloud.Household.Core;
 using PantryCloud.Household.Infrastructure.Persistence;
 using PantryCloud.Household.Infrastructure.Services;
+using PantryCloud.SharedKernel.Correlation;
 using PantryCloud.SharedKernel.Identity;
 using PantryCloud.SharedKernel.Messaging;
+using PantryCloud.SharedKernel.Persistence;
 
 namespace PantryCloud.Household.Infrastructure;
 
@@ -23,7 +25,7 @@ public static class ServiceCollectionExtensions
         
         var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-        services.AddDbContext<HouseholdDbContext>(options =>
+        services.AddDbContextWithAuditing<HouseholdDbContext>(options =>
             options.UseNpgsql(connectionString));
         
         services.AddMessaging(configuration, typeof(CreateHouseholdCommand).Assembly);
@@ -50,7 +52,7 @@ public static class ServiceCollectionExtensions
 
         services.AddAuthorization();
 
-        services.AddHttpContextAccessor();
+        services.AddCorrelationId();
         
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<IHouseholdManagementService, HouseholdManagementService>();

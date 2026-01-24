@@ -7,12 +7,38 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace PantryCloud.SharedKernel.Controllers;
 
+/// <summary>
+/// Base class for API controllers that use MediatR and AutoMapper.
+/// Provides helper methods for handling ErrorOr results and converting them to appropriate HTTP responses.
+/// </summary>
 [ApiController]
 public abstract class ApiControllerBase(IMediator mediator, IMapper mapper) : ControllerBase
 {
+    /// <summary>
+    /// Gets the MediatR mediator for sending commands and queries.
+    /// </summary>
     protected readonly IMediator Mediator = mediator;
+    
+    /// <summary>
+    /// Gets the AutoMapper mapper for object-to-object mapping.
+    /// </summary>
     protected readonly IMapper Mapper = mapper;
-
+    
+    /// <summary>
+    /// Converts an ErrorOr result to an IActionResult with the specified success status code.
+    /// </summary>
+    /// <typeparam name="T">The result value type.</typeparam>
+    /// <param name="result">The ErrorOr result.</param>
+    /// <param name="successStatusCode">The HTTP status code to return on success.</param>
+    /// <returns>An IActionResult representing the result.</returns>
+    protected IActionResult FromResult<T>(ErrorOr<T> result, int successStatusCode)
+    {
+        return result.Match<IActionResult>(
+            value => StatusCode(successStatusCode, value),
+            Problem
+        );
+    }
+    
     private IActionResult Problem(List<Error> errors)
     {
         if (errors.Count == 0)
@@ -46,12 +72,5 @@ public abstract class ApiControllerBase(IMediator mediator, IMapper mapper) : Co
             detail: firstError.Description);
     }
 
-    protected IActionResult FromResult<T>(ErrorOr<T> result, int successStatusCode)
-    {
-        return result.Match<IActionResult>(
-            value => StatusCode(successStatusCode, value),
-            Problem
-        );
-    }
 }
 

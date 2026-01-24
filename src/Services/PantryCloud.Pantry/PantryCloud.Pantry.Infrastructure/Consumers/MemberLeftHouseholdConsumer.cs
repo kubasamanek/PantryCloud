@@ -3,42 +3,37 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PantryCloud.Household.Application.Events;
 using PantryCloud.Pantry.Infrastructure.Persistence;
+using PantryCloud.SharedKernel.Messaging;
 
 namespace PantryCloud.Pantry.Infrastructure.Consumers;
 
 public class MemberLeftHouseholdConsumer(
     PantryDbContext dbContext,
-    ILogger<MemberLeftHouseholdConsumer> logger) : IConsumer<MemberLeftHouseholdEvent>
+    ILogger<MemberLeftHouseholdConsumer> logger) 
+    : DbContextConsumerBase<MemberLeftHouseholdEvent, PantryDbContext>(dbContext, logger)
 {
-    public async Task Consume(ConsumeContext<MemberLeftHouseholdEvent> context)
+    protected override async Task HandleAsync(MemberLeftHouseholdEvent @event, ConsumeContext context)
     {
-        var @event = context.Message;
-        
-        logger.LogInformation(
-            "Consuming MemberLeftHouseholdEvent - HouseholdId: {HouseholdId}, MemberEmail: {MemberEmail}, CorrelationId: {CorrelationId}",
-            @event.HouseholdId,
-            @event.MemberEmail,
-            @event.CorrelationId);
-
-        var membership = await dbContext.UserHouseholdMemberships
+        // Use MemberId for more efficient and accurate lookup
+        var membership = await DbContext.UserHouseholdMemberships
             .FirstOrDefaultAsync(
-                m => m.HouseholdId == @event.HouseholdId && m.LeftAt == null,
+                m => m.UserId == @event.MemberId && m.HouseholdId == @event.HouseholdId && m.LeftAt == null,
                 context.CancellationToken);
 
-        if (membership != null && membership.HouseholdId == @event.HouseholdId)
+        if (membership != null)
         {
             membership.LeftAt = @event.LeftAt;
-            await dbContext.SaveChangesAsync(context.CancellationToken);
             
-            logger.LogInformation(
+            Logger.LogInformation(
                 "Updated household membership - UserId: {UserId} left HouseholdId: {HouseholdId}",
-                membership.UserId,
+                @event.MemberId,
                 @event.HouseholdId);
         }
         else
         {
-            logger.LogWarning(
-                "No active membership found for HouseholdId: {HouseholdId} in MemberLeftHouseholdEvent",
+            Logger.LogWarning(
+                "No active membership found for UserId: {UserId}, HouseholdId: {HouseholdId} in MemberLeftHouseholdEvent",
+                @event.MemberId,
                 @event.HouseholdId);
         }
     }

@@ -29,6 +29,7 @@ public class MemberLeftHouseholdConsumerTests
         var @event = new MemberLeftHouseholdEvent
         {
             HouseholdId = Constants.HouseholdId,
+            MemberId = Constants.UserId,
             MemberEmail = Constants.UserEmail,
             LeftAt = leftAt,
             CorrelationId = Guid.NewGuid().ToString()
@@ -58,6 +59,7 @@ public class MemberLeftHouseholdConsumerTests
         var @event = new MemberLeftHouseholdEvent
         {
             HouseholdId = Constants.HouseholdId,
+            MemberId = Constants.UserId,
             MemberEmail = Constants.UserEmail,
             LeftAt = DateTime.UtcNow,
             CorrelationId = Guid.NewGuid().ToString()
@@ -95,6 +97,7 @@ public class MemberLeftHouseholdConsumerTests
         var @event = new MemberLeftHouseholdEvent
         {
             HouseholdId = Constants.HouseholdId,
+            MemberId = Constants.UserId,
             MemberEmail = Constants.UserEmail,
             LeftAt = DateTime.UtcNow,
             CorrelationId = Guid.NewGuid().ToString()

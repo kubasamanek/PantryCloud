@@ -6,7 +6,7 @@ public record CreateHouseholdResponseDto(Guid Id, string Name, Guid OwnerId, str
 
 public record LeaveHouseholdRequestDto();
 
-public record LeaveHouseholdResponseDto(Guid? HouseholdId, string? MemberEmail, DateTime? LeftAt);
+public record LeaveHouseholdResponseDto(Guid? HouseholdId, Guid? MemberId, string? MemberEmail, DateTime? LeftAt);
 
 public record GetCurrentHouseholdRequestDto();
 public record GetCurrentHouseholdResponseDto(Guid Id, string Name);

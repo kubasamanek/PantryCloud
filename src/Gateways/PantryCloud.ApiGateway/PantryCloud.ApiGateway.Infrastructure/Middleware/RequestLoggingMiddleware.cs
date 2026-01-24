@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using PantryCloud.SharedKernel.Correlation;
 
 namespace PantryCloud.ApiGateway.Infrastructure.Middleware;
 
@@ -14,7 +15,7 @@ public class RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggi
     public async Task InvokeAsync(HttpContext context)
     {
         var stopwatch = Stopwatch.StartNew();
-        var correlationId = context.Items[Constants.CorrelationIdItem]?.ToString() ?? Constants.UnknownPlaceholder;
+        var correlationId = context.Items[CorrelationIdConstants.HttpContextItemKey]?.ToString() ?? CorrelationIdConstants.UnknownPlaceholder;
         var method = context.Request.Method;
         var path = context.Request.Path;
         var queryString = context.Request.QueryString;

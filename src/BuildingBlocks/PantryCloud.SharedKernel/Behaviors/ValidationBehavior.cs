@@ -4,6 +4,12 @@ using MediatR;
 
 namespace PantryCloud.SharedKernel.Behaviors;
 
+/// <summary>
+/// MediatR pipeline behavior that validates requests using FluentValidation.
+/// Automatically runs all registered validators before the request handler executes.
+/// </summary>
+/// <typeparam name="TRequest">The request type.</typeparam>
+/// <typeparam name="TResponse">The response type.</typeparam>
 public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>

@@ -1,8 +1,8 @@
 using PantryCloud.ApiGateway.Core;
 using PantryCloud.ApiGateway.Infrastructure;
 using PantryCloud.ApiGateway.Infrastructure.Middleware;
-using PantryCloud.ApiGateway.Presentation;
 using PantryCloud.ApiGateway.Presentation.Extensions;
+using PantryCloud.SharedKernel.Correlation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,9 +27,10 @@ if (app.Environment.IsProduction())
     app.UseHttpsRedirection();
 }
 
+app.UseMiddleware<CorrelationIdMiddleware>();
+
 app.UseExceptionHandler();
 
-app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.UseAuthentication();

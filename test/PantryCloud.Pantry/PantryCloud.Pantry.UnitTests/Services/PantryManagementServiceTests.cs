@@ -16,8 +16,8 @@ public class PantryManagementServiceTests
     [Fact]
     public async Task CreatePantryItemAsync_ShouldCreateItem_WhenUserHasHousehold()
     {
-        await using var db = TestHelper.CreateInMemoryContext(nameof(CreatePantryItemAsync_ShouldCreateItem_WhenUserHasHousehold));
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
+        await using var db = TestHelper.CreateInMemoryContext(nameof(CreatePantryItemAsync_ShouldCreateItem_WhenUserHasHousehold), userContext);
         var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
@@ -56,8 +56,8 @@ public class PantryManagementServiceTests
     [Fact]
     public async Task CreatePantryItemAsync_ShouldReturnError_WhenUserNotInHousehold()
     {
-        await using var db = TestHelper.CreateInMemoryContext(nameof(CreatePantryItemAsync_ShouldReturnError_WhenUserNotInHousehold));
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
+        await using var db = TestHelper.CreateInMemoryContext(nameof(CreatePantryItemAsync_ShouldReturnError_WhenUserNotInHousehold), userContext);
         var cacheService = TestHelper.MockCacheHydrationService(shouldHydrate: false);
 
         var service = new PantryManagementService(db, userContext, cacheService, _logger);
@@ -80,8 +80,8 @@ public class PantryManagementServiceTests
     [Fact]
     public async Task GetPantryItemAsync_ShouldReturnItem_WhenItemExists()
     {
-        await using var db = TestHelper.CreateInMemoryContext(nameof(GetPantryItemAsync_ShouldReturnItem_WhenItemExists));
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
+        await using var db = TestHelper.CreateInMemoryContext(nameof(GetPantryItemAsync_ShouldReturnItem_WhenItemExists), userContext);
         var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
@@ -124,8 +124,8 @@ public class PantryManagementServiceTests
     [Fact]
     public async Task GetPantryItemAsync_ShouldReturnError_WhenItemNotFound()
     {
-        await using var db = TestHelper.CreateInMemoryContext(nameof(GetPantryItemAsync_ShouldReturnError_WhenItemNotFound));
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
+        await using var db = TestHelper.CreateInMemoryContext(nameof(GetPantryItemAsync_ShouldReturnError_WhenItemNotFound), userContext);
         var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
@@ -149,8 +149,8 @@ public class PantryManagementServiceTests
     [Fact]
     public async Task UpdatePantryItemAsync_ShouldUpdateItem_WhenItemExists()
     {
-        await using var db = TestHelper.CreateInMemoryContext(nameof(UpdatePantryItemAsync_ShouldUpdateItem_WhenItemExists));
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
+        await using var db = TestHelper.CreateInMemoryContext(nameof(UpdatePantryItemAsync_ShouldUpdateItem_WhenItemExists), userContext);
         var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
@@ -204,8 +204,8 @@ public class PantryManagementServiceTests
     [Fact]
     public async Task UpdatePantryItemAsync_ShouldReturnError_WhenItemNotFound()
     {
-        await using var db = TestHelper.CreateInMemoryContext(nameof(UpdatePantryItemAsync_ShouldReturnError_WhenItemNotFound));
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
+        await using var db = TestHelper.CreateInMemoryContext(nameof(UpdatePantryItemAsync_ShouldReturnError_WhenItemNotFound), userContext);
         var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
@@ -238,8 +238,8 @@ public class PantryManagementServiceTests
     [Fact]
     public async Task DeletePantryItemAsync_ShouldDeleteItem_WhenItemExists()
     {
-        await using var db = TestHelper.CreateInMemoryContext(nameof(DeletePantryItemAsync_ShouldDeleteItem_WhenItemExists));
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
+        await using var db = TestHelper.CreateInMemoryContext(nameof(DeletePantryItemAsync_ShouldDeleteItem_WhenItemExists), userContext);
         var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
@@ -279,8 +279,8 @@ public class PantryManagementServiceTests
     [Fact]
     public async Task DeletePantryItemAsync_ShouldReturnError_WhenItemNotFound()
     {
-        await using var db = TestHelper.CreateInMemoryContext(nameof(DeletePantryItemAsync_ShouldReturnError_WhenItemNotFound));
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
+        await using var db = TestHelper.CreateInMemoryContext(nameof(DeletePantryItemAsync_ShouldReturnError_WhenItemNotFound), userContext);
         var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
@@ -304,8 +304,8 @@ public class PantryManagementServiceTests
     [Fact]
     public async Task ListPantryItemsAsync_ShouldReturnItems_WhenItemsExist()
     {
-        await using var db = TestHelper.CreateInMemoryContext(nameof(ListPantryItemsAsync_ShouldReturnItems_WhenItemsExist));
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
+        await using var db = TestHelper.CreateInMemoryContext(nameof(ListPantryItemsAsync_ShouldReturnItems_WhenItemsExist), userContext);
         var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
@@ -354,8 +354,8 @@ public class PantryManagementServiceTests
     [Fact]
     public async Task ListPantryItemsAsync_ShouldFilterByCategory_WhenCategoryProvided()
     {
-        await using var db = TestHelper.CreateInMemoryContext(nameof(ListPantryItemsAsync_ShouldFilterByCategory_WhenCategoryProvided));
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
+        await using var db = TestHelper.CreateInMemoryContext(nameof(ListPantryItemsAsync_ShouldFilterByCategory_WhenCategoryProvided), userContext);
         var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
@@ -406,8 +406,8 @@ public class PantryManagementServiceTests
     [Fact]
     public async Task ListPantryItemsAsync_ShouldFilterBySearchTerm_WhenSearchTermProvided()
     {
-        await using var db = TestHelper.CreateInMemoryContext(nameof(ListPantryItemsAsync_ShouldFilterBySearchTerm_WhenSearchTermProvided));
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
+        await using var db = TestHelper.CreateInMemoryContext(nameof(ListPantryItemsAsync_ShouldFilterBySearchTerm_WhenSearchTermProvided), userContext);
         var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
@@ -456,8 +456,8 @@ public class PantryManagementServiceTests
     [Fact]
     public async Task ListPantryItemsAsync_ShouldBeCaseInsensitive_WhenSearchTermProvided()
     {
-        await using var db = TestHelper.CreateInMemoryContext(nameof(ListPantryItemsAsync_ShouldBeCaseInsensitive_WhenSearchTermProvided));
         var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail);
+        await using var db = TestHelper.CreateInMemoryContext(nameof(ListPantryItemsAsync_ShouldBeCaseInsensitive_WhenSearchTermProvided), userContext);
         var cacheService = TestHelper.MockCacheHydrationService();
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership

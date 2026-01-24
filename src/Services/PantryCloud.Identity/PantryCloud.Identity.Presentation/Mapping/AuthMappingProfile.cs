@@ -16,5 +16,14 @@ public class AuthMappingProfile : Profile
         
         CreateMap<LoginRequestDto, LoginCommand>()
             .ConstructUsing(dto => new LoginCommand(dto));
+        
+        CreateMap<ForgotPasswordRequestDto, ForgotPasswordCommand>()
+            .ConstructUsing(dto => new ForgotPasswordCommand(dto));
+        
+        CreateMap<ResetPasswordRequestDto, ResetPasswordCommand>()
+            .ConstructUsing(dto => new ResetPasswordCommand(dto));
+
+        CreateMap<VerifyEmailRequestDto, VerifyEmailCommand>()
+            .ConstructUsing(dto => new VerifyEmailCommand(dto));
     }
 }

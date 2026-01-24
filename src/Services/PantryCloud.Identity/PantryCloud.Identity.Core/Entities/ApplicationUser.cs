@@ -1,9 +1,9 @@
+using PantryCloud.SharedKernel.Entities;
+
 namespace PantryCloud.Identity.Core.Entities;
 
-public class ApplicationUser
+public class ApplicationUser : BaseEntity
 {
-    public Guid Id { get; init; }
-    
     public required string Email { get; init; }
     
     public required string PasswordHash { get; set; }

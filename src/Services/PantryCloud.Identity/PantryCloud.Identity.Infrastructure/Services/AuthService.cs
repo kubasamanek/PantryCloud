@@ -29,7 +29,6 @@ public class AuthService(
 
         var user = new ApplicationUser
         {
-            Id = Guid.NewGuid(),
             Email = request.Email,
             EmailVerified = false,
             PasswordHash = PasswordHasher.Hash(request.Password),
@@ -128,7 +127,7 @@ public class AuthService(
         
         if (user == null)
         {
-            logger.LogWarning("Refresh token failed: token not found");
+            logger.LogWarning("User {Email} does not exist", request.Email);
             return AuthErrors.UserDoesNotExist(request.Email);
         }
 
@@ -219,7 +218,7 @@ public class AuthService(
         
         if (user is null)
         {
-            logger.LogWarning("Reset password failed: user not found");
+            logger.LogWarning("Verify email failed: user not found");
             return AuthErrors.UserDoesNotExist(request.Email);
         }
         
@@ -228,19 +227,19 @@ public class AuthService(
 
         if (token is null)
         {
-            logger.LogWarning("Reset password failed: token not found");
+            logger.LogWarning("Verify email failed: token not found");
             return AuthErrors.TokenNotValid;
         }
         
         if (token.IsUsed)
         {
-            logger.LogWarning("Reset password failed: token has been used");
+            logger.LogWarning("Verify email failed: token has been used");
             return AuthErrors.TokenAlreadyUsed;
         }
         
         if (token.IsExpired)
         {
-            logger.LogWarning("Reset password failed: token has expired");
+            logger.LogWarning("Verify email failed: token has expired");
             return AuthErrors.TokenExpired;
         }
         
