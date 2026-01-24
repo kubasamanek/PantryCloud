@@ -5,6 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace PantryCloud.SharedKernel.Exceptions;
 
+/// <summary>
+/// Global exception handler that catches unhandled exceptions and converts them to appropriate HTTP responses.
+/// Uses RFC 7807 Problem Details format for consistent error responses.
+/// </summary>
 public sealed class GlobalExceptionHandler(
     ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {

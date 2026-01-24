@@ -1,3 +1,4 @@
+using PantryCloud.SharedKernel.Correlation;
 using Yarp.ReverseProxy.Transforms;
 using Yarp.ReverseProxy.Transforms.Builder;
 
@@ -23,11 +24,11 @@ public class CorrelationIdTransformProvider : ITransformProvider
     {
         context.AddRequestTransform(transformContext =>
         {
-            var correlationId = transformContext.HttpContext.Request.Headers[Constants.CorrelationIdHeader].FirstOrDefault()
-                               ?? transformContext.HttpContext.Items[Constants.CorrelationIdItem]?.ToString()
+            var correlationId = transformContext.HttpContext.Items[CorrelationIdConstants.HttpContextItemKey]?.ToString()
+                               ?? transformContext.HttpContext.Request.Headers[CorrelationIdConstants.HeaderName].FirstOrDefault()
                                ?? Guid.NewGuid().ToString();
             
-            transformContext.ProxyRequest.Headers.Add(Constants.CorrelationIdHeader, correlationId);
+            transformContext.ProxyRequest.Headers.Add(CorrelationIdConstants.HeaderName, correlationId);
             
             return ValueTask.CompletedTask;
         });

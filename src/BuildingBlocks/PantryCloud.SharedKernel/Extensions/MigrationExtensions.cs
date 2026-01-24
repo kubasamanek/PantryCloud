@@ -4,8 +4,17 @@ using Microsoft.Extensions.Hosting;
 
 namespace PantryCloud.SharedKernel.Extensions;
 
+/// <summary>
+/// Extension methods for applying Entity Framework Core migrations.
+/// </summary>
 public static class MigrationExtensions
 {
+    /// <summary>
+    /// Applies pending migrations for the specified DbContext.
+    /// Typically called during application startup in development environments.
+    /// </summary>
+    /// <typeparam name="TContext">The type of the DbContext.</typeparam>
+    /// <param name="host">The application host.</param>
     public static async Task ApplyMigrationsAsync<TContext>(this IHost host) 
         where TContext : DbContext
     {

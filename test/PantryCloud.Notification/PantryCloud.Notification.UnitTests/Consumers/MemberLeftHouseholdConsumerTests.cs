@@ -29,7 +29,9 @@ public class MemberLeftHouseholdConsumerTests
         var @event = new MemberLeftHouseholdEvent
         {
             HouseholdId = Guid.NewGuid(),
+            MemberId = Guid.NewGuid(),
             MemberEmail = "test@example.com",
+            LeftAt = DateTime.UtcNow,
             CorrelationId = Guid.NewGuid().ToString()
         };
 
@@ -44,6 +46,7 @@ public class MemberLeftHouseholdConsumerTests
                 n.Title == "Member Left Household" &&
                 n.Type == NotificationType.Success &&
                 n.CorrelationId == @event.CorrelationId &&
+                n.UserId == @event.MemberId &&
                 n.Message.Contains(@event.MemberEmail)), 
             Arg.Any<CancellationToken>());
     }

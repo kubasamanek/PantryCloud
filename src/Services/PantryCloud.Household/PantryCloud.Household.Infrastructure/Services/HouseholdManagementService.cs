@@ -3,151 +3,147 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PantryCloud.Household.Application;
 using PantryCloud.Household.Application.Dtos;
-using PantryCloud.SharedKernel.Identity;
 using PantryCloud.Household.Core.Entities;
 using PantryCloud.Household.Core.Enums;
 using PantryCloud.Household.Core.Errors;
 using PantryCloud.Household.Infrastructure.Persistence;
+using PantryCloud.SharedKernel.Identity;
+using PantryCloud.SharedKernel.Services;
 
 namespace PantryCloud.Household.Infrastructure.Services;
 
-public class HouseholdManagementService(HouseholdDbContext dbContext, IUserContext userContext, ILogger<HouseholdManagementService> logger) : IHouseholdManagementService
+public class HouseholdManagementService(
+    HouseholdDbContext dbContext,
+    IUserContext userContext,
+    ILogger<HouseholdManagementService> logger) 
+    : BaseDbContextService<HouseholdManagementService, HouseholdDbContext>(dbContext, userContext, logger), IHouseholdManagementService
 {
     public async Task<ErrorOr<GetCurrentHouseholdResponseDto>> GetCurrentHousehold(CancellationToken cancellationToken)
     {
-        var userId = userContext.UserId;
-
-        logger.LogInformation("Getting current household for {UserId}", userId);
+        Logger.LogInformation("Getting current household for {UserId}", UserId);
         
-        var household = await dbContext.Households
-            .Where(h => h.Members.Any(m => m.UserId == userId))
+        var household = await DbContext.Households
+            .Where(h => h.Members.Any(m => m.UserId == UserId))
             .FirstOrDefaultAsync(cancellationToken);
 
         if (household is null)
         {
-            logger.LogInformation("Household for {UserId} not found", userId);
+            Logger.LogInformation("Household for {UserId} not found", UserId);
             return Error.NotFound("Household.NotFound", "Household not found");
         }
         
-        logger.LogInformation("Got current household for {UserId}", userId);
+        Logger.LogInformation("Got current household for {UserId}", UserId);
 
         return new GetCurrentHouseholdResponseDto(household.Id, household.Name);
     }
 
     public async Task<ErrorOr<GetHouseholdByUserIdResponseDto>> GetHouseholdByUserId(GetHouseholdByUserIdRequestDto request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Getting household for user {UserId}", request.UserId);
+        Logger.LogInformation("Getting household for user {UserId}", request.UserId);
         
-        var household = await dbContext.Households
+        var household = await DbContext.Households
             .Where(h => h.Members.Any(m => m.UserId == request.UserId))
             .FirstOrDefaultAsync(cancellationToken);
 
         if (household is null)
         {
-            logger.LogInformation("Household for user {UserId} not found", request.UserId);
+            Logger.LogInformation("Household for user {UserId} not found", request.UserId);
             return Error.NotFound("Household.NotFound", "Household not found");
         }
         
-        logger.LogInformation("Got household for user {UserId}", request.UserId);
+        Logger.LogInformation("Got household for user {UserId}", request.UserId);
 
         return new GetHouseholdByUserIdResponseDto(household.Id, household.Name);
     }
 
     public async Task<ErrorOr<CreateHouseholdResponseDto>> CreateHousehold(CreateHouseholdRequestDto request, CancellationToken cancellationToken)
     {
-        var userId = userContext.UserId;
-
-        logger.LogInformation("Creating household for {UserId}", userId);
+        Logger.LogInformation("Creating household for {UserId}", UserId);
         
-        var alreadyMember = await dbContext.Members
-            .AnyAsync(m => m.UserId == userId, cancellationToken);
+        var alreadyMember = await DbContext.Members
+            .AnyAsync(m => m.UserId == UserId, cancellationToken);
 
         if (alreadyMember)
         {
-            logger.LogInformation("Household for {UserId} already exists", userId);
+            Logger.LogInformation("Household for {UserId} already exists", UserId);
             return HouseholdErrors.UserAlreadyInHousehold;
         }
 
-        // Create new entities
         var household = new Core.Entities.Household
         {
-            Id = Guid.NewGuid(),
             Name = request.Name,
         };
 
         var member = new HouseholdMember
         {
-            Id = Guid.NewGuid(),
             HouseholdId = household.Id,
-            UserId = userId,
+            UserId = UserId,
             Role = HouseholdRole.Owner,
             JoinedAt = DateTime.UtcNow
         };
 
-        dbContext.Households.Add(household);
-        dbContext.Members.Add(member);
+        DbContext.Households.Add(household);
+        DbContext.Members.Add(member);
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await DbContext.SaveChangesAsync(cancellationToken);
         
-        logger.LogInformation("Created household for {UserId}", userId);
+        Logger.LogInformation("Created household for {UserId}", UserId);
 
         return new CreateHouseholdResponseDto(
             household.Id, 
             household.Name, 
             member.UserId, 
-            userContext.Email, 
+            UserEmail, 
             member.JoinedAt);
     }
     
     public async Task<ErrorOr<LeaveHouseholdResponseDto>> LeaveHousehold(LeaveHouseholdRequestDto request, CancellationToken cancellationToken)
     {
-        var userId = userContext.UserId;
+        Logger.LogInformation("User {UserId} requested to leave household", UserId);
 
-        logger.LogInformation("User {UserId} requested to leave household", userId);
-
-        var member = await dbContext.Members
-            .FirstOrDefaultAsync(m => m.UserId == userId, cancellationToken);
+        var member = await DbContext.Members
+            .FirstOrDefaultAsync(m => m.UserId == UserId, cancellationToken);
 
         if (member is null)
         {
-            logger.LogWarning("User {UserId} is not a member of any household", userId);
+            Logger.LogWarning("User {UserId} is not a member of any household", UserId);
             return HouseholdErrors.UserNotInAnyHousehold;
         }
 
         var householdId = member.HouseholdId;
 
-        var membersInHousehold = await dbContext.Members
+        var membersInHousehold = await DbContext.Members
             .Where(m => m.HouseholdId == householdId)
             .ToListAsync(cancellationToken);
 
         // User is the only member → delete household and member
         if (membersInHousehold.Count == 1)
         {
-            dbContext.Members.Remove(member);
+            DbContext.Members.Remove(member);
 
-            var household = await dbContext.Households.FirstOrDefaultAsync(h => h.Id == householdId, cancellationToken);
+            var household = await DbContext.Households.FirstOrDefaultAsync(h => h.Id == householdId, cancellationToken);
             if (household is not null)
             {
-                dbContext.Households.Remove(household);
+                DbContext.Households.Remove(household);
             }
 
-            logger.LogInformation("User {UserId} was the only member. Household deleted.", userId);
+            Logger.LogInformation("User {UserId} was the only member. Household deleted.", UserId);
         }
         // User is owner but not the only member → can't leave
         else if (member.Role == HouseholdRole.Owner)
         {
-            logger.LogWarning("Owner {UserId} cannot leave household with other members present", userId);
+            Logger.LogWarning("Owner {UserId} cannot leave household with other members present", UserId);
             return HouseholdErrors.OwnerCannotLeave;
         }
         // Normal case: user is member/admin and can leave
         else
         {
-            dbContext.Members.Remove(member);
-            logger.LogInformation("User {UserId} left the household", userId);
+            DbContext.Members.Remove(member);
+            Logger.LogInformation("User {UserId} left the household", UserId);
         }
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await DbContext.SaveChangesAsync(cancellationToken);
 
-        return new LeaveHouseholdResponseDto(householdId, userContext.Email, DateTime.Now);
+        return new LeaveHouseholdResponseDto(householdId, UserId, UserEmail, DateTime.UtcNow);
     }
 }

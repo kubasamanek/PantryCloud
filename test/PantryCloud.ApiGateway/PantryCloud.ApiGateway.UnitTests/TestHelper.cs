@@ -2,15 +2,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using PantryCloud.ApiGateway.Infrastructure.Middleware;
 
 namespace PantryCloud.ApiGateway.UnitTests;
 
 internal static class TestHelper
 {
-    public static ILogger<T> MockLogger<T>() where T : class
-        => Substitute.For<ILogger<T>>();
-
     public static HttpContext CreateHttpContext(
         string? correlationId = null,
         string? method = "GET",
@@ -33,7 +29,6 @@ internal static class TestHelper
         }
 
         var services = new ServiceCollection();
-        services.AddSingleton(MockLogger<CorrelationIdMiddleware>());
         context.RequestServices = services.BuildServiceProvider();
 
         if (!isAuthenticated || userId == null) return context;
@@ -54,4 +49,8 @@ internal static class TestHelper
             await Task.CompletedTask;
         };
     }
+    
+    public static ILogger<T> MockLogger<T>() where T : class
+        => Substitute.For<ILogger<T>>();
+
 }

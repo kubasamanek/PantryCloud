@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using PantryCloud.Pantry.Application;
 using PantryCloud.Pantry.Core.Entities;
 using PantryCloud.Pantry.Infrastructure.Persistence;
+using PantryCloud.SharedKernel.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -27,6 +28,8 @@ public class HouseholdCacheHydrationService(
             logger.LogInformation("Hydrating cache for user {UserId}", userId);
 
             using var request = new HttpRequestMessage(HttpMethod.Get, $"{_householdServiceUrl}/api/households/me");
+            
+            request.AddCorrelationIdHeader(httpContextAccessor);
             
             var httpContext = httpContextAccessor.HttpContext;
             if (httpContext?.Request.Headers.ContainsKey("Authorization") == true)

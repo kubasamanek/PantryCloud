@@ -1,6 +1,8 @@
+using PantryCloud.SharedKernel.Entities;
+
 namespace PantryCloud.Pantry.Core.Entities;
 
-public class UserHouseholdMembership
+public class UserHouseholdMembership : BaseEntity
 {
     public Guid UserId { get; init; }
     public Guid HouseholdId { get; set; }

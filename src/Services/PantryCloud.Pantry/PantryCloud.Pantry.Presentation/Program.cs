@@ -2,9 +2,15 @@ using PantryCloud.Pantry.Application;
 using PantryCloud.Pantry.Infrastructure;
 using PantryCloud.Pantry.Infrastructure.Persistence;
 using PantryCloud.Pantry.Presentation.Extensions;
+using PantryCloud.SharedKernel.Correlation;
 using PantryCloud.SharedKernel.Extensions;
+using PantryCloud.SharedKernel.Logging;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSerilogLogging(builder.Configuration);
+builder.Host.UseSerilog();
 
 builder.Services
     .AddPresentationLayerServices(builder.Configuration)
@@ -25,6 +31,8 @@ if (app.Environment.IsProduction())
 {
     app.UseHttpsRedirection();
 }
+
+app.UseMiddleware<CorrelationIdMiddleware>();
 
 app.UseExceptionHandler();
 

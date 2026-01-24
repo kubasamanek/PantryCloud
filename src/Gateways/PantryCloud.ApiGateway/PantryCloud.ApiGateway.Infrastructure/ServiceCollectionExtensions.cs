@@ -45,35 +45,43 @@ public static class ServiceCollectionExtensions
         services.AddAuthorization();
 
         var resilienceSettings = apiConfiguration.Gateway.Resilience;
+        var policyRegistry = new PolicyRegistry();
         
         if (resilienceSettings.Retry.Enabled || resilienceSettings.CircuitBreaker.Enabled)
         {
-            var retryPolicy = HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .WaitAndRetryAsync(
-                    retryCount: resilienceSettings.Retry.Enabled ? resilienceSettings.Retry.MaxRetryAttempts : 0,
-                    sleepDurationProvider: retryAttempt => TimeSpan.FromMilliseconds(
-                        resilienceSettings.Retry.BaseDelayMilliseconds * Math.Pow(2, retryAttempt)));
-
-            var circuitBreakerPolicy = HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .CircuitBreakerAsync(
-                    handledEventsAllowedBeforeBreaking: resilienceSettings.CircuitBreaker.Enabled 
-                        ? resilienceSettings.CircuitBreaker.FailureThreshold 
-                        : int.MaxValue,
-                    durationOfBreak: TimeSpan.FromSeconds(resilienceSettings.CircuitBreaker.DurationOfBreakSeconds));
-
-            var policyRegistry = new PolicyRegistry();
-            services.AddSingleton<IReadOnlyPolicyRegistry<string>>(policyRegistry);
-            if (resilienceSettings.Retry.Enabled)
+            // Create policies per service to isolate failures
+            var serviceNames = new[] { "Identity", "Household", "Pantry", "Recipe", "ShoppingList" };
+            
+            foreach (var service in serviceNames)
             {
-                policyRegistry.Add(Constants.RetryPolicyName, retryPolicy);
-            }
-            if (resilienceSettings.CircuitBreaker.Enabled)
-            {
-                policyRegistry.Add(Constants.CircuitBreakerPolicyName, circuitBreakerPolicy);
+                // Create service-specific retry policy
+                if (resilienceSettings.Retry.Enabled)
+                {
+                    var retryPolicy = HttpPolicyExtensions
+                        .HandleTransientHttpError()
+                        .WaitAndRetryAsync(
+                            retryCount: resilienceSettings.Retry.MaxRetryAttempts,
+                            sleepDurationProvider: retryAttempt => TimeSpan.FromMilliseconds(
+                                resilienceSettings.Retry.BaseDelayMilliseconds * Math.Pow(2, retryAttempt)));
+                    
+                    policyRegistry.Add($"{Constants.RetryPolicyName}-{service}", retryPolicy);
+                }
+
+                // Create service-specific circuit breaker policy
+                if (resilienceSettings.CircuitBreaker.Enabled)
+                {
+                    var circuitBreakerPolicy = HttpPolicyExtensions
+                        .HandleTransientHttpError()
+                        .CircuitBreakerAsync(
+                            handledEventsAllowedBeforeBreaking: resilienceSettings.CircuitBreaker.FailureThreshold,
+                            durationOfBreak: TimeSpan.FromSeconds(resilienceSettings.CircuitBreaker.DurationOfBreakSeconds));
+                    
+                    policyRegistry.Add($"{Constants.CircuitBreakerPolicyName}-{service}", circuitBreakerPolicy);
+                }
             }
         }
+        
+        services.AddSingleton<IReadOnlyPolicyRegistry<string>>(policyRegistry);
 
         services.AddSingleton<IProxyConfigProvider>(_ => 
             new InMemoryConfigProvider(
@@ -183,28 +191,28 @@ public static class ServiceCollectionExtensions
             ActivityTimeout = TimeSpan.FromSeconds(resilienceSettings.RequestTimeoutSeconds)
         };
 
-        // Add policies to metadata
-        var metadata = new Dictionary<string, string>();
-        if (resilienceSettings.Retry.Enabled)
-        {
-            metadata[Constants.RetryPolicyName] = Constants.RetryPolicyName;
-        }
-        if (resilienceSettings.CircuitBreaker.Enabled)
-        {
-            metadata[Constants.CircuitBreakerPolicyName] = Constants.CircuitBreakerPolicyName;
-        }
-
         return
         [
-            CreateClusterConfig(RouteConfiguration.IdentityClusterId, services.IdentityService),
-            CreateClusterConfig(RouteConfiguration.HouseholdClusterId, services.HouseholdService),
-            CreateClusterConfig(RouteConfiguration.PantryClusterId, services.PantryService),
-            //CreateClusterConfig(RouteConfiguration.RecipeClusterId, services.RecipeService),
-            //CreateClusterConfig(RouteConfiguration.ShoppingListClusterId, services.ShoppingListService)
+            CreateClusterConfig(RouteConfiguration.IdentityClusterId, services.IdentityService, "Identity"),
+            CreateClusterConfig(RouteConfiguration.HouseholdClusterId, services.HouseholdService, "Household"),
+            CreateClusterConfig(RouteConfiguration.PantryClusterId, services.PantryService, "Pantry"),
+            //CreateClusterConfig(RouteConfiguration.RecipeClusterId, services.RecipeService, "Recipe"),
+            //CreateClusterConfig(RouteConfiguration.ShoppingListClusterId, services.ShoppingListService, "ShoppingList")
         ];
 
-        ClusterConfig CreateClusterConfig(string clusterId, string serviceAddress)
+        ClusterConfig CreateClusterConfig(string clusterId, string serviceAddress, string serviceName)
         {
+            // Create service-specific metadata with isolated policies
+            var metadata = new Dictionary<string, string>();
+            if (resilienceSettings.Retry.Enabled)
+            {
+                metadata[Constants.RetryPolicyName] = $"{Constants.RetryPolicyName}-{serviceName}";
+            }
+            if (resilienceSettings.CircuitBreaker.Enabled)
+            {
+                metadata[Constants.CircuitBreakerPolicyName] = $"{Constants.CircuitBreakerPolicyName}-{serviceName}";
+            }
+            
             var cluster = new ClusterConfig
             {
                 ClusterId = clusterId,

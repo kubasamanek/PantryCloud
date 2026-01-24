@@ -4,12 +4,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using PantryCloud.Pantry.Application;
-using PantryCloud.Pantry.Application.Commands;
 using PantryCloud.Pantry.Core;
 using PantryCloud.Pantry.Infrastructure.Persistence;
 using PantryCloud.Pantry.Infrastructure.Services;
+using PantryCloud.SharedKernel.Correlation;
 using PantryCloud.SharedKernel.Identity;
 using PantryCloud.SharedKernel.Messaging;
+using PantryCloud.SharedKernel.Persistence;
 
 namespace PantryCloud.Pantry.Infrastructure;
 
@@ -23,7 +24,7 @@ public static class ServiceCollectionExtensions
         
         var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-        services.AddDbContext<PantryDbContext>(options =>
+        services.AddDbContextWithAuditing<PantryDbContext>(options =>
             options.UseNpgsql(connectionString));
         
         services.AddMessaging(configuration, typeof(ServiceCollectionExtensions).Assembly);
@@ -50,7 +51,7 @@ public static class ServiceCollectionExtensions
 
         services.AddAuthorization();
 
-        services.AddHttpContextAccessor();
+        services.AddCorrelationId();
         
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<IPantryManagementService, PantryManagementService>();

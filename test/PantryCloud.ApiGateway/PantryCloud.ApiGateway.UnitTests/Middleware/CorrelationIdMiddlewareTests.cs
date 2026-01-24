@@ -1,14 +1,11 @@
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-using PantryCloud.ApiGateway.Infrastructure.Middleware;
+using PantryCloud.SharedKernel.Correlation;
 using Shouldly;
 
 namespace PantryCloud.ApiGateway.UnitTests.Middleware;
 
 public class CorrelationIdMiddlewareTests
 {
-    private readonly ILogger<CorrelationIdMiddleware> _logger = TestHelper.MockLogger<CorrelationIdMiddleware>();
 
     [Fact]
     public async Task InvokeAsync_ShouldGenerateNewCorrelationId_WhenNotProvided()
@@ -53,6 +50,19 @@ public class CorrelationIdMiddlewareTests
 
         context.Response.Headers.ContainsKey("X-Correlation-Id").ShouldBeTrue();
         context.Response.Headers["X-Correlation-Id"].ToString().ShouldNotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task InvokeAsync_ShouldSetCorrelationIdInRequestHeaders()
+    {
+        var context = TestHelper.CreateHttpContext();
+        var next = TestHelper.CreateMockNext();
+        var middleware = new CorrelationIdMiddleware(next);
+
+        await middleware.InvokeAsync(context);
+
+        context.Request.Headers.ContainsKey("X-Correlation-Id").ShouldBeTrue();
+        context.Request.Headers["X-Correlation-Id"].ToString().ShouldNotBeNullOrEmpty();
     }
 
     [Fact]

@@ -1,26 +1,20 @@
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using PantryCloud.Household.Application.Events;
+using PantryCloud.Notification.Application;
 using PantryCloud.Notification.Core.Dtos;
 using PantryCloud.Notification.Core.Enums;
+using PantryCloud.SharedKernel.Messaging;
 
 namespace PantryCloud.Notification.Application.Consumers;
 
 public class MemberJoinedHouseholdConsumer(
     INotificationService notificationService,
-    ILogger<MemberJoinedHouseholdConsumer> logger) : IConsumer<MemberJoinedHouseholdEvent>
+    ILogger<MemberJoinedHouseholdConsumer> logger) 
+    : ConsumerBase<MemberJoinedHouseholdEvent, object>(logger)
 {
-    public async Task Consume(ConsumeContext<MemberJoinedHouseholdEvent> context)
+    protected override async Task HandleAsync(MemberJoinedHouseholdEvent @event, ConsumeContext context)
     {
-        var @event = context.Message;
-        
-        logger.LogInformation(
-            "Consumed MemberJoinedHouseholdEvent - HouseholdId: {HouseholdId}, MemberId: {MemberId}, MemberEmail: {MemberEmail}, CorrelationId: {CorrelationId}",
-            @event.HouseholdId,
-            @event.NewMemberId,
-            @event.MemberEmail,
-            @event.CorrelationId);
-
         var notification = new NotificationDto(
             Id: Guid.NewGuid(),
             Title: "Member Joined Household",
@@ -32,7 +26,7 @@ public class MemberJoinedHouseholdConsumer(
 
         await notificationService.SendNotificationAsync(notification, context.CancellationToken);
         
-        logger.LogInformation(
+        Logger.LogInformation(
             "Notification sent for MemberJoinedHouseholdEvent - NotificationId: {NotificationId}, UserId: {UserId}",
             notification.Id,
             notification.UserId);

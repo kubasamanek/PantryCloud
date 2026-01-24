@@ -3,6 +3,11 @@ using Microsoft.Extensions.Logging;
 
 namespace PantryCloud.SharedKernel.Messaging;
 
+/// <summary>
+/// Base class for integration event handlers with built-in logging and error handling.
+/// Provides a simpler abstraction over MassTransit's IConsumer for handling integration events.
+/// </summary>
+/// <typeparam name="TEvent">The type of the integration event.</typeparam>
 public abstract class IntegrationEventHandler<TEvent>(ILogger logger) : IIntegrationEventHandler<TEvent>
     where TEvent : IntegrationEvent
 {
@@ -29,5 +34,10 @@ public abstract class IntegrationEventHandler<TEvent>(ILogger logger) : IIntegra
         }
     }
 
+    /// <summary>
+    /// Handles the integration event. Implement this method to provide the specific handling logic.
+    /// </summary>
+    /// <param name="event">The integration event.</param>
+    /// <param name="context">The consume context.</param>
     protected abstract Task Handle(TEvent @event, ConsumeContext context);
 }

@@ -11,12 +11,12 @@ namespace PantryCloud.Pantry.UnitTests;
 
 internal static class TestHelper
 {
-    public static PantryDbContext CreateInMemoryContext(string dbName)
+    public static PantryDbContext CreateInMemoryContext(string dbName, IUserContext? userContext = null)
     {
         var options = new DbContextOptionsBuilder<PantryDbContext>()
             .UseInMemoryDatabase(dbName)
             .Options;
-        return new TestPantryDbContext(options);
+        return new TestPantryDbContext(options, userContext);
     }
     
     public static ILogger<T> MockLogger<T>() where T : class

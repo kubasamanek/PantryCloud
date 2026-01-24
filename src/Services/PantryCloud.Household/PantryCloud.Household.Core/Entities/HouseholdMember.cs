@@ -1,12 +1,12 @@
 using PantryCloud.Household.Core.Enums;
+using PantryCloud.SharedKernel.Entities;
 
 namespace PantryCloud.Household.Core.Entities;
 
-public class HouseholdMember
+public class HouseholdMember : BaseEntity
 {
-    public Guid Id { get; set; }
     public Guid HouseholdId { get; set; }
-    public Guid UserId { get; set; }
-    public HouseholdRole Role { get; set; }
-    public DateTime JoinedAt { get; set; }
+    public Guid UserId { get; init; }
+    public HouseholdRole Role { get; init; }
+    public DateTime JoinedAt { get; init; }
 }

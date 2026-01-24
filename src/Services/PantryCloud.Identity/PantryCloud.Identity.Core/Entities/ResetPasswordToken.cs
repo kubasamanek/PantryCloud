@@ -1,8 +1,9 @@
+using PantryCloud.SharedKernel.Entities;
+
 namespace PantryCloud.Identity.Core.Entities;
 
-public class ResetPasswordToken
+public class ResetPasswordToken : BaseEntity
 {
-    public Guid Id { get; init; }
     public required string Email { get; init; }
     public DateTime ExpiresAt { get; init; }
     public required string Token { get; init; }
