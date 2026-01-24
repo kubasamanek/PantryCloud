@@ -14,7 +14,7 @@ public class QueryableExtensionsTests
             new() { Name = "Apple" },
             new() { Name = "BANANA" },
             new() { Name = "cherry" },
-            new() { Name = "Pineapple" }  // Changed: "Pineapple" contains "app"
+            new() { Name = "Pineapple" }
         }.AsQueryable();
 
         // Act
@@ -23,7 +23,7 @@ public class QueryableExtensionsTests
         // Assert
         result.Count.ShouldBe(2);
         result.ShouldContain(x => x.Name == "Apple");
-        result.ShouldContain(x => x.Name == "Pineapple");  // Both "Apple" and "Pineapple" contain "app"
+        result.ShouldContain(x => x.Name == "Pineapple");
     }
 
     [Fact]

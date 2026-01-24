@@ -113,6 +113,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipelines", "Pipelines", "{
 		.github\workflows\apigateway.yml = .github\workflows\apigateway.yml
 		.github\workflows\notification.yml = .github\workflows\notification.yml
 		.github\workflows\pantry.yml = .github\workflows\pantry.yml
+		.github\workflows\shared-kernel.yml = .github\workflows\shared-kernel.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployments", "Deployments", "{5E6219B9-5B71-4C81-A5EE-CC779BBDB4C2}"
