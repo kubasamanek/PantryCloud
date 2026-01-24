@@ -7,6 +7,7 @@ on:
     paths:
       - 'src/Services/PantryCloud.Identity/**'
       - 'src/BuildingBlocks/**'
+      - 'test/PantryCloud.Identity/**'
       - '.github/workflows/identity.yml'
   pull_request:
     branches:
@@ -14,11 +15,13 @@ on:
     paths:
       - 'src/Services/PantryCloud.Identity/**'
       - 'src/BuildingBlocks/**'
+      - 'test/PantryCloud.Identity/**'
   workflow_dispatch:  
 
 env:
   SERVICE_PROJECT: src/Services/PantryCloud.Identity/PantryCloud.Identity.Presentation/PantryCloud.Identity.Presentation.csproj
-  TEST_PROJECT: test/PantryCloud.Identity/PantryCloud.Identity.UnitTests/PantryCloud.Identity.UnitTests.csproj
+  UNIT_TEST_PROJECT: test/PantryCloud.Identity/PantryCloud.Identity.UnitTests/PantryCloud.Identity.UnitTests.csproj
+  INTEGRATION_TEST_PROJECT: test/PantryCloud.Identity/PantryCloud.Identity.IntegrationTests/PantryCloud.Identity.IntegrationTests.csproj
   DOCKERFILE_PATH: src/Services/PantryCloud.Identity/PantryCloud.Identity.Presentation/Dockerfile
   IMAGE_NAME: samanekj/identityservice
   
@@ -28,8 +31,8 @@ permissions:
   contents: read
   
 jobs:
-  ci:
-    name: Build & Test
+  build:
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
@@ -47,19 +50,111 @@ jobs:
       - name: Build
         run: dotnet build ${{ env.SERVICE_PROJECT }} --no-restore --configuration Release
 
-      - name: Run Tests
-        run: dotnet test ${{ env.TEST_PROJECT }} --configuration Release --logger "trx;LogFileName=test_results.trx" --verbosity normal
+  test:
+    name: Test & Coverage
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: |
+          dotnet restore ${{ env.UNIT_TEST_PROJECT }}
+          dotnet restore ${{ env.INTEGRATION_TEST_PROJECT }}
+
+      - name: Build tests
+        run: |
+          dotnet build ${{ env.UNIT_TEST_PROJECT }} --no-restore --configuration Release
+          dotnet build ${{ env.INTEGRATION_TEST_PROJECT }} --no-restore --configuration Release
+
+      - name: Run Unit Tests with Coverage
+        run: |
+          dotnet test ${{ env.UNIT_TEST_PROJECT }} \
+            --no-build \
+            --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/unit \
+            --logger "trx;LogFileName=unit_test_results.trx" \
+            --verbosity normal
+
+      - name: Setup Docker for Integration Tests
+        run: docker --version
+
+      - name: Run Integration Tests with Coverage
+        run: |
+          dotnet test ${{ env.INTEGRATION_TEST_PROJECT }} \
+            --no-build \
+            --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/integration \
+            --logger "trx;LogFileName=integration_test_results.trx" \
+            --verbosity normal
+        env:
+          DOCKER_HOST: unix:///var/run/docker.sock
+          TESTCONTAINERS_RYUK_DISABLED: false
+
+      - name: Cleanup Docker containers
+        if: always()
+        run: |
+          docker ps -aq --filter "label=org.testcontainers=true" | xargs -r docker rm -f || true
+
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      - name: Generate Coverage Report
+        run: |
+          reportgenerator \
+            "-reports:./coverage/**/coverage.cobertura.xml" \
+            "-targetdir:./coverage/report" \
+            "-reporttypes:Html;Cobertura;TextSummary"
+
+      - name: Display Coverage Summary
+        run: cat ./coverage/report/Summary.txt
+
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/**/coverage.cobertura.xml
+          flags: identity-service
+          name: identity-service-coverage
+          fail_ci_if_error: false
+
+      - name: Upload Test Results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: identity-service
+          files: ./coverage/**/*.trx
+
+      - name: Upload Coverage Report as Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: ./coverage/report/
+          retention-days: 30
         
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
-          name: REPORT - Identity tests
+          name: REPORT - Identity Unit & Integration Tests
           path: '**/*.trx'
           reporter: dotnet-trx
+
   cd:
-    name: Build & Push Docker image
-    needs: ci
+    name: Build & Push Docker Image
+    needs: test
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
 

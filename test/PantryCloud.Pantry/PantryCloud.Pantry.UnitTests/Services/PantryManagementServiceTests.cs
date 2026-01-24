@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PantryCloud.Pantry.Application.Dtos;
 using PantryCloud.Pantry.Core.Entities;
-using PantryCloud.Pantry.Core.Enums;
 using PantryCloud.Pantry.Core.Errors;
 using PantryCloud.Pantry.Infrastructure.Services;
 using Shouldly;

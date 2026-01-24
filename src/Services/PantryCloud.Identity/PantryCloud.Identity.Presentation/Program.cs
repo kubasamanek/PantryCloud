@@ -39,3 +39,6 @@ app.MapHealthChecks("/health");
 app.MapControllers();
 
 app.Run();
+
+// Make the implicit Program class accessible to integration tests
+public partial class Program { }
