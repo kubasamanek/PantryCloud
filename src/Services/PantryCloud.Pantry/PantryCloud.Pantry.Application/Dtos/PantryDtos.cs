@@ -1,4 +1,4 @@
-using PantryCloud.Pantry.Core.Enums;
+using PantryCloud.SharedKernel.Enums;
 
 namespace PantryCloud.Pantry.Application.Dtos;
 
@@ -22,7 +22,8 @@ public record CreatePantryItemResponseDto(
     string? Notes,
     string? ImageUrl,
     Guid CreatedBy,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    byte[] RowVersion);
 
 public record UpdatePantryItemRequestDto(
     string Name,
@@ -69,7 +70,8 @@ public record GetPantryItemResponseDto(
     Guid CreatedBy,
     DateTime CreatedAt,
     Guid? ModifiedBy,
-    DateTime? ModifiedAt);
+    DateTime? ModifiedAt,
+    byte[] RowVersion);
 
 public record ListPantryItemsRequestDto(
     string? Category,
@@ -95,5 +97,6 @@ public record PantryItemDto(
     Guid CreatedBy,
     DateTime CreatedAt,
     Guid? ModifiedBy,
-    DateTime? ModifiedAt);
+    DateTime? ModifiedAt,
+    byte[] RowVersion);
 

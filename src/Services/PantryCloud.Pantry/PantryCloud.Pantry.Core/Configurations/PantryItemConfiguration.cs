@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PantryCloud.Pantry.Core.Entities;
-using PantryCloud.Pantry.Core.Enums;
 
 namespace PantryCloud.Pantry.Core.Configurations;
 

@@ -1,5 +1,5 @@
-using PantryCloud.Pantry.Core.Enums;
 using PantryCloud.SharedKernel.Entities;
+using PantryCloud.SharedKernel.Enums;
 
 namespace PantryCloud.Pantry.Core.Entities;
 

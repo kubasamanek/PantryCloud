@@ -197,7 +197,7 @@ public static class ServiceCollectionExtensions
             CreateClusterConfig(RouteConfiguration.HouseholdClusterId, services.HouseholdService, "Household"),
             CreateClusterConfig(RouteConfiguration.PantryClusterId, services.PantryService, "Pantry"),
             //CreateClusterConfig(RouteConfiguration.RecipeClusterId, services.RecipeService, "Recipe"),
-            //CreateClusterConfig(RouteConfiguration.ShoppingListClusterId, services.ShoppingListService, "ShoppingList")
+            CreateClusterConfig(RouteConfiguration.ShoppingListClusterId, services.ShoppingListService, "ShoppingList")
         ];
 
         ClusterConfig CreateClusterConfig(string clusterId, string serviceAddress, string serviceName)
