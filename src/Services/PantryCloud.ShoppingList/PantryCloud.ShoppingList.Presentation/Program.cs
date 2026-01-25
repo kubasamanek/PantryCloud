@@ -1,39 +1,45 @@
+using PantryCloud.SharedKernel.Correlation;
+using PantryCloud.SharedKernel.Extensions;
+using PantryCloud.SharedKernel.Logging;
+using PantryCloud.ShoppingList.Application;
+using PantryCloud.ShoppingList.Infrastructure;
+using PantryCloud.ShoppingList.Infrastructure.Persistence;
+using PantryCloud.ShoppingList.Presentation.Extensions;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddSerilogLogging(builder.Configuration);
+builder.Host.UseSerilog();
+
+builder.Services
+    .AddPresentationLayerServices(builder.Configuration)
+    .AddInfrastructureLayerServices(builder.Configuration)
+    .AddApplicationLayerServices();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    
+    await app.ApplyMigrationsAsync<ShoppingListDbContext>();
 }
 
-var summaries = new[]
+if (app.Environment.IsProduction())
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    app.UseHttpsRedirection();
+}
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.UseMiddleware<CorrelationIdMiddleware>();
+
+app.UseExceptionHandler();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapHealthChecks("/health");
+app.MapControllers();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

@@ -1,0 +1,90 @@
+name: CI/CD - ShoppingListService
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.ShoppingList/**'
+      - 'src/Services/PantryCloud.Household/PantryCloud.Household.Application/**'
+      - 'src/BuildingBlocks/**'
+      - '.github/workflows/shoppinglist.yml'
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.ShoppingList/**'
+      - 'src/Services/PantryCloud.Household/PantryCloud.Household.Application/**'
+      - 'src/BuildingBlocks/**'
+  workflow_dispatch:
+
+env:
+  SERVICE_PROJECT: src/Services/PantryCloud.ShoppingList/PantryCloud.ShoppingList.Presentation/PantryCloud.ShoppingList.Presentation.csproj
+  DOCKERFILE_PATH: src/Services/PantryCloud.ShoppingList/PantryCloud.ShoppingList.Presentation/Dockerfile
+  IMAGE_NAME: samanekj/shoppinglistservice
+
+permissions:
+  checks: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  ci:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SERVICE_PROJECT }}
+
+      - name: Build
+        run: dotnet build ${{ env.SERVICE_PROJECT }} --no-restore --configuration Release
+
+  cd:
+    name: Build & Push Docker image
+    needs: ci
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Build
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v4.1.0
+        with:
+          versionSpec: '6.3.x'
+
+      - name: Generate GitVersion variables
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v4.1.0
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ env.DOCKERFILE_PATH }}
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.gitversion.outputs.semVer }}
+            ${{ env.IMAGE_NAME }}:latest
+

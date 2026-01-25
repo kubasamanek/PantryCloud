@@ -57,7 +57,8 @@ public class PantryManagementService(
             pantryItem.Notes,
             pantryItem.ImageUrl,
             pantryItem.CreatedBy,
-            pantryItem.CreatedAt);
+            pantryItem.CreatedAt,
+            pantryItem.RowVersion);
     }
 
     public async Task<ErrorOr<UpdatePantryItemResponseDto>> UpdatePantryItemAsync(Guid id, UpdatePantryItemRequestDto request, CancellationToken cancellationToken)
@@ -196,7 +197,8 @@ public class PantryManagementService(
             pantryItem.CreatedBy,
             pantryItem.CreatedAt,
             pantryItem.ModifiedBy,
-            pantryItem.ModifiedAt);
+            pantryItem.ModifiedAt,
+            pantryItem.RowVersion);
     }
 
     public async Task<ErrorOr<ListPantryItemsResponseDto>> ListPantryItemsAsync(ListPantryItemsRequestDto request, CancellationToken cancellationToken)
@@ -242,7 +244,8 @@ public class PantryManagementService(
                 p.CreatedBy,
                 p.CreatedAt,
                 p.ModifiedBy,
-                p.ModifiedAt))
+                p.ModifiedAt,
+                p.RowVersion))
             .ToListAsync(cancellationToken);
 
         Logger.LogInformation("Found {Count} pantry items for user {UserId}", totalCount, UserId);

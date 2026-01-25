@@ -2,6 +2,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PantryCloud.ShoppingList.Core\PantryCloud.ShoppingList.Core.csproj" />
+    <ProjectReference Include="..\..\PantryCloud.Household\PantryCloud.Household.Application\PantryCloud.Household.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="14.0.0" />
   </ItemGroup>
 
   <PropertyGroup>

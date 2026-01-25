@@ -181,6 +181,34 @@ services:
     networks:
       - pantry-network
 
+  shoppinglist-api:
+    container_name: pantry-shoppinglist
+    build:
+      context: ../
+      dockerfile: src/Services/PantryCloud.ShoppingList/PantryCloud.ShoppingList.Presentation/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - IsDevelopment=true
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=shoppinglist_db;Username=admin;Password=password;
+      - App__IdentityUrl=http://identity-api:8080
+      - Jwt__Issuer=pantry-identity
+      - Jwt__Audience=pantry-cloud
+      - Messaging__RabbitMQ__Host=rabbitmq
+      - Messaging__RabbitMQ__Username=admin
+      - Messaging__RabbitMQ__Password=password
+    ports:
+      - "5074:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      identity-api:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - pantry-network
+
 volumes:
   postgres-data:
   rabbitmq-data:

@@ -114,11 +114,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipelines", "Pipelines", "{
 		.github\workflows\notification.yml = .github\workflows\notification.yml
 		.github\workflows\pantry.yml = .github\workflows\pantry.yml
 		.github\workflows\shared-kernel.yml = .github\workflows\shared-kernel.yml
+		.github\workflows\shoppinglist.yml = .github\workflows\shoppinglist.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployments", "Deployments", "{5E6219B9-5B71-4C81-A5EE-CC779BBDB4C2}"
 	ProjectSection(SolutionItems) = preProject
 		deployments\docker-compose.yml = deployments\docker-compose.yml
+		deployments\init-scripts\init-db.sql = deployments\init-scripts\init-db.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Gateway", "Gateway", "{C3A202AD-EADD-4864-49DF-ED20E2971546}"
@@ -152,12 +154,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{8A60F493-A143-4140-9FAA-A561D294B14B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PantryCloud.Notification.UnitTests", "test\PantryCloud.Notification\PantryCloud.Notification.UnitTests\PantryCloud.Notification.UnitTests.csproj", "{A8609549-72CF-41F7-8700-A49BC224C42A}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{0C88DD14-F956-CE84-757C-A364CCF449FC}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PantryCloud.SharedKernel", "PantryCloud.SharedKernel", "{4B6A4AE8-A48F-46D7-26AA-19F27E945769}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PantryCloud.SharedKernel.UnitTests", "test\PantryCloud.SharedKernel\PantryCloud.SharedKernel.UnitTests\PantryCloud.SharedKernel.UnitTests.csproj", "{4F1A4C20-C477-48EE-B95A-AB463C8A67FC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PantryCloud.SharedKernel.Testing", "src\BuildingBlocks\PantryCloud.SharedKernel.Testing\PantryCloud.SharedKernel.Testing.csproj", "{662D3FB7-13BE-4B2C-B9F9-580674260F40}"
 EndProject
@@ -670,18 +666,6 @@ Global
 		{A8609549-72CF-41F7-8700-A49BC224C42A}.Release|x64.Build.0 = Release|Any CPU
 		{A8609549-72CF-41F7-8700-A49BC224C42A}.Release|x86.ActiveCfg = Release|Any CPU
 		{A8609549-72CF-41F7-8700-A49BC224C42A}.Release|x86.Build.0 = Release|Any CPU
-		{4F1A4C20-C477-48EE-B95A-AB463C8A67FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4F1A4C20-C477-48EE-B95A-AB463C8A67FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4F1A4C20-C477-48EE-B95A-AB463C8A67FC}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{4F1A4C20-C477-48EE-B95A-AB463C8A67FC}.Debug|x64.Build.0 = Debug|Any CPU
-		{4F1A4C20-C477-48EE-B95A-AB463C8A67FC}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{4F1A4C20-C477-48EE-B95A-AB463C8A67FC}.Debug|x86.Build.0 = Debug|Any CPU
-		{4F1A4C20-C477-48EE-B95A-AB463C8A67FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4F1A4C20-C477-48EE-B95A-AB463C8A67FC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4F1A4C20-C477-48EE-B95A-AB463C8A67FC}.Release|x64.ActiveCfg = Release|Any CPU
-		{4F1A4C20-C477-48EE-B95A-AB463C8A67FC}.Release|x64.Build.0 = Release|Any CPU
-		{4F1A4C20-C477-48EE-B95A-AB463C8A67FC}.Release|x86.ActiveCfg = Release|Any CPU
-		{4F1A4C20-C477-48EE-B95A-AB463C8A67FC}.Release|x86.Build.0 = Release|Any CPU
 		{662D3FB7-13BE-4B2C-B9F9-580674260F40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{662D3FB7-13BE-4B2C-B9F9-580674260F40}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{662D3FB7-13BE-4B2C-B9F9-580674260F40}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -699,6 +683,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{880E78F2-1516-4C84-A20F-9F469B48D55D} = {77C7F0F3-267C-464E-82B6-B48551FBAE9A}
 		{357A7C97-5AE1-023F-1442-0D9F9AF22A31} = {5854FF58-B8C5-05C6-5BF2-ACE42193F22B}
 		{11349CFE-E14E-3001-C5E9-551783699504} = {357A7C97-5AE1-023F-1442-0D9F9AF22A31}
 		{0FEAC96B-B08E-47D4-AE3C-9DFC8C4AD7CF} = {11349CFE-E14E-3001-C5E9-551783699504}
@@ -760,11 +745,8 @@ Global
 		{0038DAF0-8E19-48F9-BB8B-FDBAFD72728A} = {8F92B431-7114-C16D-7B8D-1A63B3CF6875}
 		{8A60F493-A143-4140-9FAA-A561D294B14B} = {06470F13-D646-4954-ED4A-FA216054436A}
 		{A8609549-72CF-41F7-8700-A49BC224C42A} = {8A60F493-A143-4140-9FAA-A561D294B14B}
-		{4B6A4AE8-A48F-46D7-26AA-19F27E945769} = {0C88DD14-F956-CE84-757C-A364CCF449FC}
-		{4F1A4C20-C477-48EE-B95A-AB463C8A67FC} = {4B6A4AE8-A48F-46D7-26AA-19F27E945769}
-		{77C7F0F3-267C-464E-82B6-B48551FBAE9A} = {7266C4A9-E384-DC00-0EB6-47F6002CFBA7}
-		{880E78F2-1516-4C84-A20F-9F469B48D55D} = {77C7F0F3-267C-464E-82B6-B48551FBAE9A}
 		{662D3FB7-13BE-4B2C-B9F9-580674260F40} = {77C7F0F3-267C-464E-82B6-B48551FBAE9A}
+		{77C7F0F3-267C-464E-82B6-B48551FBAE9A} = {7266C4A9-E384-DC00-0EB6-47F6002CFBA7}
 		{64D7EDE9-1B1C-4D13-A7DC-7D2A80B597A7} = {7266C4A9-E384-DC00-0EB6-47F6002CFBA7}
 	EndGlobalSection
 EndGlobal

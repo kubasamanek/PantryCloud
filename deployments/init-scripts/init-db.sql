@@ -1,0 +1,12 @@
+CREATE DATABASE identity_db;
+GRANT ALL PRIVILEGES ON DATABASE identity_db TO admin;
+
+CREATE DATABASE household_db;
+GRANT ALL PRIVILEGES ON DATABASE household_db TO admin;
+
+CREATE DATABASE pantry_db;
+GRANT ALL PRIVILEGES ON DATABASE pantry_db TO admin;
+
+CREATE DATABASE shoppinglist_db;
+GRANT ALL PRIVILEGES ON DATABASE shoppinglist_db TO admin;
+

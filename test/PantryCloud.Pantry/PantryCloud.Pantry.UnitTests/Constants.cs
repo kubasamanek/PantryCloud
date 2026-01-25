@@ -1,4 +1,4 @@
-using PantryCloud.Pantry.Core.Enums;
+using PantryCloud.SharedKernel.Enums;
 
 namespace PantryCloud.Pantry.UnitTests;
 
