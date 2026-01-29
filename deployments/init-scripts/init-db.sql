@@ -10,3 +10,4 @@ GRANT ALL PRIVILEGES ON DATABASE pantry_db TO admin;
 CREATE DATABASE shoppinglist_db;
 GRANT ALL PRIVILEGES ON DATABASE shoppinglist_db TO admin;
 
+

@@ -17,3 +17,4 @@ public interface IShoppingListManagementService
     Task<ErrorOr<CheckShoppingListItemResponseDto>> CheckShoppingListItemAsync(CheckShoppingListItemRequestDto request, CancellationToken cancellationToken);
 }
 
+

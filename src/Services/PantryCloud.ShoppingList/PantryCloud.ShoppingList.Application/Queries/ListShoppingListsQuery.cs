@@ -6,3 +6,4 @@ namespace PantryCloud.ShoppingList.Application.Queries;
 
 public record ListShoppingListsQuery(ListShoppingListsRequestDto Request) : IRequest<ErrorOr<ListShoppingListsResponseDto>>;
 
+

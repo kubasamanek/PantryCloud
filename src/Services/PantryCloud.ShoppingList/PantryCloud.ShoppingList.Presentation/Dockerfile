@@ -33,3 +33,4 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "PantryCloud.ShoppingList.Presentation.dll"]
 
+

@@ -164,6 +164,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{64D7EDE9
 		test\PantryCloud.SharedKernel\PantryCloud.SharedKernel.UnitTests\PantryCloud.SharedKernel.UnitTests.csproj = test\PantryCloud.SharedKernel\PantryCloud.SharedKernel.UnitTests\PantryCloud.SharedKernel.UnitTests.csproj
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PantryCloud.SharedKernel.UnitTests", "test\PantryCloud.SharedKernel\PantryCloud.SharedKernel.UnitTests\PantryCloud.SharedKernel.UnitTests.csproj", "{E9FFB9D8-2727-4803-8733-E3F4D254CAA5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -678,6 +680,18 @@ Global
 		{662D3FB7-13BE-4B2C-B9F9-580674260F40}.Release|x64.Build.0 = Release|Any CPU
 		{662D3FB7-13BE-4B2C-B9F9-580674260F40}.Release|x86.ActiveCfg = Release|Any CPU
 		{662D3FB7-13BE-4B2C-B9F9-580674260F40}.Release|x86.Build.0 = Release|Any CPU
+		{E9FFB9D8-2727-4803-8733-E3F4D254CAA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9FFB9D8-2727-4803-8733-E3F4D254CAA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9FFB9D8-2727-4803-8733-E3F4D254CAA5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E9FFB9D8-2727-4803-8733-E3F4D254CAA5}.Debug|x64.Build.0 = Debug|Any CPU
+		{E9FFB9D8-2727-4803-8733-E3F4D254CAA5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E9FFB9D8-2727-4803-8733-E3F4D254CAA5}.Debug|x86.Build.0 = Debug|Any CPU
+		{E9FFB9D8-2727-4803-8733-E3F4D254CAA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9FFB9D8-2727-4803-8733-E3F4D254CAA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9FFB9D8-2727-4803-8733-E3F4D254CAA5}.Release|x64.ActiveCfg = Release|Any CPU
+		{E9FFB9D8-2727-4803-8733-E3F4D254CAA5}.Release|x64.Build.0 = Release|Any CPU
+		{E9FFB9D8-2727-4803-8733-E3F4D254CAA5}.Release|x86.ActiveCfg = Release|Any CPU
+		{E9FFB9D8-2727-4803-8733-E3F4D254CAA5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -748,5 +762,6 @@ Global
 		{662D3FB7-13BE-4B2C-B9F9-580674260F40} = {77C7F0F3-267C-464E-82B6-B48551FBAE9A}
 		{77C7F0F3-267C-464E-82B6-B48551FBAE9A} = {7266C4A9-E384-DC00-0EB6-47F6002CFBA7}
 		{64D7EDE9-1B1C-4D13-A7DC-7D2A80B597A7} = {7266C4A9-E384-DC00-0EB6-47F6002CFBA7}
+		{E9FFB9D8-2727-4803-8733-E3F4D254CAA5} = {64D7EDE9-1B1C-4D13-A7DC-7D2A80B597A7}
 	EndGlobalSection
 EndGlobal

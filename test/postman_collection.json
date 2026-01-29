@@ -1239,6 +1239,128 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Recipe Service",
+      "item": [
+        {
+          "name": "Search Recipes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"ingredients\": [\"chicken\", \"rice\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recipe/api/recipes/search",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recipe",
+                "api",
+                "recipes",
+                "search"
+              ]
+            },
+            "description": "Search recipes by ingredients. Returns matching recipes. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recipe",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.value && jsonData.value.recipe && jsonData.value.recipe.id) {",
+                  "        pm.collectionVariables.set(\"recipe_id\", jsonData.value.recipe.id);",
+                  "        console.log(\"Recipe ID saved: \" + jsonData.value.recipe.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/recipe/api/recipes/{{recipe_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recipe",
+                "api",
+                "recipes",
+                "{{recipe_id}}"
+              ]
+            },
+            "description": "Get a specific recipe by ID. Requires authentication. Recipe ID is automatically saved when running Search Recipes or when using a known ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Seed Recipes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"count\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recipe/api/recipes/seed",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recipe",
+                "api",
+                "recipes",
+                "seed"
+              ]
+            },
+            "description": "Seed sample recipes into the database. Only available in Development environment. Requires authentication."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -1279,6 +1401,11 @@
     },
     {
       "key": "shopping_item_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "recipe_id",
       "value": "",
       "type": "string"
     }

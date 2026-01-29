@@ -6,3 +6,4 @@ namespace PantryCloud.ShoppingList.Application.Commands;
 
 public record DeleteShoppingListItemCommand(DeleteShoppingListItemRequestDto Request) : IRequest<ErrorOr<DeleteShoppingListItemResponseDto>>;
 
+

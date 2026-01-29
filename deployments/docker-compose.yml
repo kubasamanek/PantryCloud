@@ -41,6 +41,24 @@ services:
     networks:
       - pantry-network
 
+  mongodb:
+    image: mongo:7.0
+    container_name: pantry-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pantry-network
+
   # --- GATEWAY ---
   api-gateway:
     container_name: pantry-gateway
@@ -209,9 +227,34 @@ services:
     networks:
       - pantry-network
 
+  recipe-api:
+    container_name: pantry-recipe
+    build:
+      context: ../
+      dockerfile: src/Services/PantryCloud.Recipe/PantryCloud.Recipe.Presentation/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - IsDevelopment=true
+      - ConnectionStrings__DefaultConnection=mongodb://admin:password@mongodb:27017
+      - App__IdentityUrl=http://identity-api:8080
+      - Jwt__Issuer=pantry-identity
+      - Jwt__Audience=pantry-cloud
+      - MongoDB__DatabaseName=recipe_db
+    ports:
+      - "5075:8080"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      identity-api:
+        condition: service_started
+    networks:
+      - pantry-network
+
 volumes:
   postgres-data:
   rabbitmq-data:
+  mongodb-data:
 
 networks:
   pantry-network:

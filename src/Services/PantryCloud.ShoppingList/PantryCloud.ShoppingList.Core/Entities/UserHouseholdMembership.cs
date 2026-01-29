@@ -10,3 +10,4 @@ public class UserHouseholdMembership : BaseEntity
     public DateTime? LeftAt { get; set; }
 }
 
+
