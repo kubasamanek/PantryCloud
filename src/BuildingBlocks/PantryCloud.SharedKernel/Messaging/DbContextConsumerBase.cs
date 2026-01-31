@@ -29,4 +29,3 @@ public abstract class DbContextConsumerBase<TEvent, TDbContext> : ConsumerBase<T
     {
     }
 }
-

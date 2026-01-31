@@ -43,4 +43,3 @@ public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidat
         return await next(cancellationToken);
     }
 }
-

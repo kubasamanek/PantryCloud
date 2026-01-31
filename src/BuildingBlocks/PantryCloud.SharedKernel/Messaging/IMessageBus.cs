@@ -15,4 +15,3 @@ public interface IMessageBus
     /// <param name="cancellationToken">Cancellation token</param>
     Task PublishAsync<T>(T @event, CancellationToken cancellationToken = default) where T : IntegrationEvent;
 }
-

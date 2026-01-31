@@ -42,6 +42,3 @@ public static class  DbContextExtensions
         return await context.Set<TEntity>().AnyAsync(e => e.Id == id, cancellationToken);
     }
 }
-
-
-

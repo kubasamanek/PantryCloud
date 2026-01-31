@@ -13,6 +13,3 @@ public class CorrelationIdProvider(IHttpContextAccessor httpContextAccessor) : I
          return httpContextAccessor.GetCorrelationIdFromContext();
     }
 }
-
-
-

@@ -15,6 +15,3 @@ public interface ICorrelationIdProvider
     /// </summary>
     string GetCorrelationIdOrPlaceholder() => GetCorrelationId() ?? CorrelationIdConstants.UnknownPlaceholder;
 }
-
-
-

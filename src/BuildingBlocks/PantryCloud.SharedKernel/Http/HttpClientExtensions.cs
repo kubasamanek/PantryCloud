@@ -61,4 +61,3 @@ public static class HttpClientExtensions
         return null;
     }
 }
-

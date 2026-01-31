@@ -21,4 +21,3 @@ public static class CorrelationIdConstants
     /// </summary>
     public const string UnknownPlaceholder = "unknown";
 }
-

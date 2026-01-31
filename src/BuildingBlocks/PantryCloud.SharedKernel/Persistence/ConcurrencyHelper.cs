@@ -66,6 +66,3 @@ public static class ConcurrencyHelper
         }
     }
 }
-
-
-
