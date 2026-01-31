@@ -115,6 +115,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipelines", "Pipelines", "{
 		.github\workflows\pantry.yml = .github\workflows\pantry.yml
 		.github\workflows\shared-kernel.yml = .github\workflows\shared-kernel.yml
 		.github\workflows\shoppinglist.yml = .github\workflows\shoppinglist.yml
+		.github\workflows\recipe.yml = .github\workflows\recipe.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployments", "Deployments", "{5E6219B9-5B71-4C81-A5EE-CC779BBDB4C2}"
@@ -160,9 +161,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Src", "Src", "{77C7F0F3-267C-464E-82B6-B48551FBAE9A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{64D7EDE9-1B1C-4D13-A7DC-7D2A80B597A7}"
-	ProjectSection(SolutionItems) = preProject
-		test\PantryCloud.SharedKernel\PantryCloud.SharedKernel.UnitTests\PantryCloud.SharedKernel.UnitTests.csproj = test\PantryCloud.SharedKernel\PantryCloud.SharedKernel.UnitTests\PantryCloud.SharedKernel.UnitTests.csproj
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PantryCloud.SharedKernel.UnitTests", "test\PantryCloud.SharedKernel\PantryCloud.SharedKernel.UnitTests\PantryCloud.SharedKernel.UnitTests.csproj", "{E9FFB9D8-2727-4803-8733-E3F4D254CAA5}"
 EndProject

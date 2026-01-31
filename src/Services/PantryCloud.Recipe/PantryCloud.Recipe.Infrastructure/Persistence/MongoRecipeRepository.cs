@@ -1,4 +1,5 @@
 using ErrorOr;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using PantryCloud.Recipe.Application.Dtos;
 using PantryCloud.Recipe.Application.Interfaces;
@@ -7,19 +8,23 @@ using RecipeEntity = PantryCloud.Recipe.Core.Entities.Recipe;
 
 namespace PantryCloud.Recipe.Infrastructure.Persistence;
 
-public class MongoRecipeRepository(RecipeDbContext dbContext) : IRecipeRepository
+public class MongoRecipeRepository(RecipeDbContext dbContext, ILogger<MongoRecipeRepository> logger) : IRecipeRepository
 {
     public async Task<ErrorOr<RecipeDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
+        logger.LogDebug("Getting recipe {RecipeId}", id);
+
         var recipe = await dbContext.Recipes
             .Find(r => r.Id == id)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (recipe == null)
         {
+            logger.LogWarning("Recipe {RecipeId} not found", id);
             return RecipeErrors.RecipeNotFound;
         }
 
+        logger.LogInformation("Retrieved recipe {RecipeId} ({Title})", id, recipe.Title);
         return MapToDto(recipe);
     }
 
@@ -27,7 +32,11 @@ public class MongoRecipeRepository(RecipeDbContext dbContext) : IRecipeRepositor
         List<RecipeEntity> recipes,
         CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("Seeding {Count} recipes into MongoDB", recipes.Count);
+
         await dbContext.Recipes.InsertManyAsync(recipes, cancellationToken: cancellationToken);
+
+        logger.LogInformation("Seeded {Count} recipes successfully", recipes.Count);
         return new SeedRecipesResponseDto(recipes.Count);
     }
 

@@ -1,5 +1,6 @@
 using ErrorOr;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using PantryCloud.Recipe.Application.Commands;
 using PantryCloud.Recipe.Application.Dtos;
 using PantryCloud.Recipe.Application.Interfaces;
@@ -9,16 +10,27 @@ using Unit = PantryCloud.SharedKernel.Enums.Unit;
 
 namespace PantryCloud.Recipe.Application.Commands.Handlers;
 
-public class SeedRecipesCommandHandler(IRecipeRepository repository)
+public class SeedRecipesCommandHandler(IRecipeRepository repository, ILogger<SeedRecipesCommandHandler> logger)
     : IRequestHandler<SeedRecipesCommand, ErrorOr<SeedRecipesResponseDto>>
 {
     public async Task<ErrorOr<SeedRecipesResponseDto>> Handle(
         SeedRecipesCommand request,
         CancellationToken cancellationToken)
     {
-        var recipes = GenerateSampleRecipes(request.Request.Count);
-        
-        return await repository.SeedRecipesAsync(recipes, cancellationToken);
+        var count = request.Request.Count;
+        logger.LogInformation("Seed recipes requested: count={Count}", count);
+
+        var recipes = GenerateSampleRecipes(count);
+        var result = await repository.SeedRecipesAsync(recipes, cancellationToken);
+
+        if (result.IsError)
+        {
+            logger.LogWarning("Seed recipes failed: {Errors}", string.Join("; ", result.Errors.Select(e => e.Description)));
+            return result.Errors;
+        }
+
+        logger.LogInformation("Seed recipes completed: {RecipesCreated} recipes created", result.Value.RecipesCreated);
+        return result;
     }
 
     private static List<Core.Entities.Recipe> GenerateSampleRecipes(int count)

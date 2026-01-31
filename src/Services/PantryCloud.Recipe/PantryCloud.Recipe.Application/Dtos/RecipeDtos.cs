@@ -3,25 +3,34 @@ using PantryCloud.Recipe.Core.Enums;
 
 namespace PantryCloud.Recipe.Application.Dtos;
 
-// Search DTOs
+public record PreferencesFilterDto(
+    string? DietaryProfile = null,
+    List<string>? ExcludedIngredients = null);
+
 public record SearchRecipesRequestDto(
-    List<string> Ingredients);
+    List<string> Ingredients,
+    PreferencesFilterDto? Preferences = null);
 
 public record SearchRecipesResponseDto(
     List<RecipeDto> Recipes,
     int TotalCount);
 
-// Get Recipe DTOs
 public record GetRecipeRequestDto(Guid Id);
 
 public record GetRecipeResponseDto(RecipeDto Recipe);
 
-// Seed DTOs
 public record SeedRecipesRequestDto(int Count = 10);
 
 public record SeedRecipesResponseDto(int RecipesCreated);
 
-// Recipe DTO
+public record RecommendRecipesRequestDto(
+    List<string>? IngredientHints = null,
+    PreferencesFilterDto? Preferences = null,
+    int Limit = 20);
+
+public record RecommendRecipesResponseDto(
+    List<RecipeDto> Recipes);
+
 public record RecipeDto(
     Guid Id,
     string Title,

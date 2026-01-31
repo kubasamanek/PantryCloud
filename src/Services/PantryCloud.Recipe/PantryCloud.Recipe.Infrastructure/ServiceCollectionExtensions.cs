@@ -30,7 +30,6 @@ public static class ServiceCollectionExtensions
         var databaseName = apiConfiguration.MongoDb.DatabaseName;
         var database = client.GetDatabase(databaseName);
 
-        // Register MongoDB services
         services.AddSingleton(database);
         services.AddScoped<RecipeDbContext>();
 
@@ -49,7 +48,6 @@ public static class ServiceCollectionExtensions
                 }
             });
 
-        // Add Authentication
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -73,7 +71,6 @@ public static class ServiceCollectionExtensions
         services.AddCorrelationId();
         services.AddScoped<IUserContext, UserContext>();
 
-        // Register repositories and services
         services.AddScoped<IRecipeRepository, MongoRecipeRepository>();
         services.AddScoped<IRecipeSearchService, LocalMongoRecipeSearchService>();
 

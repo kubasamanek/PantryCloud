@@ -57,6 +57,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<IHouseholdManagementService, HouseholdManagementService>();
         services.AddScoped<IInvitationService, InvitationService>();
+        services.AddScoped<IPreferencesService, PreferencesService>();
         
         return services;
     }

@@ -18,4 +18,9 @@ public static class HouseholdErrors
         code:  "Household.Owner.CannotLeave",
         description: "Owner is a member of a household and cannot leave."
     );
+
+    public static Error PreferencesNotFound => Error.NotFound(
+        code: "Household.Preferences.NotFound",
+        description: "No preferences set for this user."
+    );
 }

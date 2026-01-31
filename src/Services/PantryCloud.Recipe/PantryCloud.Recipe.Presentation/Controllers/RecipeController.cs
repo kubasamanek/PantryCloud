@@ -30,6 +30,21 @@ public class RecipeController(IMediator mediator, IMapper mapper, IWebHostEnviro
     }
 
     [Authorize]
+    [HttpPost("recommend")]
+    [ProducesResponseType(typeof(RecommendRecipesResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RecommendRecipes(
+        [FromBody] RecommendRecipesRequestDto? request,
+        CancellationToken cancellationToken)
+    {
+        var req = request ?? new RecommendRecipesRequestDto();
+        var query = new RecommendRecipesQuery(req);
+        var result = await Mediator.Send(query, cancellationToken);
+
+        return FromResult(result, StatusCodes.Status200OK);
+    }
+
+    [Authorize]
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(GetRecipeResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
