@@ -129,7 +129,7 @@ jobs:
           fail_ci_if_error: false
 
       - name: Upload Test Results to Codecov
-        if: ${{ !cancelled() }} && github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
