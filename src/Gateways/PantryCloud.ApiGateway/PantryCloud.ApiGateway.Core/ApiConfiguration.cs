@@ -67,6 +67,7 @@ public class ServiceEndpoints
     public string PantryService { get; set; } = "http://pantry-api:8080";
     public string RecipeService { get; set; } = "http://recipe-api:8080";
     public string ShoppingListService { get; set; } = "http://shoppinglist-api:8080";
+    public string NotificationService { get; set; } = "http://notification-api:8080";
 }
 
 public class JwtSettings

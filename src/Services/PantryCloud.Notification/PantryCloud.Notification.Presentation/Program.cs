@@ -1,8 +1,10 @@
 using PantryCloud.Notification.Application;
 using PantryCloud.Notification.Infrastructure;
 using PantryCloud.Notification.Infrastructure.Hubs;
+using PantryCloud.Notification.Infrastructure.Persistence;
 using PantryCloud.Notification.Presentation.Extensions;
 using PantryCloud.SharedKernel.Correlation;
+using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.SharedKernel.Logging;
 using Serilog;
 
@@ -22,6 +24,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    await app.ApplyMigrationsAsync<NotificationDbContext>();
 }
 
 if (app.Environment.IsProduction())
@@ -30,6 +34,9 @@ if (app.Environment.IsProduction())
 }
 
 app.UseMiddleware<CorrelationIdMiddleware>();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseExceptionHandler();
 

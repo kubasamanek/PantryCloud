@@ -351,13 +351,23 @@ public class ShoppingListManagementService(
 
         await DbContext.SaveChangesAsync(cancellationToken);
 
+        var shoppingList = await DbContext.ShoppingLists
+            .Include(sl => sl.Items)
+            .FirstAsync(sl => sl.Id == request.ListId, cancellationToken);
+        var allItemsChecked = shoppingList.Items.Count > 0 && shoppingList.Items.All(i => i.IsChecked);
+
         Logger.LogInformation("Toggled item {ItemId} check status to {IsChecked}", request.ItemId, item.IsChecked);
 
         return new CheckShoppingListItemResponseDto(
             item.Id,
             item.IsChecked,
             item.CheckedBy,
-            item.CheckedAt);
+            item.CheckedAt,
+            AllItemsChecked: allItemsChecked,
+            HouseholdId: allItemsChecked ? shoppingList.HouseholdId : null,
+            ShoppingListId: allItemsChecked ? shoppingList.Id : null,
+            ShoppingListName: allItemsChecked ? shoppingList.Name : null,
+            CheckedByUserId: allItemsChecked ? UserId : null);
     }
 
     // Private Helper Methods

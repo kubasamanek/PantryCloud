@@ -1460,6 +1460,39 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Notification Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/notification/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notification", "health"]
+            },
+            "description": "Check if the Notification service is healthy."
+          },
+          "response": []
+        },
+        {
+          "name": "SignalR Hub - How to Test",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/notification/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notification", "health"]
+            },
+            "description": "**SignalR Real-Time Notifications**\n\n**Option A – HTML test page (recommended)**\nOpen `test/signalr-test.html` in a browser. Paste your access_token and click Connect. Uses skipNegotiation for direct WebSocket (avoids CORS when opening from file://).\n\n**Option B – Node.js script (good for CLI)**\n```\ncd test && npm install && node signalr-connect.mjs YOUR_ACCESS_TOKEN\n```\nHandles the 0x1E handshake automatically.\n\n**Option C – Postman WebSocket**\n1. File > New > WebSocket Request\n2. URL: `ws://localhost:5050/api/notification/hubs/notifications?access_token=YOUR_TOKEN`\n3. Connect, then send: `{\"protocol\":\"json\",\"version\":1}` + 0x1E character. Without 0x1E you get \"Handshake was canceled.\" To insert 0x1E: VS Code extension \"insert-unicode\" (U+001E), or Mac: Ctrl+Shift+U, type 1e, Enter.\n\nKeep connected to receive `ReceiveNotification` events (member joined/left, pantry depleted, etc.)."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -1506,6 +1539,11 @@
     {
       "key": "recipe_id",
       "value": "",
+      "type": "string"
+    },
+    {
+      "key": "signalr_ws_url",
+      "value": "ws://localhost:5050/api/notification/hubs/notifications",
       "type": "string"
     }
   ]

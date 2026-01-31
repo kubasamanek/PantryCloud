@@ -14,7 +14,9 @@ public record UpdateMyPreferencesRequestDto(
 
 public record UpdateMyPreferencesResponseDto(
     DietaryProfile DietaryProfile,
-    List<string> ExcludedIngredients);
+    List<string> ExcludedIngredients,
+    Guid HouseholdId,
+    Guid UserId);
 
 public record MemberPreferencesDto(
     Guid UserId,

@@ -34,8 +34,8 @@ public class PreferencesService(
 
     public async Task<ErrorOr<UpdateMyPreferencesResponseDto>> UpdateMyPreferencesAsync(UpdateMyPreferencesRequestDto request, CancellationToken cancellationToken = default)
     {
-        var isInHousehold = await DbContext.Members.AnyAsync(m => m.UserId == UserId, cancellationToken);
-        if (!isInHousehold)
+        var member = await DbContext.Members.FirstOrDefaultAsync(m => m.UserId == UserId, cancellationToken);
+        if (member is null)
         {
             return HouseholdErrors.UserNotInAnyHousehold;
         }
@@ -59,7 +59,7 @@ public class PreferencesService(
 
         await DbContext.SaveChangesAsync(cancellationToken);
 
-        return new UpdateMyPreferencesResponseDto(prefs.DietaryProfile, prefs.ExcludedIngredients);
+        return new UpdateMyPreferencesResponseDto(prefs.DietaryProfile, prefs.ExcludedIngredients, member.HouseholdId, UserId);
     }
 
     public async Task<ErrorOr<GetHouseholdMembersPreferencesResponseDto>> GetHouseholdMembersPreferencesAsync(CancellationToken cancellationToken = default)

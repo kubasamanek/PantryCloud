@@ -50,7 +50,7 @@ public static class ServiceCollectionExtensions
         if (resilienceSettings.Retry.Enabled || resilienceSettings.CircuitBreaker.Enabled)
         {
             // Create policies per service to isolate failures
-            var serviceNames = new[] { "Identity", "Household", "Pantry", "Recipe", "ShoppingList" };
+            var serviceNames = new[] { "Identity", "Household", "Pantry", "Recipe", "ShoppingList", "Notification" };
             
             foreach (var service in serviceNames)
             {
@@ -179,6 +179,22 @@ public static class ServiceCollectionExtensions
                         ["PathPattern"] = "/{**catch-all}"
                     }
                 ]
+            },
+            new RouteConfig
+            {
+                RouteId = RouteConfiguration.NotificationRouteId,
+                ClusterId = RouteConfiguration.NotificationClusterId,
+                Match = new RouteMatch
+                {
+                    Path = "/api/notification/{**catch-all}"
+                },
+                Transforms =
+                [
+                    new Dictionary<string, string>
+                    {
+                        ["PathPattern"] = "/{**catch-all}"
+                    }
+                ]
             }
         ];
     }
@@ -197,7 +213,8 @@ public static class ServiceCollectionExtensions
             CreateClusterConfig(RouteConfiguration.HouseholdClusterId, services.HouseholdService, "Household"),
             CreateClusterConfig(RouteConfiguration.PantryClusterId, services.PantryService, "Pantry"),
             CreateClusterConfig(RouteConfiguration.RecipeClusterId, services.RecipeService, "Recipe"),
-            CreateClusterConfig(RouteConfiguration.ShoppingListClusterId, services.ShoppingListService, "ShoppingList")
+            CreateClusterConfig(RouteConfiguration.ShoppingListClusterId, services.ShoppingListService, "ShoppingList"),
+            CreateClusterConfig(RouteConfiguration.NotificationClusterId, services.NotificationService, "Notification")
         ];
 
         ClusterConfig CreateClusterConfig(string clusterId, string serviceAddress, string serviceName)
