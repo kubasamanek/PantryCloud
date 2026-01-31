@@ -10,7 +10,7 @@ public class SearchRecipesRequestValidator : AbstractValidator<SearchRecipesRequ
         "None", "Vegetarian", "Vegan"
     };
 
-    protected SearchRecipesRequestValidator()
+    public SearchRecipesRequestValidator()
     {
         RuleFor(x => x.Ingredients)
             .NotNull()
