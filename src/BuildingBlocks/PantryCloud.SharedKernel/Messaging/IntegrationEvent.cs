@@ -12,4 +12,3 @@ public abstract class IntegrationEvent
     
     public string? CorrelationId { get; init; }
 }
-

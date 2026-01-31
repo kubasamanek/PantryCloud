@@ -13,4 +13,3 @@ public class MassTransitBus(IPublishEndpoint publishEndpoint) : IMessageBus
         await publishEndpoint.Publish(@event, cancellationToken);
     }
 }
-

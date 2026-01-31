@@ -19,3 +19,4 @@ public class ShoppingListItem : AuditableEntity
     public ShoppingList ShoppingList { get; set; } = null!;
 }
 
+

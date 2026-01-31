@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PantryCloud.Household.Infrastructure.Persistence;
-using PantryCloud.HouseholdService.Infrastructure.Persistence;
 
 #nullable disable
 
@@ -18,12 +17,12 @@ namespace PantryCloud.HouseholdService.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "9.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("PantryCloud.HouseholdService.Core.Entities.Household", b =>
+            modelBuilder.Entity("PantryCloud.Household.Core.Entities.Household", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -39,7 +38,7 @@ namespace PantryCloud.HouseholdService.Infrastructure.Persistence.Migrations
                     b.ToTable("Households");
                 });
 
-            modelBuilder.Entity("PantryCloud.HouseholdService.Core.Entities.HouseholdInvitation", b =>
+            modelBuilder.Entity("PantryCloud.Household.Core.Entities.HouseholdInvitation", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -72,7 +71,7 @@ namespace PantryCloud.HouseholdService.Infrastructure.Persistence.Migrations
                     b.ToTable("Invitations");
                 });
 
-            modelBuilder.Entity("PantryCloud.HouseholdService.Core.Entities.HouseholdMember", b =>
+            modelBuilder.Entity("PantryCloud.Household.Core.Entities.HouseholdMember", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -101,25 +100,44 @@ namespace PantryCloud.HouseholdService.Infrastructure.Persistence.Migrations
                     b.ToTable("Members");
                 });
 
-            modelBuilder.Entity("PantryCloud.HouseholdService.Core.Entities.HouseholdInvitation", b =>
+            modelBuilder.Entity("PantryCloud.Household.Core.Entities.MemberPreference", b =>
                 {
-                    b.HasOne("PantryCloud.HouseholdService.Core.Entities.Household", null)
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DietaryProfile")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ExcludedIngredients")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("MemberPreferences");
+                });
+
+            modelBuilder.Entity("PantryCloud.Household.Core.Entities.HouseholdInvitation", b =>
+                {
+                    b.HasOne("PantryCloud.Household.Core.Entities.Household", null)
                         .WithMany("Invitations")
                         .HasForeignKey("HouseholdId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PantryCloud.HouseholdService.Core.Entities.HouseholdMember", b =>
+            modelBuilder.Entity("PantryCloud.Household.Core.Entities.HouseholdMember", b =>
                 {
-                    b.HasOne("PantryCloud.HouseholdService.Core.Entities.Household", null)
+                    b.HasOne("PantryCloud.Household.Core.Entities.Household", null)
                         .WithMany("Members")
                         .HasForeignKey("HouseholdId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PantryCloud.HouseholdService.Core.Entities.Household", b =>
+            modelBuilder.Entity("PantryCloud.Household.Core.Entities.Household", b =>
                 {
                     b.Navigation("Invitations");
 

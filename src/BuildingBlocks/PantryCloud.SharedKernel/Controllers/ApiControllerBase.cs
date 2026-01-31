@@ -73,4 +73,3 @@ public abstract class ApiControllerBase(IMediator mediator, IMapper mapper) : Co
     }
 
 }
-

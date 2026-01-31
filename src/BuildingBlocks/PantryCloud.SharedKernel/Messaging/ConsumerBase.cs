@@ -102,4 +102,3 @@ public abstract class ConsumerBase<TEvent, TDbContext> : IConsumer<TEvent>
     /// <param name="context">The consume context.</param>
     protected abstract Task HandleAsync(TEvent @event, ConsumeContext context);
 }
-

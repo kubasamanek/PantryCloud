@@ -16,4 +16,3 @@ public enum Unit
     Quart = 11,
     Gallon = 12
 }
-

@@ -1,0 +1,184 @@
+name: CI/CD - RecipeService
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.Recipe/**'
+      - 'src/BuildingBlocks/**'
+      - 'test/PantryCloud.Recipe/**'
+      - '.github/workflows/recipe.yml'
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.Recipe/**'
+      - 'src/BuildingBlocks/**'
+      - 'test/PantryCloud.Recipe/**'
+      - '.github/workflows/recipe.yml'
+  workflow_dispatch:
+
+env:
+  SERVICE_PROJECT: src/Services/PantryCloud.Recipe/PantryCloud.Recipe.Presentation/PantryCloud.Recipe.Presentation.csproj
+  UNIT_TEST_PROJECT: test/PantryCloud.Recipe/PantryCloud.Recipe.UnitTests/PantryCloud.Recipe.UnitTests.csproj
+  INTEGRATION_TEST_PROJECT: test/PantryCloud.Recipe/PantryCloud.Recipe.IntegrationTests/PantryCloud.Recipe.IntegrationTests.csproj
+  DOCKERFILE_PATH: src/Services/PantryCloud.Recipe/PantryCloud.Recipe.Presentation/Dockerfile
+  IMAGE_NAME: samanekj/recipeservice
+
+permissions:
+  checks: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SERVICE_PROJECT }}
+
+      - name: Build
+        run: dotnet build ${{ env.SERVICE_PROJECT }} --no-restore --configuration Release
+
+  test:
+    name: Test & Coverage
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: |
+          dotnet restore ${{ env.UNIT_TEST_PROJECT }}
+          dotnet restore ${{ env.INTEGRATION_TEST_PROJECT }}
+
+      - name: Build tests
+        run: |
+          dotnet build ${{ env.UNIT_TEST_PROJECT }} --no-restore --configuration Release
+          dotnet build ${{ env.INTEGRATION_TEST_PROJECT }} --no-restore --configuration Release
+
+      - name: Run Unit Tests with Coverage
+        run: |
+          dotnet test ${{ env.UNIT_TEST_PROJECT }} \
+            --no-build \
+            --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/unit \
+            --logger "trx;LogFileName=unit_test_results.trx" \
+            --verbosity normal
+
+      - name: Run Integration Tests with Coverage
+        run: |
+          dotnet test ${{ env.INTEGRATION_TEST_PROJECT }} \
+            --no-build \
+            --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/integration \
+            --logger "trx;LogFileName=integration_test_results.trx" \
+            --verbosity normal
+
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      - name: Generate Coverage Report
+        run: |
+          reportgenerator \
+            "-reports:./coverage/**/coverage.cobertura.xml" \
+            "-targetdir:./coverage/report" \
+            "-reporttypes:Html;Cobertura;TextSummary"
+
+      - name: Display Coverage Summary
+        run: cat ./coverage/report/Summary.txt
+
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v5
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/**/coverage.cobertura.xml
+          flags: recipe-service
+          name: recipe-service-coverage
+          fail_ci_if_error: false
+
+      - name: Upload Test Results to Codecov
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/**/*.trx
+          report_type: test_results
+          flags: recipe-service
+
+      - name: Upload Coverage Report as Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-recipe
+          path: ./coverage/report/
+          retention-days: 30
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: REPORT - Recipe Unit & Integration Tests
+          path: '**/*.trx'
+          reporter: dotnet-trx
+
+  cd:
+    name: Build & Push Docker Image
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Build
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v4.1.0
+        with:
+          versionSpec: '6.3.x'
+
+      - name: Generate GitVersion variables
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v4.1.0
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ env.DOCKERFILE_PATH }}
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.gitversion.outputs.semVer }}
+            ${{ env.IMAGE_NAME }}:latest

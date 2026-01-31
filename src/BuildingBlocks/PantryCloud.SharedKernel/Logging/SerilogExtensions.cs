@@ -56,4 +56,3 @@ public static class SerilogExtensions
         return services;
     }
 }
-

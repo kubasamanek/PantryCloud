@@ -9,3 +9,4 @@ public class ShoppingList : AuditableEntity
     public ICollection<ShoppingListItem> Items { get; set; } = new List<ShoppingListItem>();
 }
 
+

@@ -13,3 +13,4 @@ public class ListShoppingListsQueryHandler(IShoppingListManagementService shoppi
     }
 }
 
+

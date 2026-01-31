@@ -18,8 +18,6 @@ public class ShoppingListManagementService(
     ILogger<ShoppingListManagementService> logger) 
     : BaseDbContextService<ShoppingListManagementService, ShoppingListDbContext>(dbContext, userContext, logger), IShoppingListManagementService
 {
-    // Shopping List Operations
-    
     public async Task<ErrorOr<CreateShoppingListResponseDto>> CreateShoppingListAsync(CreateShoppingListRequestDto request, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Creating shopping list '{Name}' for user {UserId}", request.Name, UserId);
@@ -170,9 +168,7 @@ public class ShoppingListManagementService(
 
         return new ListShoppingListsResponseDto(lists, totalCount, request.Page, request.PageSize);
     }
-
-    // Shopping List Item Operations
-
+    
     public async Task<ErrorOr<AddShoppingListItemResponseDto>> AddShoppingListItemAsync(Guid listId, AddShoppingListItemRequestDto request, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Adding item '{Name}' to shopping list {ListId} for user {UserId}", request.Name, listId, UserId);

@@ -26,5 +26,3 @@ public abstract class AuditableEntity : BaseEntity
     /// </summary>
     public DateTime? ModifiedAt { get; set; }
 }
-
-

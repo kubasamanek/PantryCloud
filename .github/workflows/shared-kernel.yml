@@ -89,8 +89,8 @@ jobs:
         run: cat ./coverage/report/Summary.txt
 
       - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v4
-        if: always()
+        uses: codecov/codecov-action@v5
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/**/coverage.cobertura.xml
@@ -99,12 +99,13 @@ jobs:
           fail_ci_if_error: false
 
       - name: Upload Test Results to Codecov
-        if: ${{ !cancelled() }}
-        uses: codecov/test-results-action@v1
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          flags: shared-kernel
           files: ./coverage/**/*.trx
+          report_type: test_results
+          flags: shared-kernel
 
       - name: Upload Coverage Report as Artifact
         uses: actions/upload-artifact@v4

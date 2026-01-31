@@ -42,4 +42,3 @@ public sealed class GlobalExceptionHandler(
         return true;
     }
 }
-

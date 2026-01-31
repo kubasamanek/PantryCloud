@@ -11,6 +11,7 @@ namespace PantryCloud.Household.Presentation.Controllers;
 
 [ApiController]
 [Route("api/households")]
+[Authorize]
 public class HouseholdController(IMediator mediator, IMapper mapper) : ApiControllerBase(mediator, mapper)
 {
     [Authorize]
@@ -65,7 +66,6 @@ public class HouseholdController(IMediator mediator, IMapper mapper) : ApiContro
         return FromResult(result, StatusCodes.Status200OK);
     }
     
-    [Authorize]
     [HttpPost("leave")]
     [ProducesResponseType(typeof(LeaveHouseholdResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -76,6 +76,37 @@ public class HouseholdController(IMediator mediator, IMapper mapper) : ApiContro
         var command = Mapper.Map<LeaveHouseholdCommand>(request);
         var result = await Mediator.Send(command, cancellationToken);
         
+        return FromResult(result, StatusCodes.Status200OK);
+    }
+
+    [HttpGet("me/preferences")]
+    [ProducesResponseType(typeof(GetMyPreferencesResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetMyPreferences(CancellationToken cancellationToken)
+    {
+        var query = new GetMyPreferencesQuery(new GetMyPreferencesRequestDto());
+        var result = await Mediator.Send(query, cancellationToken);
+        return FromResult(result, StatusCodes.Status200OK);
+    }
+
+    [HttpPut("me/preferences")]
+    [ProducesResponseType(typeof(UpdateMyPreferencesResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateMyPreferences([FromBody] UpdateMyPreferencesRequestDto request, CancellationToken cancellationToken)
+    {
+        var command = new UpdateMyPreferencesCommand(request);
+        var result = await Mediator.Send(command, cancellationToken);
+        return FromResult(result, StatusCodes.Status200OK);
+    }
+
+    [HttpGet("me/members/preferences")]
+    [ProducesResponseType(typeof(GetHouseholdMembersPreferencesResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetHouseholdMembersPreferences(CancellationToken cancellationToken)
+    {
+        var query = new GetHouseholdMembersPreferencesQuery(new GetHouseholdMembersPreferencesRequestDto());
+        var result = await Mediator.Send(query, cancellationToken);
         return FromResult(result, StatusCodes.Status200OK);
     }
 }

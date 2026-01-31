@@ -13,3 +13,4 @@ public class GetShoppingListQueryHandler(IShoppingListManagementService shopping
     }
 }
 
+

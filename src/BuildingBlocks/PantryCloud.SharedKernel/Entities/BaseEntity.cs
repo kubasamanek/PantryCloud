@@ -10,5 +10,3 @@ public abstract class BaseEntity : IEntity
     /// </summary>
     public Guid Id { get; init; } = Guid.NewGuid();
 }
-
-

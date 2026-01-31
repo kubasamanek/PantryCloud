@@ -26,4 +26,3 @@ public class ConnectionStrings
     /// </summary>
     public string DefaultConnection { get; set; } = string.Empty;
 }
-

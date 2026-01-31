@@ -34,5 +34,3 @@ public abstract class BaseDbContextService<TService, TDbContext> : BaseService<T
         DbContext = dbContext;
     }
 }
-
-

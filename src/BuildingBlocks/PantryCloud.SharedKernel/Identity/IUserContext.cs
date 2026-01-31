@@ -15,4 +15,3 @@ public interface IUserContext
     /// </summary>
     string Email { get; }
 }
-

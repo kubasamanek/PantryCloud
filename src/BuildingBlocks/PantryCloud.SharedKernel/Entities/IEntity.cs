@@ -10,5 +10,3 @@ public interface IEntity
     /// </summary>
     Guid Id { get; }
 }
-
-

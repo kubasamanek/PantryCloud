@@ -590,6 +590,63 @@
             "description": "Leave the current household. Requires authentication."
           },
           "response": []
+        },
+        {
+          "name": "Get My Preferences",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/household/api/households/me/preferences",
+              "host": ["{{base_url}}"],
+              "path": ["api", "household", "api", "households", "me", "preferences"]
+            },
+            "description": "Get current user's recipe preferences (dietary profile, excluded ingredients). 404 if none set. Fetch and send in Recipe search/recommend."
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"dietaryProfile\": 1,\n    \"excludedIngredients\": [\"nuts\", \"shellfish\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/household/api/households/me/preferences",
+              "host": ["{{base_url}}"],
+              "path": ["api", "household", "api", "households", "me", "preferences"]
+            },
+            "description": "Create or update preferences. dietaryProfile: 0=None, 1=Vegetarian, 2=Vegan. User must be in a household."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Household Members Preferences",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/household/api/households/me/members/preferences",
+              "host": ["{{base_url}}"],
+              "path": ["api", "household", "api", "households", "me", "members", "preferences"]
+            },
+            "description": "Get all household members' preferences. For 'recommend for household': aggregate (union excluded, strictest dietary) and send in POST /recipes/recommend."
+          },
+          "response": []
         }
       ]
     },
@@ -1239,6 +1296,170 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Recipe Service",
+      "item": [
+        {
+          "name": "Search Recipes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"ingredients\": [\"chicken\", \"rice\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recipe/api/recipes/search",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recipe",
+                "api",
+                "recipes",
+                "search"
+              ]
+            },
+            "description": "Search recipes by ingredients. Optionally include preferences (from Get My Preferences): { \"ingredients\": [...], \"preferences\": { \"dietaryProfile\": \"Vegetarian\", \"excludedIngredients\": [\"nuts\"] } }."
+          },
+          "response": []
+        },
+        {
+          "name": "Search Recipes (with preferences)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"ingredients\": [\"chicken\", \"rice\"],\n    \"preferences\": {\n        \"dietaryProfile\": \"Vegetarian\",\n        \"excludedIngredients\": [\"nuts\", \"shellfish\"]\n    }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recipe/api/recipes/search",
+              "host": ["{{base_url}}"],
+              "path": ["api", "recipe", "api", "recipes", "search"]
+            },
+            "description": "Search with preference filter. Fetch preferences from GET /households/me/preferences, then send here. dietaryProfile: None|Vegetarian|Vegan."
+          },
+          "response": []
+        },
+        {
+          "name": "Recommend Recipes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"ingredientHints\": [\"chicken\"],\n    \"preferences\": {\n        \"dietaryProfile\": \"Vegetarian\",\n        \"excludedIngredients\": [\"nuts\"]\n    },\n    \"limit\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recipe/api/recipes/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["api", "recipe", "api", "recipes", "recommend"]
+            },
+            "description": "Recommend recipes. Fetch GET /households/me/members/preferences, aggregate (union excluded, strictest dietary), then send here. ingredientHints optional; limit 1–100."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recipe",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.value && jsonData.value.recipe && jsonData.value.recipe.id) {",
+                  "        pm.collectionVariables.set(\"recipe_id\", jsonData.value.recipe.id);",
+                  "        console.log(\"Recipe ID saved: \" + jsonData.value.recipe.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/recipe/api/recipes/{{recipe_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recipe",
+                "api",
+                "recipes",
+                "{{recipe_id}}"
+              ]
+            },
+            "description": "Get a specific recipe by ID. Requires authentication. Recipe ID is automatically saved when running Search Recipes or when using a known ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Seed Recipes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"count\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recipe/api/recipes/seed",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recipe",
+                "api",
+                "recipes",
+                "seed"
+              ]
+            },
+            "description": "Seed sample recipes into the database. Only available in Development environment. Requires authentication."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -1279,6 +1500,11 @@
     },
     {
       "key": "shopping_item_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "recipe_id",
       "value": "",
       "type": "string"
     }

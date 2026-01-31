@@ -35,4 +35,3 @@ public sealed class UserContext(IHttpContextAccessor httpContextAccessor) : IUse
         ?? User.FindFirstValue(JwtRegisteredClaimNames.Email)
         ?? throw new UnauthorizedAccessException("Email not found in token");
 }
-

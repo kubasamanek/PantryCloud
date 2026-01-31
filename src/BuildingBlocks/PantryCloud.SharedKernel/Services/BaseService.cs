@@ -42,5 +42,3 @@ public abstract class BaseService<TService>
     /// </summary>
     protected string UserEmail => UserContext.Email;
 }
-
-
