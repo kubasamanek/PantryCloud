@@ -9,6 +9,7 @@ using PantryCloud.Notification.Infrastructure.Persistence;
 using PantryCloud.Notification.IntegrationTests.Infrastructure.Containers;
 using PantryCloud.Notification.IntegrationTests.Infrastructure.Environment;
 using PantryCloud.Notification.IntegrationTests.Infrastructure.Images;
+using PantryCloud.SharedKernel.Testing.Infrastructure.Environment;
 using Testcontainers.PostgreSql;
 using Testcontainers.RabbitMq;
 
@@ -52,8 +53,8 @@ public sealed class NotificationTestFixture : IAsyncLifetime
         await _network.CreateAsync();
         await _postgres.StartAsync();
 
-        await DatabaseSetup.CreateDatabaseAsync(_postgres);
-        await DatabaseSetup.ApplyMigrationsAsync(_postgres);
+        await PostgresDatabaseSetup.CreateDatabaseAsync(_postgres, Constants.Postgres.NotificationDatabase, Constants.Postgres.User, Constants.Postgres.DefaultDatabase);
+        await PostgresDatabaseSetup.ApplyMigrationsAsync<NotificationDbContext>(_postgres, Constants.Postgres.NotificationDatabase, Constants.Postgres.User, Constants.Postgres.Password, Constants.Postgres.Port);
         await _rabbitMq.StartAsync();
 
         await _notificationImage.CreateAsync();

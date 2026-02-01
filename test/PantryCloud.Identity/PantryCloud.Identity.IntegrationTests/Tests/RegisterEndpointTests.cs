@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.EntityFrameworkCore;
 using PantryCloud.Identity.Application.DTOs;
 using PantryCloud.Identity.IntegrationTests.Constants;
 using PantryCloud.Identity.IntegrationTests.Infrastructure;
@@ -8,11 +7,12 @@ using Shouldly;
 
 namespace PantryCloud.Identity.IntegrationTests.Tests;
 
-public class RegisterEndpointTests(IdentityIntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
+public class RegisterEndpointTests(IdentityTestFixture fixture) : BaseIntegrationTest(fixture)
 {
     [Fact]
     public async Task Register_ShouldReturnOk_AndCreateUser_WhenDataIsValid()
     {
+        await ResetAsync();
         // Arrange
         var request = new RegisterRequestDto(
             TestConstants.Users.DefaultEmail,
@@ -46,6 +46,7 @@ public class RegisterEndpointTests(IdentityIntegrationTestWebAppFactory factory)
     [Fact]
     public async Task Register_ShouldReturnConflict_WhenEmailAlreadyExists()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword);
 
@@ -64,6 +65,7 @@ public class RegisterEndpointTests(IdentityIntegrationTestWebAppFactory factory)
     [Fact]
     public async Task Register_ShouldReturnBadRequest_WhenEmailIsEmpty()
     {
+        await ResetAsync();
         // Arrange
         var request = new RegisterRequestDto(
             TestConstants.InvalidData.EmptyEmail,
@@ -80,6 +82,7 @@ public class RegisterEndpointTests(IdentityIntegrationTestWebAppFactory factory)
     [Fact]
     public async Task Register_ShouldReturnBadRequest_WhenPasswordIsEmpty()
     {
+        await ResetAsync();
         // Arrange
         var request = new RegisterRequestDto(
             TestConstants.Users.DefaultEmail,
@@ -96,6 +99,7 @@ public class RegisterEndpointTests(IdentityIntegrationTestWebAppFactory factory)
     [Fact]
     public async Task Register_ShouldReturnBadRequest_WhenEmailFormatIsInvalid()
     {
+        await ResetAsync();
         // Arrange
         var request = new RegisterRequestDto(
             TestConstants.InvalidData.InvalidEmailFormat,
@@ -112,6 +116,7 @@ public class RegisterEndpointTests(IdentityIntegrationTestWebAppFactory factory)
     [Fact]
     public async Task Register_ShouldReturnBadRequest_WhenPasswordIsTooWeak()
     {
+        await ResetAsync();
         // Arrange
         var request = new RegisterRequestDto(
             TestConstants.Users.DefaultEmail,
@@ -128,6 +133,7 @@ public class RegisterEndpointTests(IdentityIntegrationTestWebAppFactory factory)
     [Fact]
     public async Task Register_ShouldCreateMultipleUsers_WhenEmailsAreDifferent()
     {
+        await ResetAsync();
         // Arrange
         var request1 = new RegisterRequestDto(
             TestConstants.Users.DefaultEmail,

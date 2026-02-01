@@ -35,6 +35,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\src\BuildingBlocks\PantryCloud.SharedKernel.Testing\PantryCloud.SharedKernel.Testing.csproj" />
         <ProjectReference Include="..\..\..\src\Services\PantryCloud.Notification\PantryCloud.Notification.Presentation\PantryCloud.Notification.Presentation.csproj" />
         <ProjectReference Include="..\..\..\src\Services\PantryCloud.Notification\PantryCloud.Notification.Application\PantryCloud.Notification.Application.csproj" />
         <ProjectReference Include="..\..\..\src\Services\PantryCloud.Notification\PantryCloud.Notification.Infrastructure\PantryCloud.Notification.Infrastructure.csproj" />

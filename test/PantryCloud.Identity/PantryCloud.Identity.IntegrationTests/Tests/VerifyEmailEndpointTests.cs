@@ -7,7 +7,7 @@ using Shouldly;
 
 namespace PantryCloud.Identity.IntegrationTests.Tests;
 
-public class VerifyEmailEndpointTests(IdentityIntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
+public class VerifyEmailEndpointTests(IdentityTestFixture fixture) : BaseIntegrationTest(fixture)
 {
     [Fact]
     public async Task VerifyEmail_ShouldReturnOk_AndVerifyUser_WhenTokenIsValid()
@@ -39,6 +39,7 @@ public class VerifyEmailEndpointTests(IdentityIntegrationTestWebAppFactory facto
     [Fact]
     public async Task VerifyEmail_ShouldReturnUnauthorized_WhenTokenIsInvalid()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: false);
 
@@ -59,6 +60,7 @@ public class VerifyEmailEndpointTests(IdentityIntegrationTestWebAppFactory facto
     [Fact]
     public async Task VerifyEmail_ShouldReturnUnauthorized_WhenTokenIsAlreadyUsed()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: false);
         var token = await SeedVerifyEmailTokenAsync(TestConstants.Users.DefaultEmail, used: true, expired: false);
@@ -75,6 +77,7 @@ public class VerifyEmailEndpointTests(IdentityIntegrationTestWebAppFactory facto
     [Fact]
     public async Task VerifyEmail_ShouldReturnUnauthorized_WhenTokenIsExpired()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: false);
         var token = await SeedVerifyEmailTokenAsync(TestConstants.Users.DefaultEmail, used: false, expired: true);
@@ -96,6 +99,7 @@ public class VerifyEmailEndpointTests(IdentityIntegrationTestWebAppFactory facto
     [Fact]
     public async Task VerifyEmail_ShouldReturnNotFound_WhenUserDoesNotExist()
     {
+        await ResetAsync();
         // Arrange
         var token = await SeedVerifyEmailTokenAsync("nonexistent@pantrycloud.com", used: false, expired: false);
 
@@ -111,6 +115,7 @@ public class VerifyEmailEndpointTests(IdentityIntegrationTestWebAppFactory facto
     [Fact]
     public async Task VerifyEmail_ShouldReturnBadRequest_WhenEmailIsEmpty()
     {
+        await ResetAsync();
         // Arrange
         var request = new VerifyEmailRequestDto(TestConstants.InvalidData.EmptyEmail, "some-token");
 
@@ -124,6 +129,7 @@ public class VerifyEmailEndpointTests(IdentityIntegrationTestWebAppFactory facto
     [Fact]
     public async Task VerifyEmail_ShouldReturnBadRequest_WhenTokenIsEmpty()
     {
+        await ResetAsync();
         // Arrange
         var request = new VerifyEmailRequestDto(TestConstants.Users.DefaultEmail, "");
 
@@ -137,6 +143,7 @@ public class VerifyEmailEndpointTests(IdentityIntegrationTestWebAppFactory facto
     [Fact]
     public async Task VerifyEmail_ShouldNotVerifyTwice_WhenTokenUsedOnce()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: false);
         var token = await SeedVerifyEmailTokenAsync(TestConstants.Users.DefaultEmail, used: false, expired: false);

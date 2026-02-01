@@ -1,7 +1,6 @@
-using Docker.DotNet.Models;
 using DotNet.Testcontainers.Builders;
+using PantryCloud.SharedKernel.Testing.Infrastructure.TestContainers;
 using DotNet.Testcontainers.Networks;
-using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
 
 namespace PantryCloud.Notification.IntegrationTests.Infrastructure.Containers;
@@ -27,11 +26,7 @@ public static class NotificationContainer
             .WithNetwork(network)
             .WithNetworkAliases(Constants.Notification.NetworkAlias)
             .WithPortBinding(Constants.Notification.Port, true)
-            .WithCreateParameterModifier(p =>
-            {
-                p.HostConfig ??= new HostConfig();
-                p.HostConfig.LogConfig = new LogConfig { Type = "json-file" };
-            })
+            .WithCreateParameterModifier(ContainerLoggingConfig.JsonFileLogging)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPath("/health").ForPort(Constants.Notification.Port)));
         foreach (var (k, v) in env)
             builder = builder.WithEnvironment(k, v);
