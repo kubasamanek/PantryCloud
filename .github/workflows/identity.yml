@@ -87,6 +87,11 @@ jobs:
       - name: Setup Docker for Integration Tests
         run: docker --version
 
+      - name: Pre-pull Docker base images for Integration Tests
+        run: |
+          docker pull mcr.microsoft.com/dotnet/aspnet:9.0
+          docker pull mcr.microsoft.com/dotnet/sdk:9.0
+
       - name: Run Integration Tests with Coverage
         run: |
           dotnet test ${{ env.INTEGRATION_TEST_PROJECT }} \
@@ -98,6 +103,7 @@ jobs:
             --verbosity normal
         env:
           DOCKER_HOST: unix:///var/run/docker.sock
+          DOCKER_BUILDKIT: 0
           TESTCONTAINERS_RYUK_DISABLED: false
 
       - name: Cleanup Docker containers

@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
 EXPOSE 8080
 
@@ -11,11 +11,13 @@ COPY ["src/BuildingBlocks/PantryCloud.SharedKernel/PantryCloud.SharedKernel.cspr
 COPY ["src/Services/PantryCloud.Identity/PantryCloud.Identity.Presentation/PantryCloud.Identity.Presentation.csproj", "src/Services/PantryCloud.Identity/PantryCloud.Identity.Presentation/"]
 COPY ["src/Services/PantryCloud.Identity/PantryCloud.Identity.Application/PantryCloud.Identity.Application.csproj", "src/Services/PantryCloud.Identity/PantryCloud.Identity.Application/"]
 COPY ["src/Services/PantryCloud.Identity/PantryCloud.Identity.Core/PantryCloud.Identity.Core.csproj", "src/Services/PantryCloud.Identity/PantryCloud.Identity.Core/"]
-COPY ["src/BuildingBlocks/PantryCloud.SharedKernel/PantryCloud.SharedKernel.csproj", "src/BuildingBlocks/PantryCloud.SharedKernel/"]
 COPY ["src/Services/PantryCloud.Identity/PantryCloud.Identity.Infrastructure/PantryCloud.Identity.Infrastructure.csproj", "src/Services/PantryCloud.Identity/PantryCloud.Identity.Infrastructure/"]
 
 # Restore dependencies
 RUN dotnet restore "src/Services/PantryCloud.Identity/PantryCloud.Identity.Presentation/PantryCloud.Identity.Presentation.csproj"
+
+# Workaround for "layer does not exist" during export
+RUN true
 
 # Copy rest of the code
 COPY . .
@@ -30,5 +32,7 @@ RUN dotnet publish "./PantryCloud.Identity.Presentation.csproj" -c $BUILD_CONFIG
 
 FROM base AS final
 WORKDIR /app
+# Workaround for "layer does not exist" during export
+RUN true
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "PantryCloud.Identity.Presentation.dll"]

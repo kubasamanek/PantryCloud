@@ -15,6 +15,9 @@ COPY ["src/Services/PantryCloud.Household/PantryCloud.Household.Application/Pant
 
 RUN dotnet restore "src/Services/PantryCloud.Notification/PantryCloud.Notification.Presentation/PantryCloud.Notification.Presentation.csproj"
 
+# Workaround for "layer does not exist" during export
+RUN true
+
 COPY . .
 
 WORKDIR "/src/src/Services/PantryCloud.Notification/PantryCloud.Notification.Presentation"
@@ -26,6 +29,8 @@ RUN dotnet publish "./PantryCloud.Notification.Presentation.csproj" -c $BUILD_CO
 
 FROM base AS final
 WORKDIR /app
+# Workaround for "layer does not exist" during export
+RUN true
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "PantryCloud.Notification.Presentation.dll"]
 
