@@ -24,7 +24,10 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
 
+if (app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
+{
     await app.ApplyMigrationsAsync<NotificationDbContext>();
 }
 
@@ -40,7 +43,7 @@ app.UseAuthorization();
 
 app.UseExceptionHandler();
 
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health").AllowAnonymous();
 
 app.MapHub<NotificationHub>("/hubs/notifications");
 

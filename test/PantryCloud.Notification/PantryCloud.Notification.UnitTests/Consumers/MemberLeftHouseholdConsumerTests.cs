@@ -97,4 +97,36 @@ public class MemberLeftHouseholdConsumerTests
         membership.ShouldNotBeNull();
         membership.LeftAt.ShouldBe(leftAt);
     }
+
+    [Fact]
+    public async Task Consume_ShouldNotFail_WhenMembershipNotFound()
+    {
+        await using var db = TestHelper.CreateInMemoryContext(nameof(Consume_ShouldNotFail_WhenMembershipNotFound));
+        var notificationService = Substitute.For<INotificationService>();
+        var logger = TestHelper.MockLogger<MemberLeftHouseholdConsumer>();
+        var consumer = new MemberLeftHouseholdConsumer(db, notificationService, logger);
+
+        var householdId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+        var @event = new MemberLeftHouseholdEvent
+        {
+            HouseholdId = householdId,
+            MemberId = memberId,
+            MemberEmail = "orphan@example.com",
+            LeftAt = DateTime.UtcNow,
+            CorrelationId = Guid.NewGuid().ToString()
+        };
+
+        var context = Substitute.For<ConsumeContext<MemberLeftHouseholdEvent>>();
+        context.Message.Returns(@event);
+        context.CancellationToken.Returns(CancellationToken.None);
+
+        await consumer.Consume(context);
+
+        await notificationService.Received(1).SendToHouseholdExceptAsync(
+            householdId,
+            memberId,
+            Arg.Is<Core.Dtos.NotificationDto>(n => n.Title == "Member Left Household"),
+            Arg.Any<CancellationToken>());
+    }
 }

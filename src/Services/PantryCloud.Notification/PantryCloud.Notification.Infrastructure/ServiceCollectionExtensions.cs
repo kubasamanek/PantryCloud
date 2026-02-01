@@ -1,15 +1,14 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 using PantryCloud.Notification.Application;
 using PantryCloud.Notification.Infrastructure.Consumers;
 using PantryCloud.Notification.Core;
 using PantryCloud.Notification.Infrastructure.Persistence;
 using PantryCloud.Notification.Infrastructure.Services;
 using PantryCloud.SharedKernel.Correlation;
+using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.SharedKernel.Messaging;
 
 namespace PantryCloud.Notification.Infrastructure;
@@ -29,36 +28,20 @@ public static class ServiceCollectionExtensions
                 options.UseNpgsql(connectionString));
         }
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+        services.AddJwtBearerFromConfiguration(configuration, "App:IdentityUrl", options =>
+        {
+            options.Events = new JwtBearerEvents
             {
-                var identityUrl = apiConfiguration.App.IdentityUrl;
-                options.Audience = apiConfiguration.Jwt.Audience;
-                options.MetadataAddress = $"{identityUrl}/.well-known/openid-configuration";
-                options.TokenValidationParameters = new TokenValidationParameters
+                OnMessageReceived = context =>
                 {
-                    ValidateIssuer = true,
-                    ValidIssuer = apiConfiguration.Jwt.Issuer,
-                    ValidateAudience = true,
-                    ValidAudience = apiConfiguration.Jwt.Audience,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                };
-                options.RequireHttpsMetadata = false;
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        var accessToken = context.Request.Query["access_token"];
-                        var path = context.HttpContext.Request.Path;
-                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
-                        {
-                            context.Token = accessToken;
-                        }
-                        return Task.CompletedTask;
-                    }
-                };
-            });
+                    var accessToken = context.Request.Query["access_token"];
+                    var path = context.HttpContext.Request.Path;
+                    if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                        context.Token = accessToken;
+                    return Task.CompletedTask;
+                }
+            };
+        });
 
         services.AddAuthorization();
 

@@ -23,6 +23,7 @@ public static class ServiceCollectionExtensions
         params Assembly[] consumerAssemblies)
     {
         var rabbitMqHost = configuration["Messaging:RabbitMQ:Host"] ?? "rabbitmq";
+        var rabbitMqPort = configuration["Messaging:RabbitMQ:Port"];
         var rabbitMqUser = configuration["Messaging:RabbitMQ:Username"] ?? "admin";
         var rabbitMqPass = configuration["Messaging:RabbitMQ:Password"] ?? "password";
 
@@ -45,11 +46,23 @@ public static class ServiceCollectionExtensions
 
             busConfig.UsingRabbitMq((context, cfg) =>
             {
-                cfg.Host(rabbitMqHost, "/", h =>
+                if (!string.IsNullOrEmpty(rabbitMqPort) && int.TryParse(rabbitMqPort, out var port))
                 {
-                    h.Username(rabbitMqUser);
-                    h.Password(rabbitMqPass);
-                });
+                    var uri = new Uri($"amqp://{rabbitMqHost}:{port}/");
+                    cfg.Host(uri, h =>
+                    {
+                        h.Username(rabbitMqUser);
+                        h.Password(rabbitMqPass);
+                    });
+                }
+                else
+                {
+                    cfg.Host(rabbitMqHost, "/", h =>
+                    {
+                        h.Username(rabbitMqUser);
+                        h.Password(rabbitMqPass);
+                    });
+                }
 
                 cfg.ConfigureEndpoints(context);
             });
