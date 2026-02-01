@@ -8,11 +8,12 @@ using Shouldly;
 
 namespace PantryCloud.Identity.IntegrationTests.Tests;
 
-public class ResetPasswordEndpointTests(IdentityIntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
+public class ResetPasswordEndpointTests(IdentityTestFixture fixture) : BaseIntegrationTest(fixture)
 {
     [Fact]
     public async Task ResetPassword_ShouldReturnOk_AndChangePassword_WhenTokenIsValid()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
         var token = await SeedResetPasswordTokenAsync(TestConstants.Users.DefaultEmail, used: false, expired: false);
@@ -50,6 +51,7 @@ public class ResetPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fac
     [Fact]
     public async Task ResetPassword_ShouldReturnUnauthorized_WhenTokenIsInvalid()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
 
@@ -78,6 +80,7 @@ public class ResetPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fac
     [Fact]
     public async Task ResetPassword_ShouldReturnUnauthorized_WhenTokenIsAlreadyUsed()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
         var token = await SeedResetPasswordTokenAsync(TestConstants.Users.DefaultEmail, used: true, expired: false);
@@ -98,6 +101,7 @@ public class ResetPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fac
     [Fact]
     public async Task ResetPassword_ShouldReturnUnauthorized_WhenTokenIsExpired()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
         var token = await SeedResetPasswordTokenAsync(TestConstants.Users.DefaultEmail, used: false, expired: true);
@@ -123,6 +127,7 @@ public class ResetPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fac
     [Fact]
     public async Task ResetPassword_ShouldReturnNotFound_WhenUserDoesNotExist()
     {
+        await ResetAsync();
         // Arrange
         var token = await SeedResetPasswordTokenAsync("nonexistent@pantrycloud.com", used: false, expired: false);
 
@@ -142,6 +147,7 @@ public class ResetPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fac
     [Fact]
     public async Task ResetPassword_ShouldReturnBadRequest_WhenEmailIsEmpty()
     {
+        await ResetAsync();
         // Arrange
         var request = new ResetPasswordRequestDto(
             TestConstants.InvalidData.EmptyEmail,
@@ -159,6 +165,7 @@ public class ResetPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fac
     [Fact]
     public async Task ResetPassword_ShouldReturnBadRequest_WhenTokenIsEmpty()
     {
+        await ResetAsync();
         // Arrange
         var request = new ResetPasswordRequestDto(
             TestConstants.Users.DefaultEmail,
@@ -176,6 +183,7 @@ public class ResetPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fac
     [Fact]
     public async Task ResetPassword_ShouldReturnBadRequest_WhenNewPasswordIsEmpty()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
         var token = await SeedResetPasswordTokenAsync(TestConstants.Users.DefaultEmail, used: false, expired: false);
@@ -196,6 +204,7 @@ public class ResetPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fac
     [Fact]
     public async Task ResetPassword_ShouldReturnBadRequest_WhenNewPasswordIsTooWeak()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
         var token = await SeedResetPasswordTokenAsync(TestConstants.Users.DefaultEmail, used: false, expired: false);
@@ -216,6 +225,7 @@ public class ResetPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fac
     [Fact]
     public async Task ResetPassword_ShouldNotWorkTwice_WithSameToken()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
         var token = await SeedResetPasswordTokenAsync(TestConstants.Users.DefaultEmail, used: false, expired: false);
@@ -251,6 +261,7 @@ public class ResetPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fac
     [Fact]
     public async Task ResetPassword_ShouldWork_ForUnverifiedUsers()
     {
+        await ResetAsync();
         // Arrange - User with unverified email
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: false);
         var token = await SeedResetPasswordTokenAsync(TestConstants.Users.DefaultEmail, used: false, expired: false);

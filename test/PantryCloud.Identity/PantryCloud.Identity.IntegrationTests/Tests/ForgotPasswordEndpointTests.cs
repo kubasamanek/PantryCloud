@@ -1,20 +1,18 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using PantryCloud.Identity.Application.DTOs;
-using PantryCloud.Identity.Infrastructure.Persistence;
 using PantryCloud.Identity.IntegrationTests.Constants;
 using PantryCloud.Identity.IntegrationTests.Infrastructure;
 using Shouldly;
 
 namespace PantryCloud.Identity.IntegrationTests.Tests;
 
-public class ForgotPasswordEndpointTests(IdentityIntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
+public class ForgotPasswordEndpointTests(IdentityTestFixture fixture) : BaseIntegrationTest(fixture)
 {
     [Fact]
     public async Task ForgotPassword_ShouldReturnOk_AndCreateToken_WhenUserExists()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
 
@@ -34,11 +32,7 @@ public class ForgotPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fa
         result.Url.ShouldContain($"email={TestConstants.Users.DefaultEmail}");
 
         // Verify token was created in database
-        using var scope = Factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var tokenEntity = await dbContext.ResetPasswordTokens
-            .FirstOrDefaultAsync(t => t.Email == TestConstants.Users.DefaultEmail && t.Token == result.Token);
-
+        var tokenEntity = await GetResetPasswordTokenAsync(TestConstants.Users.DefaultEmail, result.Token);
         tokenEntity.ShouldNotBeNull();
         tokenEntity.IsExpired.ShouldBeFalse();
         tokenEntity.IsUsed.ShouldBeFalse();
@@ -47,6 +41,7 @@ public class ForgotPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fa
     [Fact]
     public async Task ForgotPassword_ShouldReturnNotFound_WhenUserDoesNotExist()
     {
+        await ResetAsync();
         // Arrange
         var request = new ForgotPasswordRequestDto("nonexistent@pantrycloud.com");
 
@@ -60,6 +55,7 @@ public class ForgotPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fa
     [Fact]
     public async Task ForgotPassword_ShouldReturnBadRequest_WhenEmailIsEmpty()
     {
+        await ResetAsync();
         // Arrange
         var request = new ForgotPasswordRequestDto(TestConstants.InvalidData.EmptyEmail);
 
@@ -73,6 +69,7 @@ public class ForgotPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fa
     [Fact]
     public async Task ForgotPassword_ShouldReturnBadRequest_WhenEmailFormatIsInvalid()
     {
+        await ResetAsync();
         // Arrange
         var request = new ForgotPasswordRequestDto(TestConstants.InvalidData.InvalidEmailFormat);
 
@@ -86,6 +83,7 @@ public class ForgotPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fa
     [Fact]
     public async Task ForgotPassword_ShouldCreateMultipleTokens_WhenCalledMultipleTimes()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
 
@@ -110,18 +108,14 @@ public class ForgotPasswordEndpointTests(IdentityIntegrationTestWebAppFactory fa
         result1.Token.ShouldNotBe(result2.Token);
 
         // Both tokens should exist in database
-        using var scope = Factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var tokens = await dbContext.ResetPasswordTokens
-            .Where(t => t.Email == TestConstants.Users.DefaultEmail)
-            .ToListAsync();
-
+        var tokens = await GetResetPasswordTokensByEmailAsync(TestConstants.Users.DefaultEmail);
         tokens.Count.ShouldBeGreaterThanOrEqualTo(2);
     }
 
     [Fact]
     public async Task ForgotPassword_ShouldWork_ForUnverifiedUsers()
     {
+        await ResetAsync();
         // Arrange - User with unverified email
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: false);
 

@@ -7,11 +7,12 @@ using Shouldly;
 
 namespace PantryCloud.Identity.IntegrationTests.Tests;
 
-public class RefreshTokenEndpointTests(IdentityIntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
+public class RefreshTokenEndpointTests(IdentityTestFixture fixture) : BaseIntegrationTest(fixture)
 {
     [Fact]
     public async Task RefreshToken_ShouldReturnOk_AndNewTokens_WhenTokenIsValid()
     {
+        await ResetAsync();
         // Arrange
         var user = await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
         var oldRefreshToken = await SeedRefreshTokenAsync(user.Id, expired: false);
@@ -43,6 +44,7 @@ public class RefreshTokenEndpointTests(IdentityIntegrationTestWebAppFactory fact
     [Fact]
     public async Task RefreshToken_ShouldReturnUnauthorized_WhenTokenDoesNotExist()
     {
+        await ResetAsync();
         // Arrange
         var request = new RefreshTokenRequestDto("non-existent-token");
 
@@ -56,6 +58,7 @@ public class RefreshTokenEndpointTests(IdentityIntegrationTestWebAppFactory fact
     [Fact]
     public async Task RefreshToken_ShouldReturnUnauthorized_WhenTokenIsExpired()
     {
+        await ResetAsync();
         // Arrange
         var user = await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
         var expiredToken = await SeedRefreshTokenAsync(user.Id, expired: true);
@@ -72,6 +75,7 @@ public class RefreshTokenEndpointTests(IdentityIntegrationTestWebAppFactory fact
     [Fact]
     public async Task RefreshToken_ShouldReturnBadRequest_WhenTokenIsEmpty()
     {
+        await ResetAsync();
         // Arrange
         var request = new RefreshTokenRequestDto("");
 
@@ -85,6 +89,7 @@ public class RefreshTokenEndpointTests(IdentityIntegrationTestWebAppFactory fact
     [Fact]
     public async Task RefreshToken_ShouldRotateTokens_OnSuccessiveRefreshes()
     {
+        await ResetAsync();
         // Arrange
         var user = await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
         var firstRefreshToken = await SeedRefreshTokenAsync(user.Id, expired: false);
@@ -119,6 +124,7 @@ public class RefreshTokenEndpointTests(IdentityIntegrationTestWebAppFactory fact
     [Fact]
     public async Task RefreshToken_ShouldNotWork_WithOldTokenAfterRotation()
     {
+        await ResetAsync();
         // Arrange
         var user = await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
         var oldRefreshToken = await SeedRefreshTokenAsync(user.Id, expired: false);

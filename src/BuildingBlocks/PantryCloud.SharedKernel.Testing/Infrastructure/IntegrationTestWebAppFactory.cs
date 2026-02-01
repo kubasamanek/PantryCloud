@@ -31,7 +31,7 @@ public class IntegrationTestWebAppFactory<TProgram, TDbContext> : WebApplication
         builder.ConfigureTestServices(services =>
         {
             // Remove the existing DbContext registration
-            services.RemoveAll(typeof(DbContextOptions<TDbContext>));
+            services.RemoveAll<DbContextOptions<TDbContext>>();
 
             // Replace with test container connection string
             services.AddDbContext<TDbContext>(options =>
@@ -47,7 +47,7 @@ public class IntegrationTestWebAppFactory<TProgram, TDbContext> : WebApplication
     }
 
     /// <summary>
-    /// Override this method to configure service-specific test services.
+    /// Configure service-specific test services.
     /// </summary>
     protected virtual void ConfigureTestServices(IServiceCollection services)
     {

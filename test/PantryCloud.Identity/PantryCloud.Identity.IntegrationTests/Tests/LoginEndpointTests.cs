@@ -7,11 +7,12 @@ using Shouldly;
 
 namespace PantryCloud.Identity.IntegrationTests.Tests;
 
-public class LoginEndpointTests(IdentityIntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
+public class LoginEndpointTests(IdentityTestFixture fixture) : BaseIntegrationTest(fixture)
 {
     [Fact]
     public async Task Login_ShouldReturnOk_AndTokens_WhenCredentialsAreValid()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
 
@@ -42,6 +43,7 @@ public class LoginEndpointTests(IdentityIntegrationTestWebAppFactory factory) : 
     [Fact]
     public async Task Login_ShouldReturnUnauthorized_WhenPasswordIsWrong()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
 
@@ -60,6 +62,7 @@ public class LoginEndpointTests(IdentityIntegrationTestWebAppFactory factory) : 
     [Fact]
     public async Task Login_ShouldReturnUnauthorized_WhenUserDoesNotExist()
     {
+        await ResetAsync();
         // Arrange
         var request = new LoginRequestDto(
             "nonexistent@pantrycloud.com",
@@ -76,6 +79,7 @@ public class LoginEndpointTests(IdentityIntegrationTestWebAppFactory factory) : 
     [Fact]
     public async Task Login_ShouldReturnUnauthorized_WhenEmailIsNotVerified()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: false);
 
@@ -94,6 +98,7 @@ public class LoginEndpointTests(IdentityIntegrationTestWebAppFactory factory) : 
     [Fact]
     public async Task Login_ShouldReturnBadRequest_WhenEmailIsEmpty()
     {
+        await ResetAsync();
         // Arrange
         var request = new LoginRequestDto(
             TestConstants.InvalidData.EmptyEmail,
@@ -110,6 +115,7 @@ public class LoginEndpointTests(IdentityIntegrationTestWebAppFactory factory) : 
     [Fact]
     public async Task Login_ShouldReturnBadRequest_WhenPasswordIsEmpty()
     {
+        await ResetAsync();
         // Arrange
         var request = new LoginRequestDto(
             TestConstants.Users.DefaultEmail,
@@ -126,6 +132,7 @@ public class LoginEndpointTests(IdentityIntegrationTestWebAppFactory factory) : 
     [Fact]
     public async Task Login_ShouldUpdateRefreshToken_OnSuccessiveLogins()
     {
+        await ResetAsync();
         // Arrange
         await SeedUserAsync(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword, verified: true);
 

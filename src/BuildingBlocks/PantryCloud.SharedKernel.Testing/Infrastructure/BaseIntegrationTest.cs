@@ -18,14 +18,13 @@ public abstract class BaseIntegrationTest<TProgram, TDbContext>(
     where TProgram : class
     where TDbContext : DbContext
 {
-    protected readonly IntegrationTestWebAppFactory<TProgram, TDbContext> Factory = factory;
     protected readonly HttpClient HttpClient = factory.CreateClient();
     private Respawner _respawner = null!;
 
     public async Task InitializeAsync()
     {
         // Initialize Respawner for database cleanup
-        using var scope = Factory.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
         var connection = dbContext.Database.GetDbConnection();
         
@@ -49,7 +48,7 @@ public abstract class BaseIntegrationTest<TProgram, TDbContext>(
     /// </summary>
     private async Task ResetDatabaseAsync()
     {
-        using var scope = Factory.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
         var connection = dbContext.Database.GetDbConnection();
         
@@ -74,7 +73,7 @@ public abstract class BaseIntegrationTest<TProgram, TDbContext>(
     /// </summary>
     protected async Task<DbConnection> GetDatabaseConnectionAsync()
     {
-        using var scope = Factory.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
         var connection = dbContext.Database.GetDbConnection();
         await connection.OpenAsync();
