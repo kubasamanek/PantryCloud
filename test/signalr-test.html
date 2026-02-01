@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PantryCloud SignalR Test</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+    input, button { font-size: 1rem; padding: 0.5rem; margin: 0.25rem 0; }
+    input { width: 100%; box-sizing: border-box; }
+    button { background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 0.5rem 1rem; }
+    button:disabled { background: #999; cursor: not-allowed; }
+    #log { background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 4px; font-family: monospace; font-size: 0.9rem; max-height: 400px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+    .status { padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0; }
+    .status.connected { background: #0e639c; color: white; }
+    .status.disconnected { background: #5a5a5a; color: #ccc; }
+    .notification { background: #264f78; padding: 0.5rem; margin: 0.25rem 0; border-radius: 4px; }
+    label { display: block; margin-top: 0.5rem; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <h1>PantryCloud SignalR Test</h1>
+  <p>Connect to the Notification hub to receive real-time notifications (member joined/left, pantry depleted, etc.).</p>
+
+  <label for="hubUrl">Hub URL (Gateway):</label>
+  <input type="text" id="hubUrl" value="http://localhost:5050/api/notification/hubs/notifications" placeholder="http://localhost:5050/api/notification/hubs/notifications">
+
+  <label for="accessToken">Access Token (from Login):</label>
+  <input type="password" id="accessToken" placeholder="Paste your JWT access_token here">
+
+  <div style="margin-top: 1rem;">
+    <button id="connectBtn" onclick="connect()">Connect</button>
+    <button id="disconnectBtn" onclick="disconnect()" disabled>Disconnect</button>
+  </div>
+
+  <div id="status" class="status disconnected">Disconnected</div>
+  <div id="log"></div>
+
+  <script>
+    let connection = null;
+
+    function log(msg, isNotification = false) {
+      const el = document.getElementById('log');
+      const time = new Date().toLocaleTimeString();
+      const line = document.createElement('div');
+      line.className = isNotification ? 'notification' : '';
+      line.textContent = `[${time}] ${msg}`;
+      el.appendChild(line);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function connect() {
+      const url = document.getElementById('hubUrl').value.trim();
+      const token = document.getElementById('accessToken').value.trim();
+      if (!url || !token) {
+        log('Error: Enter both Hub URL and Access Token');
+        return;
+      }
+
+      log('Connecting to ' + url + '...');
+      document.getElementById('connectBtn').disabled = true;
+
+      connection = new signalR.HubConnectionBuilder()
+        .withUrl(url, {
+          accessTokenFactory: () => token,
+          skipNegotiation: true,
+          transport: signalR.HttpTransportType.WebSockets
+        })
+        .withAutomaticReconnect()
+        .configureLogging(signalR.LogLevel.Information)
+        .build();
+
+      connection.on('ReceiveNotification', (data) => {
+        const msg = `Notification: ${data.title} - ${data.message} (type: ${data.type})`;
+        log(msg, true);
+      });
+
+      connection.onreconnecting(() => {
+        document.getElementById('status').textContent = 'Reconnecting...';
+        document.getElementById('status').className = 'status disconnected';
+      });
+
+      connection.onreconnected(() => {
+        document.getElementById('status').textContent = 'Connected';
+        document.getElementById('status').className = 'status connected';
+      });
+
+      connection.start()
+        .then(() => {
+          log('Connected successfully. Listening for ReceiveNotification...');
+          document.getElementById('status').textContent = 'Connected';
+          document.getElementById('status').className = 'status connected';
+          document.getElementById('disconnectBtn').disabled = false;
+        })
+        .catch(err => {
+          log('Connection failed: ' + err.toString());
+          document.getElementById('connectBtn').disabled = false;
+        });
+
+      connection.onclose((err) => {
+        log('Connection closed' + (err ? ': ' + err.message : ''));
+        document.getElementById('status').textContent = 'Disconnected';
+        document.getElementById('status').className = 'status disconnected';
+        document.getElementById('connectBtn').disabled = false;
+        document.getElementById('disconnectBtn').disabled = true;
+      });
+    }
+
+    function disconnect() {
+      if (connection) {
+        connection.stop();
+        connection = null;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,8 +1,10 @@
 using PantryCloud.Notification.Application;
 using PantryCloud.Notification.Infrastructure;
 using PantryCloud.Notification.Infrastructure.Hubs;
+using PantryCloud.Notification.Infrastructure.Persistence;
 using PantryCloud.Notification.Presentation.Extensions;
 using PantryCloud.SharedKernel.Correlation;
+using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.SharedKernel.Logging;
 using Serilog;
 
@@ -24,6 +26,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+if (app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
+{
+    await app.ApplyMigrationsAsync<NotificationDbContext>();
+}
+
 if (app.Environment.IsProduction())
 {
     app.UseHttpsRedirection();
@@ -31,9 +38,12 @@ if (app.Environment.IsProduction())
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseExceptionHandler();
 
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health").AllowAnonymous();
 
 app.MapHub<NotificationHub>("/hubs/notifications");
 

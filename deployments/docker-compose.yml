@@ -73,6 +73,7 @@ services:
       - Services__PantryService=http://pantry-api:8080
       - Services__RecipeService=http://recipe-api:8080
       - Services__ShoppingListService=http://shoppinglist-api:8080
+      - Services__NotificationService=http://notification-api:8080
       - Gateway__EnableSwagger=true
       - Jwt__Issuer=pantry-identity
       - Jwt__Audience=pantry-cloud
@@ -83,6 +84,7 @@ services:
       - identity-api
       - household-api
       - pantry-api
+      - notification-api
     networks:
       - pantry-network
 
@@ -188,12 +190,20 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - IsDevelopment=true
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=notification_db;Username=admin;Password=password
       - Messaging__RabbitMQ__Host=rabbitmq
       - Messaging__RabbitMQ__Username=admin
       - Messaging__RabbitMQ__Password=password
+      - App__IdentityUrl=http://identity-api:8080
+      - Jwt__Issuer=pantry-identity
+      - Jwt__Audience=pantry-cloud
     ports:
       - "5160:8080"
     depends_on:
+      postgres:
+        condition: service_healthy
+      identity-api:
+        condition: service_started
       rabbitmq:
         condition: service_healthy
     networks:

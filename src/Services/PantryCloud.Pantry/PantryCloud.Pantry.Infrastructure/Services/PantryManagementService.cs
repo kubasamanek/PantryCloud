@@ -154,12 +154,13 @@ public class PantryManagementService(
             return PantryErrors.PantryItemNotFound;
         }
 
+        var itemName = pantryItem.Name;
         DbContext.PantryItems.Remove(pantryItem);
         await DbContext.SaveChangesAsync(cancellationToken);
 
         Logger.LogInformation("Deleted pantry item {ItemId} for user {UserId}", request.Id, UserId);
 
-        return new DeletePantryItemResponseDto(request.Id);
+        return new DeletePantryItemResponseDto(request.Id, householdId, itemName, UserId);
     }
 
     public async Task<ErrorOr<GetPantryItemResponseDto>> GetPantryItemAsync(GetPantryItemRequestDto request, CancellationToken cancellationToken)

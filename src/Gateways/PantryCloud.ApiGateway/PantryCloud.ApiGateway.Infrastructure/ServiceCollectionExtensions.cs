@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using PantryCloud.ApiGateway.Core;
+using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.ApiGateway.Infrastructure.Transforms;
 using Polly;
 using Polly.Extensions.Http;
@@ -23,24 +22,7 @@ public static class ServiceCollectionExtensions
         configuration.Bind(apiConfiguration);
         services.AddSingleton(apiConfiguration);
 
-        // Add JWT Authentication
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                var identityUrl = apiConfiguration.App.IdentityUrl;
-                options.Audience = apiConfiguration.Jwt.Audience;
-                options.MetadataAddress = $"{identityUrl}/.well-known/openid-configuration";
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = apiConfiguration.Jwt.Issuer,
-                    ValidateAudience = true,
-                    ValidAudience = apiConfiguration.Jwt.Audience,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                };
-                options.RequireHttpsMetadata = false;
-            });
+        services.AddJwtBearerFromConfiguration(configuration, "App:IdentityUrl");
 
         services.AddAuthorization();
 
@@ -50,7 +32,7 @@ public static class ServiceCollectionExtensions
         if (resilienceSettings.Retry.Enabled || resilienceSettings.CircuitBreaker.Enabled)
         {
             // Create policies per service to isolate failures
-            var serviceNames = new[] { "Identity", "Household", "Pantry", "Recipe", "ShoppingList" };
+            var serviceNames = new[] { "Identity", "Household", "Pantry", "Recipe", "ShoppingList", "Notification" };
             
             foreach (var service in serviceNames)
             {
@@ -179,6 +161,22 @@ public static class ServiceCollectionExtensions
                         ["PathPattern"] = "/{**catch-all}"
                     }
                 ]
+            },
+            new RouteConfig
+            {
+                RouteId = RouteConfiguration.NotificationRouteId,
+                ClusterId = RouteConfiguration.NotificationClusterId,
+                Match = new RouteMatch
+                {
+                    Path = "/api/notification/{**catch-all}"
+                },
+                Transforms =
+                [
+                    new Dictionary<string, string>
+                    {
+                        ["PathPattern"] = "/{**catch-all}"
+                    }
+                ]
             }
         ];
     }
@@ -197,7 +195,8 @@ public static class ServiceCollectionExtensions
             CreateClusterConfig(RouteConfiguration.HouseholdClusterId, services.HouseholdService, "Household"),
             CreateClusterConfig(RouteConfiguration.PantryClusterId, services.PantryService, "Pantry"),
             CreateClusterConfig(RouteConfiguration.RecipeClusterId, services.RecipeService, "Recipe"),
-            CreateClusterConfig(RouteConfiguration.ShoppingListClusterId, services.ShoppingListService, "ShoppingList")
+            CreateClusterConfig(RouteConfiguration.ShoppingListClusterId, services.ShoppingListService, "ShoppingList"),
+            CreateClusterConfig(RouteConfiguration.NotificationClusterId, services.NotificationService, "Notification")
         ];
 
         ClusterConfig CreateClusterConfig(string clusterId, string serviceAddress, string serviceName)

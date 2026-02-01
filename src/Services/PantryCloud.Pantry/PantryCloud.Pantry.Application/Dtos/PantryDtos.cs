@@ -53,7 +53,7 @@ public record UpdatePantryItemResponseDto(
 
 public record DeletePantryItemRequestDto(Guid Id);
 
-public record DeletePantryItemResponseDto(Guid Id);
+public record DeletePantryItemResponseDto(Guid Id, Guid HouseholdId, string ItemName, Guid InitiatedByUserId);
 
 public record GetPantryItemRequestDto(Guid Id);
 

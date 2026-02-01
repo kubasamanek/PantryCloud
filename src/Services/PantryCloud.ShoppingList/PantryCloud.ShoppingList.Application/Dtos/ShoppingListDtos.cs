@@ -106,7 +106,12 @@ public record CheckShoppingListItemResponseDto(
     Guid Id,
     bool IsChecked,
     Guid? CheckedBy,
-    DateTime? CheckedAt);
+    DateTime? CheckedAt,
+    bool AllItemsChecked = false,
+    Guid? HouseholdId = null,
+    Guid? ShoppingListId = null,
+    string? ShoppingListName = null,
+    Guid? CheckedByUserId = null);
 
 public record ShoppingListItemDto(
     Guid Id,

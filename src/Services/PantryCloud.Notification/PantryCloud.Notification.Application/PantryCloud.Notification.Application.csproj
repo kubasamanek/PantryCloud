@@ -3,6 +3,8 @@
   <ItemGroup>
     <ProjectReference Include="..\PantryCloud.Notification.Core\PantryCloud.Notification.Core.csproj" />
     <ProjectReference Include="..\..\PantryCloud.Household\PantryCloud.Household.Application\PantryCloud.Household.Application.csproj" />
+    <ProjectReference Include="..\..\PantryCloud.Pantry\PantryCloud.Pantry.Application\PantryCloud.Pantry.Application.csproj" />
+    <ProjectReference Include="..\..\PantryCloud.ShoppingList\PantryCloud.ShoppingList.Application\PantryCloud.ShoppingList.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
