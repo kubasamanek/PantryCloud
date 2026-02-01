@@ -1,13 +1,12 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using PantryCloud.Recipe.Application.Interfaces;
 using PantryCloud.Recipe.Core;
 using PantryCloud.Recipe.Infrastructure.Persistence;
 using PantryCloud.Recipe.Infrastructure.Services;
 using PantryCloud.SharedKernel.Correlation;
+using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.SharedKernel.Identity;
 
 namespace PantryCloud.Recipe.Infrastructure;
@@ -48,23 +47,7 @@ public static class ServiceCollectionExtensions
                 }
             });
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                var identityUrl = apiConfiguration.App.IdentityUrl;
-                options.Audience = apiConfiguration.Jwt.Audience;
-                options.MetadataAddress = $"{identityUrl}/.well-known/openid-configuration";
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = apiConfiguration.Jwt.Issuer,
-                    ValidateAudience = true,
-                    ValidAudience = apiConfiguration.Jwt.Audience,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                };
-                options.RequireHttpsMetadata = false;
-            });
+        services.AddJwtBearerFromConfiguration(configuration, "App:IdentityUrl");
 
         services.AddAuthorization();
 

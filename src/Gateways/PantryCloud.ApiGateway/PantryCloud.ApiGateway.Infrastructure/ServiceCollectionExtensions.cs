@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using PantryCloud.ApiGateway.Core;
+using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.ApiGateway.Infrastructure.Transforms;
 using Polly;
 using Polly.Extensions.Http;
@@ -23,24 +22,7 @@ public static class ServiceCollectionExtensions
         configuration.Bind(apiConfiguration);
         services.AddSingleton(apiConfiguration);
 
-        // Add JWT Authentication
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                var identityUrl = apiConfiguration.App.IdentityUrl;
-                options.Audience = apiConfiguration.Jwt.Audience;
-                options.MetadataAddress = $"{identityUrl}/.well-known/openid-configuration";
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = apiConfiguration.Jwt.Issuer,
-                    ValidateAudience = true,
-                    ValidAudience = apiConfiguration.Jwt.Audience,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                };
-                options.RequireHttpsMetadata = false;
-            });
+        services.AddJwtBearerFromConfiguration(configuration, "App:IdentityUrl");
 
         services.AddAuthorization();
 
