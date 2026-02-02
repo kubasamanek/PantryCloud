@@ -10,6 +10,7 @@ public class HouseholdDbContext(DbContextOptions<HouseholdDbContext> options) : 
     public DbSet<HouseholdMember> Members => Set<HouseholdMember>();
     public DbSet<HouseholdInvitation> Invitations => Set<HouseholdInvitation>();
     public DbSet<Core.Entities.MemberPreference> MemberPreferences => Set<Core.Entities.MemberPreference>();
+    public DbSet<MemberProfile> MemberProfiles => Set<MemberProfile>();
     
     protected override void OnModelCreating(ModelBuilder builder)
     {

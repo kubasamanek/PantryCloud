@@ -35,4 +35,6 @@ WORKDIR /app
 # Workaround for "layer does not exist" during export
 RUN true
 COPY --from=publish /app/publish .
+RUN chown -R app:app /app
+USER app
 ENTRYPOINT ["dotnet", "PantryCloud.Identity.Presentation.dll"]

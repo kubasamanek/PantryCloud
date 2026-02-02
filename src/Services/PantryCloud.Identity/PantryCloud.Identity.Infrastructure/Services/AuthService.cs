@@ -1,5 +1,6 @@
 using System.Net.Mail;
 using ErrorOr;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PantryCloud.Identity.Application;
@@ -15,7 +16,8 @@ public class AuthService(
     ITokenProvider tokenProvider,
     ApplicationDbContext dbContext,
     ILogger<AuthService> logger,
-    ApiConfiguration config) : IAuthService
+    ApiConfiguration config,
+    IIdentityUserContext userContext) : IAuthService
 {
     public async Task<ErrorOr<RegisterResponseDto>> RegisterAsync(RegisterRequestDto request, CancellationToken cancellationToken)
     {
@@ -73,49 +75,69 @@ public class AuthService(
             return AuthErrors.LoginEmailNotVerified;
         }
 
-        var accessToken = tokenProvider.CreateAccessToken(user);
         var refreshToken = tokenProvider.CreateRefreshToken();
+        var expiresAt = DateTime.UtcNow.AddDays(7);
 
-        user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-
+        var session = new RefreshSession
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            RefreshToken = refreshToken,
+            ExpiresAt = expiresAt,
+            CreatedAt = DateTime.UtcNow,
+            LastUsedAt = DateTime.UtcNow,
+            DeviceName = request.DeviceName != null ? request.DeviceName.Length > 200 ? request.DeviceName[..200] : request.DeviceName : null
+        };
+        await dbContext.RefreshSessions.AddAsync(session, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
+        var accessToken = tokenProvider.CreateAccessToken(user, session.Id);
         logger.LogInformation("User {UserId} logged in successfully", user.Id);
 
-        return new LoginResponseDto(accessToken, refreshToken);
+        return new LoginResponseDto(accessToken, refreshToken, session.Id);
     }
 
     public async Task<ErrorOr<RefreshTokenResponseDto>> RefreshTokenAsync(RefreshTokenRequestDto request, CancellationToken cancellationToken)
     {
         logger.LogInformation("Attempting to refresh token");
 
-        var user = await dbContext.Users
-            .FirstOrDefaultAsync(u => u.RefreshToken == request.RefreshToken, cancellationToken);
+        var session = await dbContext.RefreshSessions
+            .Include(s => s.User)
+            .FirstOrDefaultAsync(s => s.RefreshToken == request.RefreshToken, cancellationToken);
 
-        if (user == null)
+        if (session?.User == null)
+
+        if (session?.User == null)
         {
             logger.LogWarning("Refresh token failed: token not found");
             return AuthErrors.InvalidRefreshToken;
         }
 
-        if (user.RefreshTokenExpiryTime < DateTime.UtcNow)
+        var user = session.User;
+
+        if (session.ExpiresAt < DateTime.UtcNow)
         {
             logger.LogWarning("Refresh token expired for user {UserId}", user.Id);
             return AuthErrors.ExpiredRefreshToken;
         }
 
-        var newAccessToken = tokenProvider.CreateAccessToken(user);
         var newRefreshToken = tokenProvider.CreateRefreshToken();
+        var expiresAt = DateTime.UtcNow.AddDays(7);
 
-        user.RefreshToken = newRefreshToken;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        session.RefreshToken = newRefreshToken;
+        session.ExpiresAt = expiresAt;
+        session.LastUsedAt = DateTime.UtcNow;
+        if (request.DeviceName != null)
+        {
+            session.DeviceName = request.DeviceName.Length > 200 ? request.DeviceName[..200] : request.DeviceName;
+        }
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
+        var accessToken = tokenProvider.CreateAccessToken(user, session.Id);
         logger.LogInformation("Refresh token succeeded for user {UserId}", user.Id);
 
-        return new RefreshTokenResponseDto(newAccessToken, newRefreshToken);
+        return new RefreshTokenResponseDto(accessToken, newRefreshToken, session.Id);
     }
 
     public async Task<ErrorOr<ForgotPasswordResponseDto>> ForgotPasswordAsync(ForgotPasswordRequestDto request, CancellationToken cancellationToken)
@@ -251,5 +273,77 @@ public class AuthService(
         logger.LogInformation("User {Email} successfully verified email.", request.Email);
         
         return new VerifyEmailResponseDto();
+    }
+
+    public async Task<ErrorOr<ListSessionsResponseDto>> ListSessionsAsync(CancellationToken cancellationToken = default)
+    {
+        var userId = userContext.UserId;
+        var currentSessionId = userContext.SessionId;
+
+        var sessions = await dbContext.RefreshSessions
+            .AsNoTracking()
+            .Where(s => s.UserId == userId && s.ExpiresAt > DateTime.UtcNow)
+            .OrderByDescending(s => s.LastUsedAt ?? s.CreatedAt)
+            .Select(s => new SessionDto(
+                s.Id,
+                s.CreatedAt,
+                s.LastUsedAt,
+                s.DeviceName,
+                currentSessionId == s.Id))
+            .ToListAsync(cancellationToken);
+
+        return new ListSessionsResponseDto(sessions);
+    }
+
+    public async Task<ErrorOr<Unit>> RevokeSessionAsync(Guid sessionId, CancellationToken cancellationToken = default)
+    {
+        var userId = userContext.UserId;
+
+        var session = await dbContext.RefreshSessions.FirstOrDefaultAsync(s => s.Id == sessionId && s.UserId == userId, cancellationToken);
+        if (session == null)
+        {
+            return AuthErrors.SessionNotFound;
+        }
+
+        dbContext.RefreshSessions.Remove(session);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("User {UserId} revoked session {SessionId}", userId, sessionId);
+        return Unit.Value;
+    }
+
+    public async Task<ErrorOr<Unit>> RevokeAllOtherSessionsAsync(CancellationToken cancellationToken = default)
+    {
+        var userId = userContext.UserId;
+        var currentSessionId = userContext.SessionId;
+
+        if (!currentSessionId.HasValue)
+        {
+            return AuthErrors.SessionNotFound;
+        }
+
+        var otherSessions = await dbContext.RefreshSessions
+            .Where(s => s.UserId == userId && s.Id != currentSessionId.Value)
+            .ToListAsync(cancellationToken);
+
+        dbContext.RefreshSessions.RemoveRange(otherSessions);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("User {UserId} revoked {Count} other sessions", userId, otherSessions.Count);
+        return Unit.Value;
+    }
+
+    public async Task<ErrorOr<Unit>> LogoutAsync(LogoutRequestDto request, CancellationToken cancellationToken = default)
+    {
+        var session = await dbContext.RefreshSessions
+            .FirstOrDefaultAsync(s => s.RefreshToken == request.RefreshToken, cancellationToken);
+
+        if (session == null)
+        {
+            return AuthErrors.InvalidRefreshToken;
+        }
+
+        dbContext.RefreshSessions.Remove(session);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("User logged out, session {SessionId} revoked", session.Id);
+        return Unit.Value;
     }
 }

@@ -34,11 +34,10 @@ public class RefreshTokenEndpointTests(IdentityTestFixture fixture) : BaseIntegr
         result.RefreshToken.ShouldNotBe(oldRefreshToken);
 
         // Verify new refresh token was persisted in database
-        var updatedUser = await GetUserByIdAsync(user.Id);
-        updatedUser.ShouldNotBeNull();
-        updatedUser.RefreshToken.ShouldBe(result.RefreshToken);
-        updatedUser.RefreshTokenExpiryTime.ShouldNotBeNull();
-        updatedUser.RefreshTokenExpiryTime!.Value.ShouldBeGreaterThan(DateTime.UtcNow);
+        var session = await GetSessionByRefreshTokenAsync(result.RefreshToken);
+        session.ShouldNotBeNull();
+        session.RefreshToken.ShouldBe(result.RefreshToken);
+        session.ExpiresAt.ShouldBeGreaterThan(DateTime.UtcNow);
     }
 
     [Fact]
@@ -116,9 +115,9 @@ public class RefreshTokenEndpointTests(IdentityTestFixture fixture) : BaseIntegr
         result1.RefreshToken.ShouldNotBe(result2.RefreshToken);
 
         // Database should have the latest refresh token
-        var updatedUser = await GetUserByIdAsync(user.Id);
-        updatedUser.ShouldNotBeNull();
-        updatedUser.RefreshToken.ShouldBe(result2.RefreshToken);
+        var session = await GetSessionByRefreshTokenAsync(result2.RefreshToken);
+        session.ShouldNotBeNull();
+        session.RefreshToken.ShouldBe(result2.RefreshToken);
     }
 
     [Fact]

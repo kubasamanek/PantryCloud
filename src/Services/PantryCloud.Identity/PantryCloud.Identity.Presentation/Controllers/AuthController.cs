@@ -16,7 +16,9 @@ public class AuthController(IMediator mediator, IMapper mapper) : ApiControllerB
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto request, CancellationToken cancellationToken)
     {
-        var command = Mapper.Map<LoginCommand>(request);
+        var deviceName = Request.Headers["X-Device-Name"].FirstOrDefault() ?? request.DeviceName;
+        var requestWithDevice = request with { DeviceName = deviceName };
+        var command = new LoginCommand(requestWithDevice);
         var result = await Mediator.Send(command, cancellationToken);
 
         return FromResult(result, StatusCodes.Status200OK);
@@ -27,11 +29,12 @@ public class AuthController(IMediator mediator, IMapper mapper) : ApiControllerB
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequestDto request, CancellationToken cancellationToken)
     {
-        var command = Mapper.Map<RefreshTokenCommand>(request);
+        var deviceName = Request.Headers["X-Device-Name"].FirstOrDefault() ?? request.DeviceName;
+        var requestWithDevice = request with { DeviceName = deviceName };
+        var command = new RefreshTokenCommand(requestWithDevice);
         var result = await Mediator.Send(command, cancellationToken);
 
         return FromResult(result, StatusCodes.Status200OK);
-
     }
     
     [HttpPost("register")]

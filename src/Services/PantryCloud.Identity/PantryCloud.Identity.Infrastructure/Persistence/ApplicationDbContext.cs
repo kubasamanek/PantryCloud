@@ -10,6 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ResetPasswordToken> ResetPasswordTokens { get; set; }
     
     public DbSet<VerifyEmailToken> VerifyEmailTokens { get; set; }
+    public DbSet<RefreshSession> RefreshSessions { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {

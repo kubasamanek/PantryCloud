@@ -19,6 +19,7 @@ public static class ServiceCollectionExtensions
         
         services.AddSingleton<ITokenProvider, TokenProvider>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddIdentityJwtAuth(apiConfiguration);
         
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         

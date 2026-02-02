@@ -30,6 +30,7 @@ public abstract class BaseIntegrationTest(IdentityTestFixture fixture)
 
     protected Task<ApplicationUser?> GetUserByEmailAsync(string email) => Fixture.GetUserByEmailAsync(email);
     protected Task<ApplicationUser?> GetUserByIdAsync(Guid userId) => Fixture.GetUserByIdAsync(userId);
+    protected Task<RefreshSession?> GetSessionByRefreshTokenAsync(string refreshToken) => Fixture.GetSessionByRefreshTokenAsync(refreshToken);
     protected Task<VerifyEmailToken?> GetVerifyEmailTokenAsync(string email, string token) => Fixture.GetVerifyEmailTokenAsync(email, token);
     protected Task<ResetPasswordToken?> GetResetPasswordTokenAsync(string email, string token) => Fixture.GetResetPasswordTokenAsync(email, token);
     protected Task<IReadOnlyList<ResetPasswordToken>> GetResetPasswordTokensByEmailAsync(string email) => Fixture.GetResetPasswordTokensByEmailAsync(email);

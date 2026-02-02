@@ -81,13 +81,21 @@ public class PreferencesService(
             .Where(p => memberIds.Contains(p.UserId))
             .ToDictionaryAsync(p => p.UserId, cancellationToken);
 
+        var profilesMap = await DbContext.MemberProfiles
+            .AsNoTracking()
+            .Where(p => memberIds.Contains(p.UserId))
+            .ToDictionaryAsync(p => p.UserId, cancellationToken);
+
         var members = memberIds.Select(uid =>
         {
             var p = preferencesMap.GetValueOrDefault(uid);
-            return new MemberPreferencesDto(
+            var profile = profilesMap.GetValueOrDefault(uid);
+            return new MemberWithProfileDto(
                 uid,
                 p?.DietaryProfile ?? DietaryProfile.None,
-                p?.ExcludedIngredients ?? []);
+                p?.ExcludedIngredients ?? [],
+                profile?.DisplayName,
+                profile?.AvatarUrl);
         }).ToList();
 
         return new GetHouseholdMembersPreferencesResponseDto(members);

@@ -33,6 +33,9 @@ if (app.Environment.IsProduction())
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseExceptionHandler();
 
 app.MapHealthChecks("/health");

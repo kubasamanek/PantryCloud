@@ -30,17 +30,23 @@ public sealed class TokenProvider : ITokenProvider, IDisposable
         _configuration = configuration;
     }
 
-    public string CreateAccessToken(ApplicationUser user)
+    public string CreateAccessToken(ApplicationUser user, Guid? sessionId = null)
     {
+        var claims = new List<Claim>
+        {
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Email, user.Email),
+            new("email_verified", user.EmailVerified.ToString())
+        };
+        if (sessionId.HasValue)
+        {
+            claims.Add(new Claim("sid", sessionId.Value.ToString()));
+        }
+
         var handler = new JsonWebTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(
-            [
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("email_verified", user.EmailVerified.ToString())
-            ]),
+            Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddMinutes(_configuration.Jwt.ExpirationInMinutes),
             SigningCredentials = _signingCredentials,
             Issuer = _configuration.Jwt.Issuer,

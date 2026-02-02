@@ -34,7 +34,7 @@ public abstract class ApiControllerBase(IMediator mediator, IMapper mapper) : Co
     protected IActionResult FromResult<T>(ErrorOr<T> result, int successStatusCode)
     {
         return result.Match<IActionResult>(
-            value => StatusCode(successStatusCode, value),
+            value => successStatusCode == StatusCodes.Status204NoContent ? NoContent() : StatusCode(successStatusCode, value),
             Problem
         );
     }
@@ -62,6 +62,7 @@ public abstract class ApiControllerBase(IMediator mediator, IMapper mapper) : Co
         var statusCode = firstError.Type switch
         {
             ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
+            ErrorType.Forbidden => StatusCodes.Status403Forbidden,
             ErrorType.Conflict => StatusCodes.Status409Conflict,
             ErrorType.NotFound => StatusCodes.Status404NotFound,
             _ => StatusCodes.Status400BadRequest,

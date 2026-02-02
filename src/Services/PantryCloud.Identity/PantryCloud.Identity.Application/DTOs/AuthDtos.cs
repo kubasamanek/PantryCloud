@@ -18,19 +18,21 @@ public record LoginRequestDto(
     string Email,
     
     [Required(ErrorMessage = "Password is required")]
-    string Password
+    string Password,
+    string? DeviceName = null
 );
 
-public record LoginResponseDto(string AccessToken, string RefreshToken);
+public record LoginResponseDto(string AccessToken, string RefreshToken, Guid? SessionId = null);
 
 public record RegisterResponseDto(string UserId, string VerifyEmailToken);
 
 public record RefreshTokenRequestDto(
     [Required(ErrorMessage = "Refresh token is required")]
-    string RefreshToken
+    string RefreshToken,
+    string? DeviceName = null
 );
 
-public record RefreshTokenResponseDto(string AccessToken, string RefreshToken);
+public record RefreshTokenResponseDto(string AccessToken, string RefreshToken, Guid? SessionId = null);
 
 public record ForgotPasswordRequestDto(
     [Required(ErrorMessage = "Email is required")]
@@ -65,3 +67,13 @@ public record VerifyEmailRequestDto(
 );
 
 public record VerifyEmailResponseDto();
+
+public record SessionDto(Guid Id, DateTime CreatedAt, DateTime? LastUsedAt, string? DeviceName, bool IsCurrent);
+
+public record ListSessionsResponseDto(List<SessionDto> Sessions);
+
+public record RevokeSessionRequestDto(Guid SessionId);
+
+public record LogoutRequestDto(
+    [Required(ErrorMessage = "Refresh token is required")]
+    string RefreshToken);

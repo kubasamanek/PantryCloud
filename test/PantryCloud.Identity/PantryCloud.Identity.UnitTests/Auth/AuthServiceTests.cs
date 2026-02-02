@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PantryCloud.Identity.Application;
+using PantryCloud.Identity.Core.Entities;
 using PantryCloud.Identity.Application.DTOs;
 using PantryCloud.Identity.Core;
 using PantryCloud.Identity.Core.Errors;
@@ -15,11 +16,13 @@ public class AuthServiceTests
     private readonly ITokenProvider  _tokenProviderMock = TestHelper.MockTokenProvider();
     private readonly ApiConfiguration _configurationMock = TestHelper.MockConfiguration();
 
+    private readonly IIdentityUserContext _userContextMock = TestHelper.MockIdentityUserContext();
+
     [Fact]
     public async Task RegisterAsync_ShouldCreateUser_AndReturnId_WhenNewEmail()
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(RegisterAsync_ShouldCreateUser_AndReturnId_WhenNewEmail));
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var request = new RegisterRequestDto(Constants.ExampleUser.Email, Constants.StrongPassword);
 
@@ -42,7 +45,7 @@ public class AuthServiceTests
         db.Users.Add(existing);
         await db.SaveChangesAsync();
         
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock,  _configurationMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var request = new RegisterRequestDto(existing.Email, Constants.ExamplePassword);
 
@@ -61,7 +64,7 @@ public class AuthServiceTests
         await db.SaveChangesAsync();
 
         var tokenProvider = TestHelper.MockTokenProvider(accessToken: "AT", refreshToken: "RT");
-        var authService = new AuthService(tokenProvider, db, _loggerMock, _configurationMock);
+        var authService = new AuthService(tokenProvider, db, _loggerMock, _configurationMock, _userContextMock);
 
         var request = new LoginRequestDto(user.Email, Constants.StrongPassword);
 
@@ -71,17 +74,17 @@ public class AuthServiceTests
         result.Value.AccessToken.ShouldBe("AT");
         result.Value.RefreshToken.ShouldBe("RT");
 
-        var reloaded = await db.Users.SingleAsync(u => u.Id == user.Id);
-        reloaded.RefreshToken.ShouldBe("RT");
-        reloaded.RefreshTokenExpiryTime.ShouldNotBeNull();
-        reloaded.RefreshTokenExpiryTime!.Value.ShouldBeGreaterThan(DateTime.UtcNow);
+        var session = await db.RefreshSessions.SingleOrDefaultAsync(s => s.UserId == user.Id);
+        session.ShouldNotBeNull();
+        session!.RefreshToken.ShouldBe("RT");
+        session.ExpiresAt.ShouldBeGreaterThan(DateTime.UtcNow);
     }
 
     [Fact]
     public async Task LoginAsync_ShouldReturnError_WhenUserNotFound()
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(LoginAsync_ShouldReturnError_WhenUserNotFound));
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await authService.LoginAsync(
             new LoginRequestDto(Constants.ExampleUser.Email, "x"), 
@@ -101,7 +104,7 @@ public class AuthServiceTests
 
         var tokenProvider = TestHelper.MockTokenProvider();
         var logger = TestHelper.MockLogger();
-        var authService = new AuthService(tokenProvider, db, logger,  _configurationMock);
+        var authService = new AuthService(tokenProvider, db, logger, _configurationMock, _userContextMock);
 
         var result = await authService.LoginAsync(
             new LoginRequestDto(user.Email, "Wrong#123"),
@@ -117,13 +120,20 @@ public class AuthServiceTests
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(RefreshTokenAsync_ShouldIssueNewTokens_AndRotateRefreshToken_WhenValid));
         var user = Constants.ExampleUser;
-        user.RefreshToken = "OLD_RT";
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(1);
         db.Users.Add(user);
+        db.RefreshSessions.Add(new RefreshSession
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            RefreshToken = "OLD_RT",
+            ExpiresAt = DateTime.UtcNow.AddDays(1),
+            CreatedAt = DateTime.UtcNow,
+            LastUsedAt = DateTime.UtcNow
+        });
         await db.SaveChangesAsync();
 
         var tokenProvider = TestHelper.MockTokenProvider(accessToken: "NEW_AT", refreshToken: "NEW_RT");
-        var authService = new AuthService(tokenProvider, db, _loggerMock, _configurationMock);
+        var authService = new AuthService(tokenProvider, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await authService.RefreshTokenAsync(
             new RefreshTokenRequestDto("OLD_RT"), 
@@ -133,17 +143,16 @@ public class AuthServiceTests
         result.Value.AccessToken.ShouldBe("NEW_AT");
         result.Value.RefreshToken.ShouldBe("NEW_RT");
 
-        var reloaded = await db.Users.SingleAsync(u => u.Id == user.Id);
-        reloaded.RefreshToken.ShouldBe("NEW_RT");
-        reloaded.RefreshTokenExpiryTime.ShouldNotBeNull();
-        reloaded.RefreshTokenExpiryTime!.Value.ShouldBeGreaterThan(DateTime.UtcNow);
+        var session = await db.RefreshSessions.SingleAsync(s => s.UserId == user.Id);
+        session.RefreshToken.ShouldBe("NEW_RT");
+        session.ExpiresAt.ShouldBeGreaterThan(DateTime.UtcNow);
     }
 
     [Fact]
     public async Task RefreshTokenAsync_ShouldReturnError_WhenTokenNotFound()
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(RefreshTokenAsync_ShouldReturnError_WhenTokenNotFound));
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await authService.RefreshTokenAsync(
             new RefreshTokenRequestDto("NON_EXISTENT"), 
@@ -158,12 +167,19 @@ public class AuthServiceTests
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(RefreshTokenAsync_ShouldReturnError_WhenTokenExpired));
         var user = Constants.ExampleUser;
-        user.RefreshToken = "EXPIRED_RT";
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddMinutes(-1);
         db.Users.Add(user);
+        db.RefreshSessions.Add(new RefreshSession
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            RefreshToken = "EXPIRED_RT",
+            ExpiresAt = DateTime.UtcNow.AddMinutes(-1),
+            CreatedAt = DateTime.UtcNow,
+            LastUsedAt = DateTime.UtcNow
+        });
         await db.SaveChangesAsync();
         
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await authService.RefreshTokenAsync(
             new RefreshTokenRequestDto("EXPIRED_RT"), 
@@ -181,7 +197,7 @@ public class AuthServiceTests
         db.Users.Add(user);
         await db.SaveChangesAsync();
 
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await authService.ForgotPasswordAsync(
             new ForgotPasswordRequestDto(user.Email), CancellationToken.None);
@@ -197,7 +213,7 @@ public class AuthServiceTests
     public async Task ForgotPasswordAsync_ShouldReturnError_WhenUserDoesNotExist()
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(ForgotPasswordAsync_ShouldReturnError_WhenUserDoesNotExist));
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await authService.ForgotPasswordAsync(new ForgotPasswordRequestDto("notfound@example.com"), CancellationToken.None);
 
@@ -218,7 +234,7 @@ public class AuthServiceTests
         db.ResetPasswordTokens.Add(token);
         await db.SaveChangesAsync();
 
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await authService.ResetPasswordAsync(
             new ResetPasswordRequestDto(user.Email, token.Token, "NewPass123!"), CancellationToken.None);
@@ -238,7 +254,7 @@ public class AuthServiceTests
         db.ResetPasswordTokens.Add(token);
         await db.SaveChangesAsync();
 
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await authService.ResetPasswordAsync(new ResetPasswordRequestDto(user.Email, token.Token, "newPass123!"), CancellationToken.None);
 
@@ -256,7 +272,7 @@ public class AuthServiceTests
         db.ResetPasswordTokens.Add(token);
         await db.SaveChangesAsync();
 
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await authService.ResetPasswordAsync(
             new ResetPasswordRequestDto(user.Email, token.Token, "newPass123!"), CancellationToken.None);
@@ -275,7 +291,7 @@ public class AuthServiceTests
         // Do not add the token to db
         await db.SaveChangesAsync();
 
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await authService.ResetPasswordAsync(
             new ResetPasswordRequestDto(user.Email, token.Token, "newPass123!"), CancellationToken.None);
@@ -295,7 +311,7 @@ public class AuthServiceTests
         db.VerifyEmailTokens.Add(token);
         await db.SaveChangesAsync();
 
-        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock);
+        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await service.VerifyEmailAsync(new VerifyEmailRequestDto(user.Email, token.Token), CancellationToken.None);
 
@@ -317,7 +333,7 @@ public class AuthServiceTests
         db.VerifyEmailTokens.Add(token);
         await db.SaveChangesAsync();
 
-        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock);
+        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await service.VerifyEmailAsync(
             new VerifyEmailRequestDto("notfound@example.com", token.Token),
@@ -335,7 +351,7 @@ public class AuthServiceTests
         db.Users.Add(user);
         await db.SaveChangesAsync();
 
-        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock);
+        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await service.VerifyEmailAsync(
             new VerifyEmailRequestDto(user.Email, "invalid-token"),
@@ -356,7 +372,7 @@ public class AuthServiceTests
         db.VerifyEmailTokens.Add(token);
         await db.SaveChangesAsync();
 
-        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock);
+        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await service.VerifyEmailAsync(
             new VerifyEmailRequestDto(user.Email, token.Token),
@@ -377,7 +393,7 @@ public class AuthServiceTests
         db.VerifyEmailTokens.Add(token);
         await db.SaveChangesAsync();
 
-        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock);
+        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await service.VerifyEmailAsync(
             new VerifyEmailRequestDto(user.Email, token.Token),

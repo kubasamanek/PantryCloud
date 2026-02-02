@@ -16,6 +16,8 @@ public static class TestConstants
         public const string ForgotPassword = "/api/auth/forgot-password";
         public const string ResetPassword = "/api/auth/reset-password";
         public const string VerifyEmail = "/api/auth/verify-email";
+        public const string Sessions = "/api/auth/sessions";
+        public const string Logout = "/api/auth/logout";
     }
 
     /// <summary>

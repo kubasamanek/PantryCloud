@@ -9,8 +9,4 @@ public class ApplicationUser : BaseEntity
     public required string PasswordHash { get; set; }
     
     public bool EmailVerified { get; set; }
-    
-    public string? RefreshToken { get; set; }
-
-    public DateTime? RefreshTokenExpiryTime { get; set; }
 }

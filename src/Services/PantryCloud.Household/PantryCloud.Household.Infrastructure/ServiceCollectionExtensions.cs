@@ -41,6 +41,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IHouseholdManagementService, HouseholdManagementService>();
         services.AddScoped<IInvitationService, InvitationService>();
         services.AddScoped<IPreferencesService, PreferencesService>();
+        services.AddScoped<IProfileService, ProfileService>();
         
         return services;
     }

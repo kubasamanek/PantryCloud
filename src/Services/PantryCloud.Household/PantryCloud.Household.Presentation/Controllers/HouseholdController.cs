@@ -100,6 +100,26 @@ public class HouseholdController(IMediator mediator, IMapper mapper) : ApiContro
         return FromResult(result, StatusCodes.Status200OK);
     }
 
+    [HttpGet("me/profile")]
+    [ProducesResponseType(typeof(GetMyProfileResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetMyProfile(CancellationToken cancellationToken)
+    {
+        var query = new GetMyProfileQuery(new GetMyProfileRequestDto());
+        var result = await Mediator.Send(query, cancellationToken);
+        return FromResult(result, StatusCodes.Status200OK);
+    }
+
+    [HttpPut("me/profile")]
+    [ProducesResponseType(typeof(UpdateMyProfileResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateMyProfileRequestDto request, CancellationToken cancellationToken)
+    {
+        var command = new UpdateMyProfileCommand(request);
+        var result = await Mediator.Send(command, cancellationToken);
+        return FromResult(result, StatusCodes.Status200OK);
+    }
+
     [HttpGet("me/members/preferences")]
     [ProducesResponseType(typeof(GetHouseholdMembersPreferencesResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

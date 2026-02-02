@@ -48,4 +48,14 @@ public static class AuthErrors
         code: "Auth.TokenAlreadyUsed",
         description: $"Token has already been used."
     );
+
+    public static Error SessionNotFound = Error.NotFound(
+        code: "Auth.Session.NotFound",
+        description: "Session not found."
+    );
+
+    public static Error SessionAccessDenied = Error.Forbidden(
+        code: "Auth.Session.AccessDenied",
+        description: "You can only revoke your own sessions."
+    );
 }

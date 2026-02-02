@@ -23,7 +23,14 @@ public record MemberPreferencesDto(
     DietaryProfile DietaryProfile,
     List<string> ExcludedIngredients);
 
+public record MemberWithProfileDto(
+    Guid UserId,
+    DietaryProfile DietaryProfile,
+    List<string> ExcludedIngredients,
+    string? DisplayName,
+    string? AvatarUrl);
+
 public record GetHouseholdMembersPreferencesRequestDto;
 
 public record GetHouseholdMembersPreferencesResponseDto(
-    List<MemberPreferencesDto> Members);
+    List<MemberWithProfileDto> Members);

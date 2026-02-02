@@ -26,11 +26,20 @@ internal static class TestHelper
         string passwordResetToken = "PASSWORD_RESET_TOKEN")
     {
         var tp = Substitute.For<ITokenProvider>();
-        tp.CreateAccessToken(Arg.Any<ApplicationUser>()).Returns(accessToken);
+        tp.CreateAccessToken(Arg.Any<ApplicationUser>(), Arg.Any<Guid?>()).Returns(accessToken);
         tp.CreateRefreshToken().Returns(refreshToken);
         tp.CreatePasswordResetToken().Returns(passwordResetToken);
 
         return tp;
+    }
+
+    public static IIdentityUserContext MockIdentityUserContext(Guid? userId = null, Guid? sessionId = null)
+    {
+        var ctx = Substitute.For<IIdentityUserContext>();
+        ctx.UserId.Returns(userId ?? Guid.NewGuid());
+        ctx.Email.Returns("test@example.com");
+        ctx.SessionId.Returns(sessionId);
+        return ctx;
     }
 
     public static ApiConfiguration MockConfiguration()

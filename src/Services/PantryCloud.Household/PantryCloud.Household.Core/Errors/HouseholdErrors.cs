@@ -23,4 +23,9 @@ public static class HouseholdErrors
         code: "Household.Preferences.NotFound",
         description: "No preferences set for this user."
     );
+
+    public static Error ProfileNotFound => Error.NotFound(
+        code: "Household.Profile.NotFound",
+        description: "No profile set for this user."
+    );
 }

@@ -33,11 +33,10 @@ public class LoginEndpointTests(IdentityTestFixture fixture) : BaseIntegrationTe
         result.RefreshToken.ShouldNotBeNullOrWhiteSpace();
 
         // Verify refresh token was persisted in database
-        var user = await GetUserByEmailAsync(TestConstants.Users.DefaultEmail);
-        user.ShouldNotBeNull();
-        user.RefreshToken.ShouldBe(result.RefreshToken);
-        user.RefreshTokenExpiryTime.ShouldNotBeNull();
-        user.RefreshTokenExpiryTime!.Value.ShouldBeGreaterThan(DateTime.UtcNow);
+        var session = await GetSessionByRefreshTokenAsync(result.RefreshToken);
+        session.ShouldNotBeNull();
+        session.RefreshToken.ShouldBe(result.RefreshToken);
+        session.ExpiresAt.ShouldBeGreaterThan(DateTime.UtcNow);
     }
 
     [Fact]
@@ -160,9 +159,9 @@ public class LoginEndpointTests(IdentityTestFixture fixture) : BaseIntegrationTe
         result1.RefreshToken.ShouldNotBe(result2.RefreshToken);
 
         // Database should have the latest refresh token
-        var user = await GetUserByEmailAsync(TestConstants.Users.DefaultEmail);
-        user.ShouldNotBeNull();
-        user.RefreshToken.ShouldBe(result2.RefreshToken);
+        var session = await GetSessionByRefreshTokenAsync(result2.RefreshToken);
+        session.ShouldNotBeNull();
+        session.RefreshToken.ShouldBe(result2.RefreshToken);
     }
 }
 

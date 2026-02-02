@@ -111,8 +111,16 @@ public sealed class IdentityTestFixture : IAsyncLifetime
         var user = await context.Users.FindAsync(userId)
             ?? throw new InvalidOperationException($"User with ID {userId} not found");
         var refreshToken = Guid.NewGuid().ToString();
-        user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryTime = expired ? DateTime.UtcNow.AddMinutes(-1) : DateTime.UtcNow.AddDays(7);
+        var session = new RefreshSession
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            RefreshToken = refreshToken,
+            ExpiresAt = expired ? DateTime.UtcNow.AddMinutes(-1) : DateTime.UtcNow.AddDays(7),
+            CreatedAt = DateTime.UtcNow,
+            LastUsedAt = DateTime.UtcNow
+        };
+        await context.RefreshSessions.AddAsync(session);
         await context.SaveChangesAsync();
         return refreshToken;
     }
@@ -164,6 +172,13 @@ public sealed class IdentityTestFixture : IAsyncLifetime
         var options = CreateDbContextOptions();
         await using var context = new ApplicationDbContext(options);
         return await context.Users.FindAsync(userId);
+    }
+
+    public async Task<RefreshSession?> GetSessionByRefreshTokenAsync(string refreshToken)
+    {
+        var options = CreateDbContextOptions();
+        await using var context = new ApplicationDbContext(options);
+        return await context.RefreshSessions.FirstOrDefaultAsync(s => s.RefreshToken == refreshToken);
     }
 
     public async Task<VerifyEmailToken?> GetVerifyEmailTokenAsync(string email, string token)
