@@ -28,4 +28,34 @@ public static class HouseholdErrors
         code: "Household.Profile.NotFound",
         description: "No profile set for this user."
     );
+
+    public static Error UserNotOwner => Error.Forbidden(
+        code: "Household.Role.UserNotOwner",
+        description: "Only the household owner can perform this action."
+    );
+
+    public static Error CannotKickSelf => Error.Validation(
+        code: "Household.Kick.CannotKickSelf",
+        description: "You cannot kick yourself from the household."
+    );
+
+    public static Error CannotKickOwner => Error.Validation(
+        code: "Household.Kick.CannotKickOwner",
+        description: "You cannot kick the household owner."
+    );
+
+    public static Error NewOwnerMustBeMember => Error.Validation(
+        code: "Household.Transfer.NewOwnerMustBeMember",
+        description: "The new owner must be an existing member of the household."
+    );
+
+    public static Error CannotTransferToSelf => Error.Validation(
+        code: "Household.Transfer.CannotTransferToSelf",
+        description: "You cannot transfer ownership to yourself."
+    );
+
+    public static Error MemberNotFoundInHousehold => Error.NotFound(
+        code: "Household.Member.NotFound",
+        description: "The specified user is not a member of this household."
+    );
 }

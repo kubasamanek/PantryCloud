@@ -38,4 +38,9 @@ public static class InvitationErrors
         code: "Household.Invitations.InvitationNotForUser",
         description: $"Invitation is for {email}."
     );
+
+    public static Error OwnerCannotAcceptInvitation => Error.Forbidden(
+        code: "Household.Invitations.OwnerCannotAccept",
+        description: "Household owner must transfer ownership before joining another household."
+    );
 }

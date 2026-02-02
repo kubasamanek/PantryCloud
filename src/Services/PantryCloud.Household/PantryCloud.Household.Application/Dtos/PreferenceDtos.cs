@@ -25,6 +25,7 @@ public record MemberPreferencesDto(
 
 public record MemberWithProfileDto(
     Guid UserId,
+    HouseholdRole Role,
     DietaryProfile DietaryProfile,
     List<string> ExcludedIngredients,
     string? DisplayName,

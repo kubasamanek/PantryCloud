@@ -223,4 +223,180 @@ public class HouseholdManagementServiceTests
         result.IsError.ShouldBeTrue();
         result.Errors.ShouldContain(HouseholdErrors.UserNotInAnyHousehold);
     }
+
+    [Fact]
+    public async Task KickMember_ShouldSucceed_WhenOwnerKicksMember()
+    {
+        var memberToKickId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        await using var db = TestHelper.CreateInMemoryContext(nameof(KickMember_ShouldSucceed_WhenOwnerKicksMember));
+        db.Households.Add(new Core.Entities.Household { Id = Constants.HouseholdId, Name = "Team House" });
+        db.Members.AddRange(
+            new HouseholdMember { UserId = Constants.UserId, HouseholdId = Constants.HouseholdId, Role = HouseholdRole.Owner, JoinedAt = DateTime.UtcNow },
+            new HouseholdMember { UserId = memberToKickId, HouseholdId = Constants.HouseholdId, Role = HouseholdRole.Member, JoinedAt = DateTime.UtcNow }
+        );
+        await db.SaveChangesAsync();
+
+        var service = new HouseholdManagementService(db, TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail), _logger);
+
+        var result = await service.KickMemberAsync(new KickMemberRequestDto(memberToKickId), CancellationToken.None);
+
+        result.IsError.ShouldBeFalse();
+        result.Value.HouseholdId.ShouldBe(Constants.HouseholdId);
+        result.Value.KickedUserId.ShouldBe(memberToKickId);
+        db.Members.Count().ShouldBe(1);
+        db.Members.Single().UserId.ShouldBe(Constants.UserId);
+    }
+
+    [Fact]
+    public async Task KickMember_ShouldReturnError_WhenCallerNotOwner()
+    {
+        var memberToKickId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        await using var db = TestHelper.CreateInMemoryContext(nameof(KickMember_ShouldReturnError_WhenCallerNotOwner));
+        db.Households.Add(new Core.Entities.Household { Id = Constants.HouseholdId, Name = "Team House" });
+        db.Members.AddRange(
+            new HouseholdMember { UserId = Constants.UserId, HouseholdId = Constants.HouseholdId, Role = HouseholdRole.Member, JoinedAt = DateTime.UtcNow },
+            new HouseholdMember { UserId = memberToKickId, HouseholdId = Constants.HouseholdId, Role = HouseholdRole.Owner, JoinedAt = DateTime.UtcNow }
+        );
+        await db.SaveChangesAsync();
+
+        var service = new HouseholdManagementService(db, TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail), _logger);
+
+        var result = await service.KickMemberAsync(new KickMemberRequestDto(memberToKickId), CancellationToken.None);
+
+        result.IsError.ShouldBeTrue();
+        result.Errors.ShouldContain(HouseholdErrors.UserNotOwner);
+    }
+
+    [Fact]
+    public async Task KickMember_ShouldReturnError_WhenKickingOwner()
+    {
+        var otherOwnerId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        await using var db = TestHelper.CreateInMemoryContext(nameof(KickMember_ShouldReturnError_WhenKickingOwner));
+        db.Households.Add(new Core.Entities.Household { Id = Constants.HouseholdId, Name = "Team House" });
+        db.Members.AddRange(
+            new HouseholdMember { UserId = Constants.UserId, HouseholdId = Constants.HouseholdId, Role = HouseholdRole.Owner, JoinedAt = DateTime.UtcNow },
+            new HouseholdMember { UserId = otherOwnerId, HouseholdId = Constants.HouseholdId, Role = HouseholdRole.Owner, JoinedAt = DateTime.UtcNow }
+        );
+        await db.SaveChangesAsync();
+
+        var service = new HouseholdManagementService(db, TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail), _logger);
+
+        var result = await service.KickMemberAsync(new KickMemberRequestDto(otherOwnerId), CancellationToken.None);
+
+        result.IsError.ShouldBeTrue();
+        result.Errors.ShouldContain(HouseholdErrors.CannotKickOwner);
+    }
+
+    [Fact]
+    public async Task KickMember_ShouldReturnError_WhenKickingSelf()
+    {
+        await using var db = TestHelper.CreateInMemoryContext(nameof(KickMember_ShouldReturnError_WhenKickingSelf));
+        db.Households.Add(new Core.Entities.Household { Id = Constants.HouseholdId, Name = "Solo House" });
+        db.Members.Add(new HouseholdMember { UserId = Constants.UserId, HouseholdId = Constants.HouseholdId, Role = HouseholdRole.Owner, JoinedAt = DateTime.UtcNow });
+        await db.SaveChangesAsync();
+
+        var service = new HouseholdManagementService(db, TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail), _logger);
+
+        var result = await service.KickMemberAsync(new KickMemberRequestDto(Constants.UserId), CancellationToken.None);
+
+        result.IsError.ShouldBeTrue();
+        result.Errors.ShouldContain(HouseholdErrors.CannotKickSelf);
+    }
+
+    [Fact]
+    public async Task KickMember_ShouldReturnError_WhenTargetNotInHousehold()
+    {
+        var nonMemberId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
+        await using var db = TestHelper.CreateInMemoryContext(nameof(KickMember_ShouldReturnError_WhenTargetNotInHousehold));
+        db.Households.Add(new Core.Entities.Household { Id = Constants.HouseholdId, Name = "Team House" });
+        db.Members.Add(new HouseholdMember { UserId = Constants.UserId, HouseholdId = Constants.HouseholdId, Role = HouseholdRole.Owner, JoinedAt = DateTime.UtcNow });
+        await db.SaveChangesAsync();
+
+        var service = new HouseholdManagementService(db, TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail), _logger);
+
+        var result = await service.KickMemberAsync(new KickMemberRequestDto(nonMemberId), CancellationToken.None);
+
+        result.IsError.ShouldBeTrue();
+        result.Errors.ShouldContain(HouseholdErrors.MemberNotFoundInHousehold);
+    }
+
+    [Fact]
+    public async Task TransferOwnership_ShouldSucceed_WhenValidMember()
+    {
+        var newOwnerId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        await using var db = TestHelper.CreateInMemoryContext(nameof(TransferOwnership_ShouldSucceed_WhenValidMember));
+        db.Households.Add(new Core.Entities.Household { Id = Constants.HouseholdId, Name = "Team House" });
+        db.Members.AddRange(
+            new HouseholdMember { UserId = Constants.UserId, HouseholdId = Constants.HouseholdId, Role = HouseholdRole.Owner, JoinedAt = DateTime.UtcNow },
+            new HouseholdMember { UserId = newOwnerId, HouseholdId = Constants.HouseholdId, Role = HouseholdRole.Member, JoinedAt = DateTime.UtcNow }
+        );
+        await db.SaveChangesAsync();
+
+        var service = new HouseholdManagementService(db, TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail), _logger);
+
+        var result = await service.TransferOwnershipAsync(new TransferOwnershipRequestDto(newOwnerId), CancellationToken.None);
+
+        result.IsError.ShouldBeFalse();
+        result.Value.HouseholdId.ShouldBe(Constants.HouseholdId);
+        result.Value.PreviousOwnerId.ShouldBe(Constants.UserId);
+        result.Value.NewOwnerId.ShouldBe(newOwnerId);
+
+        var previousOwner = await db.Members.FirstAsync(m => m.UserId == Constants.UserId);
+        var newOwner = await db.Members.FirstAsync(m => m.UserId == newOwnerId);
+        previousOwner.Role.ShouldBe(HouseholdRole.Member);
+        newOwner.Role.ShouldBe(HouseholdRole.Owner);
+    }
+
+    [Fact]
+    public async Task TransferOwnership_ShouldReturnError_WhenCallerNotOwner()
+    {
+        var newOwnerId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        await using var db = TestHelper.CreateInMemoryContext(nameof(TransferOwnership_ShouldReturnError_WhenCallerNotOwner));
+        db.Households.Add(new Core.Entities.Household { Id = Constants.HouseholdId, Name = "Team House" });
+        db.Members.AddRange(
+            new HouseholdMember { UserId = Constants.UserId, HouseholdId = Constants.HouseholdId, Role = HouseholdRole.Member, JoinedAt = DateTime.UtcNow },
+            new HouseholdMember { UserId = newOwnerId, HouseholdId = Constants.HouseholdId, Role = HouseholdRole.Owner, JoinedAt = DateTime.UtcNow }
+        );
+        await db.SaveChangesAsync();
+
+        var service = new HouseholdManagementService(db, TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail), _logger);
+
+        var result = await service.TransferOwnershipAsync(new TransferOwnershipRequestDto(newOwnerId), CancellationToken.None);
+
+        result.IsError.ShouldBeTrue();
+        result.Errors.ShouldContain(HouseholdErrors.UserNotOwner);
+    }
+
+    [Fact]
+    public async Task TransferOwnership_ShouldReturnError_WhenNewOwnerNotMember()
+    {
+        var nonMemberId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
+        await using var db = TestHelper.CreateInMemoryContext(nameof(TransferOwnership_ShouldReturnError_WhenNewOwnerNotMember));
+        db.Households.Add(new Core.Entities.Household { Id = Constants.HouseholdId, Name = "Team House" });
+        db.Members.Add(new HouseholdMember { UserId = Constants.UserId, HouseholdId = Constants.HouseholdId, Role = HouseholdRole.Owner, JoinedAt = DateTime.UtcNow });
+        await db.SaveChangesAsync();
+
+        var service = new HouseholdManagementService(db, TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail), _logger);
+
+        var result = await service.TransferOwnershipAsync(new TransferOwnershipRequestDto(nonMemberId), CancellationToken.None);
+
+        result.IsError.ShouldBeTrue();
+        result.Errors.ShouldContain(HouseholdErrors.NewOwnerMustBeMember);
+    }
+
+    [Fact]
+    public async Task TransferOwnership_ShouldReturnError_WhenTransferToSelf()
+    {
+        await using var db = TestHelper.CreateInMemoryContext(nameof(TransferOwnership_ShouldReturnError_WhenTransferToSelf));
+        db.Households.Add(new Core.Entities.Household { Id = Constants.HouseholdId, Name = "Solo House" });
+        db.Members.Add(new HouseholdMember { UserId = Constants.UserId, HouseholdId = Constants.HouseholdId, Role = HouseholdRole.Owner, JoinedAt = DateTime.UtcNow });
+        await db.SaveChangesAsync();
+
+        var service = new HouseholdManagementService(db, TestHelper.CreateMockUserContext(Constants.UserId, Constants.UserEmail), _logger);
+
+        var result = await service.TransferOwnershipAsync(new TransferOwnershipRequestDto(Constants.UserId), CancellationToken.None);
+
+        result.IsError.ShouldBeTrue();
+        result.Errors.ShouldContain(HouseholdErrors.CannotTransferToSelf);
+    }
 }

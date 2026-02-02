@@ -669,7 +669,44 @@
                 "leave"
               ]
             },
-            "description": "Leave the current household. Requires authentication."
+            "description": "Leave the current household. Requires authentication. Owners must transfer ownership first."
+          },
+          "response": []
+        },
+        {
+          "name": "Kick Member",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/household/api/households/members/{{member_user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "household", "api", "households", "members", "{{member_user_id}}"]
+            },
+            "description": "Remove a member from the household. Owner only. Cannot kick yourself or another owner. Get member IDs from Get Household Members Preferences."
+          },
+          "response": []
+        },
+        {
+          "name": "Transfer Ownership",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"newOwnerUserId\": \"{{member_user_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/household/api/households/transfer-ownership",
+              "host": ["{{base_url}}"],
+              "path": ["api", "household", "api", "households", "transfer-ownership"]
+            },
+            "description": "Transfer household ownership to another member. Owner only. New owner must be existing member. Notifies all household members."
           },
           "response": []
         },
@@ -763,7 +800,7 @@
               "host": ["{{base_url}}"],
               "path": ["api", "household", "api", "households", "me", "members", "preferences"]
             },
-            "description": "Get all household members' preferences and profile data (DisplayName, AvatarUrl). For 'recommend for household': aggregate (union excluded, strictest dietary) and send in POST /recipes/recommend."
+            "description": "Get all household members' preferences, profile data (DisplayName, AvatarUrl), and Role (Owner/Member). Use userId as member_user_id for Kick/Transfer. For 'recommend for household': aggregate (union excluded, strictest dietary) and send in POST /recipes/recommend."
           },
           "response": []
         }
@@ -1642,6 +1679,11 @@
     },
     {
       "key": "household_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "member_user_id",
       "value": "",
       "type": "string"
     },

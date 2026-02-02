@@ -79,6 +79,28 @@ public class HouseholdController(IMediator mediator, IMapper mapper) : ApiContro
         return FromResult(result, StatusCodes.Status200OK);
     }
 
+    [HttpDelete("members/{memberUserId:guid}")]
+    [ProducesResponseType(typeof(KickMemberResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> KickMember(Guid memberUserId, CancellationToken cancellationToken)
+    {
+        var command = new KickMemberCommand(new KickMemberRequestDto(memberUserId));
+        var result = await Mediator.Send(command, cancellationToken);
+        return FromResult(result, StatusCodes.Status200OK);
+    }
+
+    [HttpPost("transfer-ownership")]
+    [ProducesResponseType(typeof(TransferOwnershipResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> TransferOwnership([FromBody] TransferOwnershipRequestDto request, CancellationToken cancellationToken)
+    {
+        var command = new TransferOwnershipCommand(request);
+        var result = await Mediator.Send(command, cancellationToken);
+        return FromResult(result, StatusCodes.Status200OK);
+    }
+
     [HttpGet("me/preferences")]
     [ProducesResponseType(typeof(GetMyPreferencesResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

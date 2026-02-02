@@ -146,4 +146,101 @@ public class HouseholdManagementService(
 
         return new LeaveHouseholdResponseDto(householdId, UserId, UserEmail, DateTime.UtcNow);
     }
+
+    public async Task<ErrorOr<KickMemberResponseDto>> KickMemberAsync(KickMemberRequestDto request, CancellationToken cancellationToken)
+    {
+        Logger.LogInformation("User {UserId} requested to kick member {MemberUserId}", UserId, request.MemberUserId);
+
+        var owner = await DbContext.Members
+            .FirstOrDefaultAsync(m => m.UserId == UserId, cancellationToken);
+
+        if (owner is null)
+        {
+            Logger.LogWarning("User {UserId} is not a member of any household", UserId);
+            return HouseholdErrors.UserNotInAnyHousehold;
+        }
+
+        if (owner.Role != HouseholdRole.Owner)
+        {
+            Logger.LogWarning("User {UserId} is not owner and cannot kick members", UserId);
+            return HouseholdErrors.UserNotOwner;
+        }
+
+        if (request.MemberUserId == UserId)
+        {
+            Logger.LogWarning("Owner {UserId} cannot kick themselves", UserId);
+            return HouseholdErrors.CannotKickSelf;
+        }
+
+        var targetMember = await DbContext.Members
+            .FirstOrDefaultAsync(m => m.UserId == request.MemberUserId && m.HouseholdId == owner.HouseholdId, cancellationToken);
+
+        if (targetMember is null)
+        {
+            Logger.LogWarning("User {MemberUserId} is not a member of household {HouseholdId}", request.MemberUserId, owner.HouseholdId);
+            return HouseholdErrors.MemberNotFoundInHousehold;
+        }
+
+        if (targetMember.Role == HouseholdRole.Owner)
+        {
+            Logger.LogWarning("Cannot kick the household owner {MemberUserId}", request.MemberUserId);
+            return HouseholdErrors.CannotKickOwner;
+        }
+
+        var kickedAt = DateTime.UtcNow;
+        DbContext.Members.Remove(targetMember);
+        await DbContext.SaveChangesAsync(cancellationToken);
+
+        Logger.LogInformation("User {UserId} kicked member {MemberUserId} from household {HouseholdId}", UserId, request.MemberUserId, owner.HouseholdId);
+
+        return new KickMemberResponseDto(owner.HouseholdId, request.MemberUserId, kickedAt);
+    }
+
+    public async Task<ErrorOr<TransferOwnershipResponseDto>> TransferOwnershipAsync(TransferOwnershipRequestDto request, CancellationToken cancellationToken)
+    {
+        Logger.LogInformation("User {UserId} requested to transfer ownership to {NewOwnerUserId}", UserId, request.NewOwnerUserId);
+
+        var currentOwner = await DbContext.Members
+            .FirstOrDefaultAsync(m => m.UserId == UserId, cancellationToken);
+
+        if (currentOwner is null)
+        {
+            Logger.LogWarning("User {UserId} is not a member of any household", UserId);
+            return HouseholdErrors.UserNotInAnyHousehold;
+        }
+
+        if (currentOwner.Role != HouseholdRole.Owner)
+        {
+            Logger.LogWarning("User {UserId} is not owner and cannot transfer ownership", UserId);
+            return HouseholdErrors.UserNotOwner;
+        }
+
+        if (request.NewOwnerUserId == UserId)
+        {
+            Logger.LogWarning("Owner {UserId} cannot transfer ownership to themselves", UserId);
+            return HouseholdErrors.CannotTransferToSelf;
+        }
+
+        var newOwnerMember = await DbContext.Members
+            .FirstOrDefaultAsync(m => m.UserId == request.NewOwnerUserId && m.HouseholdId == currentOwner.HouseholdId, cancellationToken);
+
+        if (newOwnerMember is null)
+        {
+            Logger.LogWarning("User {NewOwnerUserId} is not a member of household {HouseholdId}", request.NewOwnerUserId, currentOwner.HouseholdId);
+            return HouseholdErrors.NewOwnerMustBeMember;
+        }
+
+        var transferredAt = DateTime.UtcNow;
+        currentOwner.Role = HouseholdRole.Member;
+        newOwnerMember.Role = HouseholdRole.Owner;
+        await DbContext.SaveChangesAsync(cancellationToken);
+
+        Logger.LogInformation("Ownership transferred from {UserId} to {NewOwnerUserId} in household {HouseholdId}", UserId, request.NewOwnerUserId, currentOwner.HouseholdId);
+
+        return new TransferOwnershipResponseDto(
+            currentOwner.HouseholdId,
+            UserId,
+            request.NewOwnerUserId,
+            transferredAt);
+    }
 }

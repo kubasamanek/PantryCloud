@@ -183,4 +183,35 @@ public class InvitationServiceTests
         result.IsError.ShouldBeTrue();
         result.Errors.ShouldContain(InvitationErrors.ExpiredInvitation);
     }
+
+    [Fact]
+    public async Task AcceptHouseholdInvitation_ShouldFail_WhenUserIsOwner()
+    {
+        await using var db = TestHelper.CreateInMemoryContext(nameof(AcceptHouseholdInvitation_ShouldFail_WhenUserIsOwner));
+        var userContext = TestHelper.CreateMockUserContext(Constants.UserId, Constants.InviteeEmail);
+
+        db.Members.Add(new HouseholdMember
+        {
+            UserId = Constants.UserId,
+            HouseholdId = Guid.NewGuid(),
+            Role = HouseholdRole.Owner,
+            JoinedAt = DateTime.UtcNow
+        });
+        db.Invitations.Add(new HouseholdInvitation
+        {
+            Code = Constants.ValidCode,
+            Email = Constants.InviteeEmail,
+            HouseholdId = Constants.HouseholdId,
+            ExpiresAt = DateTime.UtcNow.AddMinutes(5)
+        });
+        db.Households.Add(new HouseholdEntity { Id = Constants.HouseholdId, Name = "Target" });
+        await db.SaveChangesAsync();
+
+        var service = new InvitationService(_logger, userContext, db);
+
+        var result = await service.AcceptHouseholdInvitation(new AcceptHouseholdInvitationRequestDto(Constants.ValidCode), CancellationToken.None);
+
+        result.IsError.ShouldBeTrue();
+        result.Errors.ShouldContain(InvitationErrors.OwnerCannotAcceptInvitation);
+    }
 }

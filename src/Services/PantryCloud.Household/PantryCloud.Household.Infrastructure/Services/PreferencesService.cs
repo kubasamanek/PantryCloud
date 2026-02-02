@@ -71,10 +71,14 @@ public class PreferencesService(
             return HouseholdErrors.UserNotInAnyHousehold;
         }
 
-        var memberIds = await DbContext.Members
+        var householdMembers = await DbContext.Members
+            .AsNoTracking()
             .Where(m => m.HouseholdId == member.HouseholdId)
-            .Select(m => m.UserId)
+            .Select(m => new { m.UserId, m.Role })
             .ToListAsync(cancellationToken);
+
+        var memberIds = householdMembers.Select(m => m.UserId).ToList();
+        var roleMap = householdMembers.ToDictionary(m => m.UserId, m => m.Role);
 
         var preferencesMap = await DbContext.MemberPreferences
             .AsNoTracking()
@@ -90,8 +94,10 @@ public class PreferencesService(
         {
             var p = preferencesMap.GetValueOrDefault(uid);
             var profile = profilesMap.GetValueOrDefault(uid);
+            var role = roleMap.GetValueOrDefault(uid, HouseholdRole.Member);
             return new MemberWithProfileDto(
                 uid,
+                role,
                 p?.DietaryProfile ?? DietaryProfile.None,
                 p?.ExcludedIngredients ?? [],
                 profile?.DisplayName,
