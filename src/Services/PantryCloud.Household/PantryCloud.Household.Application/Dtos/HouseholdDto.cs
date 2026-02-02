@@ -13,3 +13,11 @@ public record GetCurrentHouseholdResponseDto(Guid Id, string Name);
 
 public record GetHouseholdByUserIdRequestDto(Guid UserId);
 public record GetHouseholdByUserIdResponseDto(Guid Id, string Name);
+
+public record KickMemberRequestDto(Guid MemberUserId);
+
+public record KickMemberResponseDto(Guid HouseholdId, Guid KickedUserId, DateTime KickedAt);
+
+public record TransferOwnershipRequestDto(Guid NewOwnerUserId);
+
+public record TransferOwnershipResponseDto(Guid HouseholdId, Guid PreviousOwnerId, Guid NewOwnerId, DateTime TransferredAt);

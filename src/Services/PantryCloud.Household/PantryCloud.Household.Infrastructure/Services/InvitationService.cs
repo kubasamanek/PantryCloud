@@ -104,6 +104,12 @@ public class InvitationService(
         
         var user = DbContext.Members.FirstOrDefault(u => u.UserId == UserId);
 
+        if (user != null && user.Role == HouseholdRole.Owner)
+        {
+            Logger.LogWarning("Owner {Email} cannot accept invitation - must transfer ownership first.", UserEmail);
+            return InvitationErrors.OwnerCannotAcceptInvitation;
+        }
+
         invitation.UsedAt = DateTime.UtcNow;
         
         if (user != null)

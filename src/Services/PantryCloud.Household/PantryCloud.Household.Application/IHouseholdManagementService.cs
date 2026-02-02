@@ -5,8 +5,10 @@ namespace PantryCloud.Household.Application;
 
 public interface IHouseholdManagementService
 {
-    public Task<ErrorOr<GetCurrentHouseholdResponseDto>> GetCurrentHousehold(CancellationToken cancellationToken);
-    public Task<ErrorOr<GetHouseholdByUserIdResponseDto>> GetHouseholdByUserId(GetHouseholdByUserIdRequestDto request, CancellationToken cancellationToken);
-    public Task<ErrorOr<CreateHouseholdResponseDto>> CreateHousehold(CreateHouseholdRequestDto request, CancellationToken cancellationToken);
-    public Task<ErrorOr<LeaveHouseholdResponseDto>> LeaveHousehold(LeaveHouseholdRequestDto request, CancellationToken cancellationToken);
+    Task<ErrorOr<GetCurrentHouseholdResponseDto>> GetCurrentHousehold(CancellationToken cancellationToken);
+    Task<ErrorOr<GetHouseholdByUserIdResponseDto>> GetHouseholdByUserId(GetHouseholdByUserIdRequestDto request, CancellationToken cancellationToken);
+    Task<ErrorOr<CreateHouseholdResponseDto>> CreateHousehold(CreateHouseholdRequestDto request, CancellationToken cancellationToken);
+    Task<ErrorOr<LeaveHouseholdResponseDto>> LeaveHousehold(LeaveHouseholdRequestDto request, CancellationToken cancellationToken);
+    Task<ErrorOr<KickMemberResponseDto>> KickMemberAsync(KickMemberRequestDto request, CancellationToken cancellationToken);
+    Task<ErrorOr<TransferOwnershipResponseDto>> TransferOwnershipAsync(TransferOwnershipRequestDto request, CancellationToken cancellationToken);
 }
