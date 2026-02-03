@@ -32,7 +32,7 @@ public class ExpirationCheckBackgroundService(
 
         using var timer = new PeriodicTimer(interval);
 
-        while (true)
+        while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
