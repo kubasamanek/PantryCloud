@@ -155,8 +155,8 @@ jobs:
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
-          name: REPORT - Notification Unit & Integration Tests
-          path: '**/*.trx'
+          name: REPORT - NotificationService - Unit & Integration Tests
+          path: './coverage/**/*.trx'
           reporter: dotnet-trx
 
   cd:

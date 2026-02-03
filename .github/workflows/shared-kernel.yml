@@ -119,6 +119,6 @@ jobs:
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
-          name: REPORT - SharedKernel Unit Tests
-          path: '**/*.trx'
+          name: REPORT - SharedKernel - Unit Tests
+          path: './coverage/**/*.trx'
           reporter: dotnet-trx

@@ -50,15 +50,20 @@ jobs:
         run: dotnet build ${{ env.SERVICE_PROJECT }} --no-restore --configuration Release
 
       - name: Run Tests
-        run: dotnet test ${{ env.TEST_PROJECT }} --configuration Release --logger "trx;LogFileName=test_results.trx" --verbosity normal
+        run: |
+          dotnet test ${{ env.TEST_PROJECT }} \
+            --configuration Release \
+            --results-directory ./coverage \
+            --logger "trx;LogFileName=test_results.trx" \
+            --verbosity normal
         continue-on-error: true
-     
+
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
-          name: REPORT - Pantry tests
-          path: '**/*.trx'
+          name: REPORT - PantryService - Tests
+          path: './coverage/**/*.trx'
           reporter: dotnet-trx
   cd:
     name: Build & Push Docker image
