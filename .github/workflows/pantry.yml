@@ -58,13 +58,14 @@ jobs:
             --verbosity normal
         continue-on-error: true
 
-      - name: Test Report
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always() && !cancelled()
         with:
-          name: REPORT - PantryService - Tests
-          path: './coverage/**/*.trx'
-          reporter: dotnet-trx
+          files: './coverage/**/*.trx'
+          check_name: "PantryService - Test Results"
+          check_run: false
+          comment_mode: off
   cd:
     name: Build & Push Docker image
     needs: ci

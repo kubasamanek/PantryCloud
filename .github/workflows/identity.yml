@@ -151,13 +151,14 @@ jobs:
           path: ./coverage/report/
           retention-days: 30
         
-      - name: Test Report
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always() && !cancelled()
         with:
-          name: REPORT - IdentityService - Unit & Integration Tests
-          path: './coverage/**/*.trx'
-          reporter: dotnet-trx
+          files: './coverage/**/*.trx'
+          check_name: "IdentityService - Test Results"
+          check_run: false
+          comment_mode: off
 
   cd:
     name: Build & Push Docker Image
