@@ -167,6 +167,7 @@ services:
       - Messaging__RabbitMQ__Host=rabbitmq
       - Messaging__RabbitMQ__Username=admin
       - Messaging__RabbitMQ__Password=password
+      - ExpirationCheck__DebugEnabled=true
     ports:
       - "5073:8080"
     depends_on:
