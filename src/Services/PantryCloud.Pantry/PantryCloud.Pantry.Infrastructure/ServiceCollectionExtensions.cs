@@ -3,6 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PantryCloud.Pantry.Application;
 using PantryCloud.Pantry.Core;
+using PantryCloud.Pantry.Core.Options;
+using PantryCloud.Pantry.Infrastructure.BackgroundServices;
 using PantryCloud.Pantry.Infrastructure.Persistence;
 using PantryCloud.Pantry.Infrastructure.Services;
 using PantryCloud.SharedKernel.Correlation;
@@ -35,6 +37,12 @@ public static class ServiceCollectionExtensions
         services.AddAuthorization();
 
         services.AddCorrelationId();
+
+        services.Configure<ExpirationCheckOptions>(
+            configuration.GetSection(ExpirationCheckOptions.SectionName));
+        services.AddSingleton(TimeProvider.System);
+        services.AddScoped<IExpirationCheckService, ExpirationCheckService>();
+        services.AddHostedService<ExpirationCheckBackgroundService>();
         
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<IPantryManagementService, PantryManagementService>();

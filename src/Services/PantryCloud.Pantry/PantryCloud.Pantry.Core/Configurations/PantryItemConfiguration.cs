@@ -49,6 +49,7 @@ public class PantryItemConfiguration : IEntityTypeConfiguration<PantryItem>
         builder.HasIndex(p => p.HouseholdId);
         builder.HasIndex(p => new { p.HouseholdId, p.Category });
         builder.HasIndex(p => new { p.HouseholdId, p.Name });
+        builder.HasIndex(p => new { p.HouseholdId, p.ExpirationDate });
     }
 }
 
