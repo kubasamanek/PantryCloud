@@ -8,6 +8,7 @@ public static class RouteConfiguration
     public const string RecipeRouteId = "recipe-service";
     public const string ShoppingListRouteId = "shoppinglist-service";
     public const string NotificationRouteId = "notification-service";
+    public const string AuditRouteId = "audit-service";
 
     public const string IdentityClusterId = "identity-cluster";
     public const string HouseholdClusterId = "household-cluster";
@@ -15,5 +16,6 @@ public static class RouteConfiguration
     public const string RecipeClusterId = "recipe-cluster";
     public const string ShoppingListClusterId = "shoppinglist-cluster";
     public const string NotificationClusterId = "notification-cluster";
+    public const string AuditClusterId = "audit-cluster";
 }
 

@@ -12,3 +12,6 @@ GRANT ALL PRIVILEGES ON DATABASE shoppinglist_db TO admin;
 
 CREATE DATABASE notification_db;
 GRANT ALL PRIVILEGES ON DATABASE notification_db TO admin;
+
+CREATE DATABASE audit_db;
+GRANT ALL PRIVILEGES ON DATABASE audit_db TO admin;

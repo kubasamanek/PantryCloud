@@ -19,6 +19,16 @@ public class UpdatePantryItemCommandHandler(
         if (result.IsError)
             return result;
 
+        await messageBus.PublishAsync(new PantryItemUpdatedEvent
+        {
+            HouseholdId = result.Value.HouseholdId,
+            ItemId = result.Value.Id,
+            ItemName = result.Value.Name,
+            Quantity = result.Value.Quantity,
+            UserId = result.Value.ModifiedBy ?? result.Value.CreatedBy,
+            CorrelationId = correlationIdProvider.GetCorrelationId()
+        }, cancellationToken);
+
         if (result.Value.Quantity == 0)
         {
             await messageBus.PublishAsync(new PantryItemDepletedEvent

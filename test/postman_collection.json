@@ -1649,6 +1649,39 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Audit Service",
+      "item": [
+        {
+          "name": "List Household Audit Entries",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/audit/api/audit/households/{{household_id}}/entries?page=1&pageSize=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "audit", "api", "audit", "households", "{{household_id}}", "entries"],
+              "query": [
+                {"key": "from", "value": "", "disabled": true},
+                {"key": "to", "value": "", "disabled": true},
+                {"key": "actionType", "value": "", "disabled": true},
+                {"key": "entityType", "value": "", "disabled": true},
+                {"key": "page", "value": "1"},
+                {"key": "pageSize", "value": "50"}
+              ]
+            },
+            "description": "List audit entries for a household. Requires authentication and household membership. Optional filters: from, to (date range), actionType, entityType."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
