@@ -26,13 +26,13 @@ public class PantryItemDepletedNotificationIntegrationTests(NotificationTestFixt
             {
                 HouseholdId = householdId,
                 ItemId = Guid.NewGuid(),
-                ItemName = "Milk",
+                ItemName = Constants.TestData.ItemNameMilk,
                 InitiatedByUserId = userId,
                 CorrelationId = Guid.NewGuid().ToString()
             });
-            await Task.Delay(2000);
+            await Task.Delay(Constants.Delays.DefaultMs);
 
-            received.ShouldContain(n => n.Title == "Pantry Item Depleted" && n.Message.Contains("Milk"));
+            received.ShouldContain(n => n.Title == Constants.NotificationTitles.PantryItemDepleted && n.Message.Contains(Constants.TestData.ItemNameMilk));
         }
         finally
         {

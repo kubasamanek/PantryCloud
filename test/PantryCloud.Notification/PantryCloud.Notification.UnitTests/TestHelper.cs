@@ -10,7 +10,7 @@ internal static class TestHelper
     public static NotificationDbContext CreateInMemoryContext(string dbName)
     {
         var options = new DbContextOptionsBuilder<NotificationDbContext>()
-            .UseInMemoryDatabase(dbName)
+            .UseInMemoryDatabase(dbName + "_" + Guid.NewGuid())
             .Options;
         return new NotificationDbContext(options);
     }

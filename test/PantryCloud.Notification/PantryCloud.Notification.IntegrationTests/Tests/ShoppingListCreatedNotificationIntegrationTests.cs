@@ -28,13 +28,13 @@ public class ShoppingListCreatedNotificationIntegrationTests(NotificationTestFix
             {
                 HouseholdId = householdId,
                 ShoppingListId = Guid.NewGuid(),
-                ShoppingListName = "Weekly Groceries",
+                ShoppingListName = Constants.TestData.ShoppingListName,
                 CreatedByUserId = creatorId,
                 CorrelationId = Guid.NewGuid().ToString()
             });
-            await Task.Delay(2000);
+            await Task.Delay(Constants.Delays.DefaultMs);
 
-            received.ShouldContain(n => n.Title == "New Shopping List" && n.Message.Contains("Weekly Groceries"));
+            received.ShouldContain(n => n.Title == Constants.NotificationTitles.NewShoppingList && n.Message.Contains(Constants.TestData.ShoppingListName));
         }
         finally
         {

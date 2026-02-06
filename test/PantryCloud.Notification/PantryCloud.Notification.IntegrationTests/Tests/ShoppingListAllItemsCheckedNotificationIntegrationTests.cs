@@ -26,13 +26,13 @@ public class ShoppingListAllItemsCheckedNotificationIntegrationTests(Notificatio
             {
                 HouseholdId = householdId,
                 ShoppingListId = Guid.NewGuid(),
-                ShoppingListName = "Weekly Groceries",
+                ShoppingListName = Constants.TestData.ShoppingListName,
                 CheckedByUserId = userId,
                 CorrelationId = Guid.NewGuid().ToString()
             });
-            await Task.Delay(2000);
+            await Task.Delay(Constants.Delays.DefaultMs);
 
-            received.ShouldContain(n => n.Title == "Shopping List Complete" && n.Message.Contains("Weekly Groceries"));
+            received.ShouldContain(n => n.Title == Constants.NotificationTitles.ShoppingListComplete && n.Message.Contains(Constants.TestData.ShoppingListName));
         }
         finally
         {

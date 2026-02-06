@@ -28,7 +28,7 @@ public class MemberLeftHouseholdConsumerTests
         {
             HouseholdId = householdId,
             MemberId = memberId,
-            MemberEmail = "test@example.com",
+            MemberEmail = Constants.User.Email,
             LeftAt = DateTime.UtcNow,
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -43,9 +43,9 @@ public class MemberLeftHouseholdConsumerTests
             householdId,
             memberId,
             Arg.Is<Core.Dtos.NotificationDto>(n =>
-                n.Title == "Member Left Household" &&
+                n.Title == Constants.NotificationTitles.MemberLeftHousehold &&
                 n.Type == Core.Enums.NotificationType.Success &&
-                n.Message.Contains("test@example.com")),
+                n.Message.Contains(Constants.User.Email)),
             Arg.Any<CancellationToken>());
     }
 
@@ -57,7 +57,7 @@ public class MemberLeftHouseholdConsumerTests
         {
             UserId = Guid.NewGuid(),
             HouseholdId = Guid.NewGuid(),
-            JoinedAt = DateTime.UtcNow.AddDays(-1)
+            JoinedAt = Constants.Dates.OneDayAgo
         });
         await db.SaveChangesAsync();
 
@@ -67,7 +67,7 @@ public class MemberLeftHouseholdConsumerTests
         {
             UserId = memberId,
             HouseholdId = householdId,
-            JoinedAt = DateTime.UtcNow.AddDays(-1)
+            JoinedAt = Constants.Dates.OneDayAgo
         });
         await db.SaveChangesAsync();
 
@@ -80,7 +80,7 @@ public class MemberLeftHouseholdConsumerTests
         {
             HouseholdId = householdId,
             MemberId = memberId,
-            MemberEmail = "test@example.com",
+            MemberEmail = Constants.User.Email,
             LeftAt = leftAt,
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -112,7 +112,7 @@ public class MemberLeftHouseholdConsumerTests
         {
             HouseholdId = householdId,
             MemberId = memberId,
-            MemberEmail = "orphan@example.com",
+            MemberEmail = Constants.User.OrphanEmail,
             LeftAt = DateTime.UtcNow,
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -126,7 +126,7 @@ public class MemberLeftHouseholdConsumerTests
         await notificationService.Received(1).SendToHouseholdExceptAsync(
             householdId,
             memberId,
-            Arg.Is<Core.Dtos.NotificationDto>(n => n.Title == "Member Left Household"),
+            Arg.Is<Core.Dtos.NotificationDto>(n => n.Title == Constants.NotificationTitles.MemberLeftHousehold),
             Arg.Any<CancellationToken>());
     }
 }

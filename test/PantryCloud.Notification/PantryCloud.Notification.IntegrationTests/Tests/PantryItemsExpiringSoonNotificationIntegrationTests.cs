@@ -27,18 +27,18 @@ public class PantryItemsExpiringSoonNotificationIntegrationTests(NotificationTes
                 HouseholdId = householdId,
                 Items =
                 [
-                    new ExpiringItemDto(Guid.NewGuid(), "Milk", DateTime.UtcNow, 0),
-                    new ExpiringItemDto(Guid.NewGuid(), "Bread", DateTime.UtcNow.AddDays(1), 1)
+                    new ExpiringItemDto(Guid.NewGuid(), Constants.TestData.ItemNameMilk, DateTime.UtcNow, 0),
+                    new ExpiringItemDto(Guid.NewGuid(), Constants.TestData.ItemNameBread, DateTime.UtcNow.AddDays(1), 1)
                 ],
                 CorrelationId = Guid.NewGuid().ToString()
             });
-            await Task.Delay(2000);
+            await Task.Delay(Constants.Delays.DefaultMs);
 
             received.ShouldContain(n =>
-                n.Title == "Pantry Items Expiring Soon" &&
-                n.Message.Contains("Milk") &&
+                n.Title == Constants.NotificationTitles.PantryItemsExpiringSoon &&
+                n.Message.Contains(Constants.TestData.ItemNameMilk) &&
                 n.Message.Contains("expires today") &&
-                n.Message.Contains("Bread") &&
+                n.Message.Contains(Constants.TestData.ItemNameBread) &&
                 n.Message.Contains("one day"));
         }
         finally

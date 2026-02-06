@@ -23,7 +23,7 @@ public class PantryItemDepletedConsumerTests
         {
             HouseholdId = householdId,
             ItemId = Guid.NewGuid(),
-            ItemName = "Milk",
+            ItemName = Constants.TestData.ItemNameMilk,
             InitiatedByUserId = Guid.NewGuid(),
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -37,10 +37,10 @@ public class PantryItemDepletedConsumerTests
         await notificationService.Received(1).SendToHouseholdAsync(
             householdId,
             Arg.Is<Core.Dtos.NotificationDto>(n =>
-                n.Title == "Pantry Item Depleted" &&
+                n.Title == Constants.NotificationTitles.PantryItemDepleted &&
                 n.Type == Core.Enums.NotificationType.Info &&
-                n.Message.Contains("Milk") &&
-                n.Message.Contains("eaten completely")),
+                n.Message.Contains(Constants.TestData.ItemNameMilk) &&
+                n.Message.Contains(Constants.TestData.EatenCompletely)),
             Arg.Any<CancellationToken>());
     }
 }

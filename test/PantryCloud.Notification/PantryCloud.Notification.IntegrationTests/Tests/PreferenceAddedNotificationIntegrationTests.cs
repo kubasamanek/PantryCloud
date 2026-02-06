@@ -30,9 +30,9 @@ public class PreferenceAddedNotificationIntegrationTests(NotificationTestFixture
                 UserId = adderId,
                 CorrelationId = Guid.NewGuid().ToString()
             });
-            await Task.Delay(2000);
+            await Task.Delay(Constants.Delays.DefaultMs);
 
-            received.ShouldContain(n => n.Title == "Preferences Updated");
+            received.ShouldContain(n => n.Title == Constants.NotificationTitles.PreferencesUpdated);
         }
         finally
         {
