@@ -20,8 +20,8 @@ public class ConcurrencyHelperTests
     public void HandleConcurrencyException_ShouldReturnConflictError_WithDefaultMessage()
     {
         // Arrange
-        var exception = new DbUpdateConcurrencyException("Concurrency conflict");
-        var entityName = "User";
+        var exception = new DbUpdateConcurrencyException(Constants.Concurrency.ConcurrencyConflictMessage);
+        var entityName = Constants.Concurrency.UserEntityName;
         var entityId = Guid.NewGuid();
 
         // Act
@@ -34,17 +34,17 @@ public class ConcurrencyHelperTests
         // Assert
         result.IsError.ShouldBeTrue();
         result.FirstError.Type.ShouldBe(ErrorType.Conflict);
-        result.FirstError.Code.ShouldBe("User.ConcurrencyConflict");
-        result.FirstError.Description.ShouldBe("The User was modified by another user. Please refresh and try again.");
+        result.FirstError.Code.ShouldBe(Constants.Concurrency.UserConcurrencyConflictCode);
+        result.FirstError.Description.ShouldBe(Constants.Concurrency.UserConcurrencyConflictDescription);
     }
 
     [Fact]
     public void HandleConcurrencyException_ShouldReturnCustomError_WhenProvided()
     {
         // Arrange
-        var exception = new DbUpdateConcurrencyException("Concurrency conflict");
-        var entityName = "Product";
-        var customError = Error.Conflict("Product.StaleData", "Product data is stale");
+        var exception = new DbUpdateConcurrencyException(Constants.Concurrency.ConcurrencyConflictMessage);
+        var entityName = Constants.Concurrency.ProductEntityName;
+        var customError = Error.Conflict(Constants.Concurrency.ProductStaleDataCode, Constants.Concurrency.ProductStaleDataDescription);
 
         // Act
         var result = ConcurrencyHelper.HandleConcurrencyException<string>(
@@ -56,16 +56,16 @@ public class ConcurrencyHelperTests
         // Assert
         result.IsError.ShouldBeTrue();
         result.FirstError.Type.ShouldBe(ErrorType.Conflict);
-        result.FirstError.Code.ShouldBe("Product.StaleData");
-        result.FirstError.Description.ShouldBe("Product data is stale");
+        result.FirstError.Code.ShouldBe(Constants.Concurrency.ProductStaleDataCode);
+        result.FirstError.Description.ShouldBe(Constants.Concurrency.ProductStaleDataDescription);
     }
 
     [Fact]
     public void HandleConcurrencyException_ShouldLogWarning_WithEntityId()
     {
         // Arrange
-        var exception = new DbUpdateConcurrencyException("Concurrency conflict");
-        var entityName = "Order";
+        var exception = new DbUpdateConcurrencyException(Constants.Concurrency.ConcurrencyConflictMessage);
+        var entityName = Constants.Concurrency.OrderEntityName;
         var entityId = Guid.NewGuid();
 
         // Act
@@ -79,7 +79,7 @@ public class ConcurrencyHelperTests
         _logger.Received(1).Log(
             LogLevel.Warning,
             Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("Order")),
+            Arg.Is<object>(o => o.ToString()!.Contains(Constants.Concurrency.OrderEntityName)),
             exception,
             Arg.Any<Func<object, Exception?, string>>());
     }
@@ -88,8 +88,8 @@ public class ConcurrencyHelperTests
     public void HandleConcurrencyException_ShouldLogWarning_WithoutEntityId()
     {
         // Arrange
-        var exception = new DbUpdateConcurrencyException("Concurrency conflict");
-        var entityName = "Invoice";
+        var exception = new DbUpdateConcurrencyException(Constants.Concurrency.ConcurrencyConflictMessage);
+        var entityName = Constants.Concurrency.InvoiceEntityName;
 
         // Act
         ConcurrencyHelper.HandleConcurrencyException<string>(
@@ -101,7 +101,7 @@ public class ConcurrencyHelperTests
         _logger.Received(1).Log(
             LogLevel.Warning,
             Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("Invoice")),
+            Arg.Is<object>(o => o.ToString()!.Contains(Constants.Concurrency.InvoiceEntityName)),
             exception,
             Arg.Any<Func<object, Exception?, string>>());
     }
@@ -110,14 +110,14 @@ public class ConcurrencyHelperTests
     public async Task ExecuteWithConcurrencyHandling_ShouldReturnResult_WhenOperationSucceeds()
     {
         // Arrange
-        var expectedResult = "success";
+        var expectedResult = Constants.Concurrency.SuccessResult;
         Func<Task<string>> operation = () => Task.FromResult(expectedResult);
 
         // Act
         var result = await ConcurrencyHelper.ExecuteWithConcurrencyHandling(
             operation,
             _logger,
-            "User");
+            Constants.Concurrency.UserEntityName);
 
         // Assert
         result.IsError.ShouldBeFalse();
@@ -128,53 +128,53 @@ public class ConcurrencyHelperTests
     public async Task ExecuteWithConcurrencyHandling_ShouldReturnError_WhenConcurrencyExceptionThrown()
     {
         // Arrange
-        Func<Task<string>> operation = () => throw new DbUpdateConcurrencyException("Concurrency conflict");
+        Func<Task<string>> operation = () => throw new DbUpdateConcurrencyException(Constants.Concurrency.ConcurrencyConflictMessage);
 
         // Act
         var result = await ConcurrencyHelper.ExecuteWithConcurrencyHandling(
             operation,
             _logger,
-            "Product",
+            Constants.Concurrency.ProductEntityName,
             Guid.NewGuid());
 
         // Assert
         result.IsError.ShouldBeTrue();
         result.FirstError.Type.ShouldBe(ErrorType.Conflict);
-        result.FirstError.Code.ShouldBe("Product.ConcurrencyConflict");
+        result.FirstError.Code.ShouldBe(Constants.Concurrency.ProductConcurrencyConflictCode);
     }
 
     [Fact]
     public async Task ExecuteWithConcurrencyHandling_ShouldUseCustomError_WhenProvided()
     {
         // Arrange
-        var customError = Error.Conflict("Custom.Error", "Custom message");
-        Func<Task<string>> operation = () => throw new DbUpdateConcurrencyException("Concurrency conflict");
+        var customError = Error.Conflict(Constants.Concurrency.CustomErrorCode, Constants.Concurrency.CustomErrorMessage);
+        Func<Task<string>> operation = () => throw new DbUpdateConcurrencyException(Constants.Concurrency.ConcurrencyConflictMessage);
 
         // Act
         var result = await ConcurrencyHelper.ExecuteWithConcurrencyHandling(
             operation,
             _logger,
-            "Entity",
+            Constants.Concurrency.EntityEntityName,
             error: customError);
 
         // Assert
         result.IsError.ShouldBeTrue();
-        result.FirstError.Code.ShouldBe("Custom.Error");
-        result.FirstError.Description.ShouldBe("Custom message");
+        result.FirstError.Code.ShouldBe(Constants.Concurrency.CustomErrorCode);
+        result.FirstError.Description.ShouldBe(Constants.Concurrency.CustomErrorMessage);
     }
 
     [Fact]
     public async Task ExecuteWithConcurrencyHandling_ShouldLogException_WhenConcurrencyExceptionThrown()
     {
         // Arrange
-        var exception = new DbUpdateConcurrencyException("Concurrency conflict");
+        var exception = new DbUpdateConcurrencyException(Constants.Concurrency.ConcurrencyConflictMessage);
         Func<Task<string>> operation = () => throw exception;
 
         // Act
         await ConcurrencyHelper.ExecuteWithConcurrencyHandling(
             operation,
             _logger,
-            "Category");
+            Constants.Concurrency.CategoryEntityName);
 
         // Assert
         _logger.Received(1).Log(

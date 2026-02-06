@@ -62,14 +62,14 @@ public class UserContextTests
         // Arrange
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Email, "test@example.com")
+            new(ClaimTypes.Email, Constants.Identity.TestEmail)
         };
         var httpContext = CreateHttpContext(claims);
         _httpContextAccessor.HttpContext.Returns(httpContext);
 
         // Act & Assert
         Should.Throw<UnauthorizedAccessException>(() => _sut.UserId)
-            .Message.ShouldBe("User ID not found in token");
+            .Message.ShouldBe(Constants.Identity.UserIdNotFoundMessage);
     }
 
     [Fact]
@@ -78,21 +78,21 @@ public class UserContextTests
         // Arrange
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, "not-a-guid")
+            new(ClaimTypes.NameIdentifier, Constants.Identity.NotAGuid)
         };
         var httpContext = CreateHttpContext(claims);
         _httpContextAccessor.HttpContext.Returns(httpContext);
 
         // Act & Assert
         Should.Throw<UnauthorizedAccessException>(() => _sut.UserId)
-            .Message.ShouldBe("User ID not found in token");
+            .Message.ShouldBe(Constants.Identity.UserIdNotFoundMessage);
     }
 
     [Fact]
     public void Email_ShouldReturnEmail_WhenClaimTypeEmail()
     {
         // Arrange
-        var email = "test@example.com";
+        var email = Constants.Identity.TestEmail;
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
@@ -112,7 +112,7 @@ public class UserContextTests
     public void Email_ShouldReturnEmail_WhenJwtEmailClaim()
     {
         // Arrange
-        var email = "jwt@example.com";
+        var email = Constants.Identity.JwtEmail;
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
@@ -141,7 +141,7 @@ public class UserContextTests
 
         // Act & Assert
         Should.Throw<UnauthorizedAccessException>(() => _sut.Email)
-            .Message.ShouldBe("Email not found in token");
+            .Message.ShouldBe(Constants.Identity.EmailNotFoundMessage);
     }
 
     [Fact]
@@ -152,7 +152,7 @@ public class UserContextTests
 
         // Act & Assert
         Should.Throw<UnauthorizedAccessException>(() => _sut.UserId)
-            .Message.ShouldBe("No HttpContext found");
+            .Message.ShouldBe(Constants.Identity.NoHttpContextMessage);
     }
 
     [Fact]
@@ -165,7 +165,7 @@ public class UserContextTests
 
         // Act & Assert
         Should.Throw<UnauthorizedAccessException>(() => _sut.UserId)
-            .Message.ShouldBe("User not authenticated");
+            .Message.ShouldBe(Constants.Identity.UserNotAuthenticatedMessage);
     }
 
     [Fact]
@@ -182,12 +182,12 @@ public class UserContextTests
 
         // Act & Assert
         Should.Throw<UnauthorizedAccessException>(() => _sut.UserId)
-            .Message.ShouldBe("User not authenticated");
+            .Message.ShouldBe(Constants.Identity.UserNotAuthenticatedMessage);
     }
 
     private static DefaultHttpContext CreateHttpContext(List<Claim> claims)
     {
-        var identity = new ClaimsIdentity(claims, "TestAuth");
+        var identity = new ClaimsIdentity(claims, Constants.Identity.TestAuthType);
         var principal = new ClaimsPrincipal(identity);
         var httpContext = new DefaultHttpContext
         {
