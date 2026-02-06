@@ -14,8 +14,8 @@ public class ValidationBehaviorTests
     public async Task Handle_ShouldCallNext_WhenNoValidatorsRegistered()
     {
         // Arrange
-        var request = new TestRequest { Value = "test" };
-        ErrorOr<string> expectedResponse = "success";
+        var request = new TestRequest { Value = Constants.Validation.TestValue };
+        ErrorOr<string> expectedResponse = Constants.Validation.SuccessResult;
         var validators = Enumerable.Empty<IValidator<TestRequest>>();
         var behavior = new ValidationBehavior<TestRequest, ErrorOr<string>>(validators);
         var nextCalled = false;
@@ -31,15 +31,15 @@ public class ValidationBehaviorTests
         // Assert
         nextCalled.ShouldBeTrue();
         result.IsError.ShouldBeFalse();
-        result.Value.ShouldBe("success");
+        result.Value.ShouldBe(Constants.Validation.SuccessResult);
     }
 
     [Fact]
     public async Task Handle_ShouldCallNext_WhenValidationPasses()
     {
         // Arrange
-        var request = new TestRequest { Value = "valid" };
-        ErrorOr<string> expectedResponse = "success";
+        var request = new TestRequest { Value = Constants.Validation.ValidValue };
+        ErrorOr<string> expectedResponse = Constants.Validation.SuccessResult;
         var validator = Substitute.For<IValidator<TestRequest>>();
         validator.ValidateAsync(Arg.Any<ValidationContext<TestRequest>>(), Arg.Any<CancellationToken>())
             .Returns(new ValidationResult());
@@ -58,7 +58,7 @@ public class ValidationBehaviorTests
         // Assert
         nextCalled.ShouldBeTrue();
         result.IsError.ShouldBeFalse();
-        result.Value.ShouldBe("success");
+        result.Value.ShouldBe(Constants.Validation.SuccessResult);
     }
 
     [Fact]
@@ -69,8 +69,8 @@ public class ValidationBehaviorTests
         var validator = Substitute.For<IValidator<TestRequest>>();
         var validationFailures = new List<ValidationFailure>
         {
-            new("Value", "Value is required"),
-            new("Value", "Value must not be empty")
+            new(Constants.Validation.ValueField, Constants.Validation.ValueRequired),
+            new(Constants.Validation.ValueField, Constants.Validation.ValueMustNotBeEmpty)
         };
         validator.ValidateAsync(Arg.Any<ValidationContext<TestRequest>>(), Arg.Any<CancellationToken>())
             .Returns(new ValidationResult(validationFailures));
@@ -80,7 +80,7 @@ public class ValidationBehaviorTests
         RequestHandlerDelegate<ErrorOr<string>> next = (CancellationToken ct) =>
         {
             nextCalled = true;
-            ErrorOr<string> success = "success";
+            ErrorOr<string> success = Constants.Validation.SuccessResult;
             return Task.FromResult(success);
         };
 
@@ -92,9 +92,9 @@ public class ValidationBehaviorTests
         result.IsError.ShouldBeTrue();
         result.Errors.Count.ShouldBe(2);
         result.Errors[0].Type.ShouldBe(ErrorType.Validation);
-        result.Errors[0].Code.ShouldBe("Value");
-        result.Errors[0].Description.ShouldBe("Value is required");
-        result.Errors[1].Description.ShouldBe("Value must not be empty");
+        result.Errors[0].Code.ShouldBe(Constants.Validation.ValueField);
+        result.Errors[0].Description.ShouldBe(Constants.Validation.ValueRequired);
+        result.Errors[1].Description.ShouldBe(Constants.Validation.ValueMustNotBeEmpty);
     }
 
     [Fact]
@@ -107,14 +107,14 @@ public class ValidationBehaviorTests
         validator1.ValidateAsync(Arg.Any<ValidationContext<TestRequest>>(), Arg.Any<CancellationToken>())
             .Returns(new ValidationResult(new[]
             {
-                new ValidationFailure("Value", "Error from validator 1")
+                new ValidationFailure(Constants.Validation.ValueField, Constants.Validation.ErrorFromValidator1)
             }));
 
         var validator2 = Substitute.For<IValidator<TestRequest>>();
         validator2.ValidateAsync(Arg.Any<ValidationContext<TestRequest>>(), Arg.Any<CancellationToken>())
             .Returns(new ValidationResult(new[]
             {
-                new ValidationFailure("AnotherField", "Error from validator 2")
+                new ValidationFailure(Constants.Validation.AnotherField, Constants.Validation.ErrorFromValidator2)
             }));
 
         var validators = new[] { validator1, validator2 };
@@ -131,15 +131,15 @@ public class ValidationBehaviorTests
         // Assert
         result.IsError.ShouldBeTrue();
         result.Errors.Count.ShouldBe(2);
-        result.Errors[0].Code.ShouldBe("Value");
-        result.Errors[1].Code.ShouldBe("AnotherField");
+        result.Errors[0].Code.ShouldBe(Constants.Validation.ValueField);
+        result.Errors[1].Code.ShouldBe(Constants.Validation.AnotherField);
     }
 
     [Fact]
     public async Task Handle_ShouldPassCancellationToken_ToValidators()
     {
         // Arrange
-        var request = new TestRequest { Value = "test" };
+        var request = new TestRequest { Value = Constants.Validation.TestValue };
         var validator = Substitute.For<IValidator<TestRequest>>();
         validator.ValidateAsync(Arg.Any<ValidationContext<TestRequest>>(), Arg.Any<CancellationToken>())
             .Returns(new ValidationResult());

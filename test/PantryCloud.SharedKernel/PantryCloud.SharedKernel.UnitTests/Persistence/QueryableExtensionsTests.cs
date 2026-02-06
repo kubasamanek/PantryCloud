@@ -11,19 +11,19 @@ public class QueryableExtensionsTests
         // Arrange
         var items = new List<TestEntity>
         {
-            new() { Name = "Apple" },
+            new() { Name = Constants.Queryable.Apple },
             new() { Name = "BANANA" },
-            new() { Name = "cherry" },
-            new() { Name = "Pineapple" }
+            new() { Name = Constants.Queryable.Cherry },
+            new() { Name = Constants.Queryable.Pineapple }
         }.AsQueryable();
 
         // Act
-        var result = items.WhereContainsCaseInsensitive(x => x.Name, "app").ToList();
+        var result = items.WhereContainsCaseInsensitive(x => x.Name, Constants.Queryable.AppSearchTerm).ToList();
 
         // Assert
         result.Count.ShouldBe(2);
-        result.ShouldContain(x => x.Name == "Apple");
-        result.ShouldContain(x => x.Name == "Pineapple");
+        result.ShouldContain(x => x.Name == Constants.Queryable.Apple);
+        result.ShouldContain(x => x.Name == Constants.Queryable.Pineapple);
     }
 
     [Fact]
@@ -32,9 +32,9 @@ public class QueryableExtensionsTests
         // Arrange
         var items = new List<TestEntity>
         {
-            new() { Name = "Apple" },
-            new() { Name = "Banana" },
-            new() { Name = "Cherry" }
+            new() { Name = Constants.Queryable.Apple },
+            new() { Name = Constants.Queryable.Banana },
+            new() { Name = Constants.Queryable.Cherry }
         }.AsQueryable();
 
         // Act
@@ -50,9 +50,9 @@ public class QueryableExtensionsTests
         // Arrange
         var items = new List<TestEntity>
         {
-            new() { Name = "Apple" },
-            new() { Name = "Banana" },
-            new() { Name = "Cherry" }
+            new() { Name = Constants.Queryable.Apple },
+            new() { Name = Constants.Queryable.Banana },
+            new() { Name = Constants.Queryable.Cherry }
         }.AsQueryable();
 
         // Act
@@ -68,13 +68,13 @@ public class QueryableExtensionsTests
         // Arrange
         var items = new List<TestEntity>
         {
-            new() { Name = "Apple" },
-            new() { Name = "Banana" },
-            new() { Name = "Cherry" }
+            new() { Name = Constants.Queryable.Apple },
+            new() { Name = Constants.Queryable.Banana },
+            new() { Name = Constants.Queryable.Cherry }
         }.AsQueryable();
 
         // Act
-        var result = items.WhereContainsCaseInsensitive(x => x.Name, "   ").ToList();
+        var result = items.WhereContainsCaseInsensitive(x => x.Name, Constants.Queryable.WhitespaceSearchTerm).ToList();
 
         // Assert
         result.Count.ShouldBe(3);
@@ -86,13 +86,13 @@ public class QueryableExtensionsTests
         // Arrange
         var items = new List<TestEntity>
         {
-            new() { Name = "Apple" },
-            new() { Name = "Banana" },
-            new() { Name = "Cherry" }
+            new() { Name = Constants.Queryable.Apple },
+            new() { Name = Constants.Queryable.Banana },
+            new() { Name = Constants.Queryable.Cherry }
         }.AsQueryable();
 
         // Act
-        var result = items.WhereContainsCaseInsensitive(x => x.Name, "xyz").ToList();
+        var result = items.WhereContainsCaseInsensitive(x => x.Name, Constants.Queryable.XyzSearchTerm).ToList();
 
         // Assert
         result.ShouldBeEmpty();
@@ -109,7 +109,7 @@ public class QueryableExtensionsTests
         }.AsQueryable();
 
         // Act
-        var result = items.WhereContainsCaseInsensitive(x => x.Name, "apple").ToList();
+        var result = items.WhereContainsCaseInsensitive(x => x.Name, Constants.Queryable.AppleSearchTerm).ToList();
 
         // Assert
         result.Count.ShouldBe(1);
@@ -127,7 +127,7 @@ public class QueryableExtensionsTests
         }.AsQueryable();
 
         // Act
-        var result = items.WhereContainsCaseInsensitive(x => x.Name, "APPLE").ToList();
+        var result = items.WhereContainsCaseInsensitive(x => x.Name, Constants.Queryable.AppleSearchTermUpper).ToList();
 
         // Assert
         result.Count.ShouldBe(1);
@@ -140,13 +140,13 @@ public class QueryableExtensionsTests
         // Arrange
         var items = new List<TestEntity>
         {
-            new() { Name = "Pineapple" },
-            new() { Name = "Apple" },
-            new() { Name = "Grapple" }
+            new() { Name = Constants.Queryable.Pineapple },
+            new() { Name = Constants.Queryable.Apple },
+            new() { Name = Constants.Queryable.Grapple }
         }.AsQueryable();
 
         // Act
-        var result = items.WhereContainsCaseInsensitive(x => x.Name, "app").ToList();
+        var result = items.WhereContainsCaseInsensitive(x => x.Name, Constants.Queryable.AppSearchTerm).ToList();
 
         // Assert
         result.Count.ShouldBe(3);

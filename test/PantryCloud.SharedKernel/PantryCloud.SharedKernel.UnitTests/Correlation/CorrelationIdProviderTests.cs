@@ -20,7 +20,7 @@ public class CorrelationIdProviderTests
     public void GetCorrelationId_ShouldReturnCorrelationId_WhenSetInHttpContextItems()
     {
         // Arrange
-        var correlationId = "test-correlation-id-123";
+        var correlationId = Constants.Correlation.TestCorrelationId;
         var httpContext = new DefaultHttpContext();
         httpContext.Items[CorrelationIdConstants.HttpContextItemKey] = correlationId;
         _httpContextAccessor.HttpContext.Returns(httpContext);
@@ -36,7 +36,7 @@ public class CorrelationIdProviderTests
     public void GetCorrelationId_ShouldReturnCorrelationId_WhenSetInHeader()
     {
         // Arrange
-        var correlationId = "header-correlation-id-456";
+        var correlationId = Constants.Correlation.HeaderCorrelationId;
         var httpContext = new DefaultHttpContext();
         httpContext.Request.Headers[CorrelationIdConstants.HeaderName] = correlationId;
         _httpContextAccessor.HttpContext.Returns(httpContext);
@@ -52,8 +52,8 @@ public class CorrelationIdProviderTests
     public void GetCorrelationId_ShouldPreferHttpContextItems_OverHeader()
     {
         // Arrange
-        var itemsCorrelationId = "items-correlation-id";
-        var headerCorrelationId = "header-correlation-id";
+        var itemsCorrelationId = Constants.Correlation.ItemsCorrelationId;
+        var headerCorrelationId = Constants.Correlation.HeaderCorrelationIdShort;
         var httpContext = new DefaultHttpContext();
         httpContext.Items[CorrelationIdConstants.HttpContextItemKey] = itemsCorrelationId;
         httpContext.Request.Headers[CorrelationIdConstants.HeaderName] = headerCorrelationId;

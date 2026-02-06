@@ -26,7 +26,7 @@ public class ApiControllerBaseTests
     public void FromResult_ShouldReturnOkResult_WhenResultIsSuccess()
     {
         // Arrange
-        var value = "test-value";
+        var value = Constants.Controllers.TestValue;
         ErrorOr<string> result = value;
 
         // Act
@@ -42,7 +42,7 @@ public class ApiControllerBaseTests
     public void FromResult_ShouldReturnCreatedResult_WhenResultIsSuccessWithCreatedStatusCode()
     {
         // Arrange
-        var value = new { Id = 123 };
+        var value = new { Id = Constants.Controllers.TestId };
         ErrorOr<object> result = value;
 
         // Act
@@ -58,7 +58,7 @@ public class ApiControllerBaseTests
     public void FromResult_ShouldReturn401_WhenErrorTypeIsUnauthorized()
     {
         // Arrange
-        var error = Error.Unauthorized("Auth.Invalid", "Invalid credentials");
+        var error = Error.Unauthorized(Constants.Controllers.AuthInvalidCode, Constants.Controllers.InvalidCredentials);
         var result = ErrorOr<string>.From(new List<Error> { error });
 
         // Act
@@ -68,14 +68,14 @@ public class ApiControllerBaseTests
         var problemResult = actionResult.ShouldBeOfType<ObjectResult>();
         problemResult.StatusCode.ShouldBe(StatusCodes.Status401Unauthorized);
         var problemDetails = problemResult.Value.ShouldBeOfType<ProblemDetails>();
-        problemDetails.Detail.ShouldBe("Invalid credentials");
+        problemDetails.Detail.ShouldBe(Constants.Controllers.InvalidCredentials);
     }
 
     [Fact]
     public void FromResult_ShouldReturn404_WhenErrorTypeIsNotFound()
     {
         // Arrange
-        var error = Error.NotFound("User.NotFound", "User not found");
+        var error = Error.NotFound(Constants.Controllers.UserNotFoundCode, Constants.Controllers.UserNotFound);
         var result = ErrorOr<string>.From(new List<Error> { error });
 
         // Act
@@ -85,14 +85,14 @@ public class ApiControllerBaseTests
         var problemResult = actionResult.ShouldBeOfType<ObjectResult>();
         problemResult.StatusCode.ShouldBe(StatusCodes.Status404NotFound);
         var problemDetails = problemResult.Value.ShouldBeOfType<ProblemDetails>();
-        problemDetails.Detail.ShouldBe("User not found");
+        problemDetails.Detail.ShouldBe(Constants.Controllers.UserNotFound);
     }
 
     [Fact]
     public void FromResult_ShouldReturn409_WhenErrorTypeIsConflict()
     {
         // Arrange
-        var error = Error.Conflict("User.Exists", "User already exists");
+        var error = Error.Conflict(Constants.Controllers.UserExistsCode, Constants.Controllers.UserAlreadyExists);
         var result = ErrorOr<string>.From(new List<Error> { error });
 
         // Act
@@ -102,14 +102,14 @@ public class ApiControllerBaseTests
         var problemResult = actionResult.ShouldBeOfType<ObjectResult>();
         problemResult.StatusCode.ShouldBe(StatusCodes.Status409Conflict);
         var problemDetails = problemResult.Value.ShouldBeOfType<ProblemDetails>();
-        problemDetails.Detail.ShouldBe("User already exists");
+        problemDetails.Detail.ShouldBe(Constants.Controllers.UserAlreadyExists);
     }
 
     [Fact]
     public void FromResult_ShouldReturn400_WhenErrorTypeIsFailure()
     {
         // Arrange
-        var error = Error.Failure("Operation.Failed", "Operation failed");
+        var error = Error.Failure(Constants.Controllers.OperationFailedCode, Constants.Controllers.OperationFailed);
         var result = ErrorOr<string>.From(new List<Error> { error });
 
         // Act
@@ -119,7 +119,7 @@ public class ApiControllerBaseTests
         var problemResult = actionResult.ShouldBeOfType<ObjectResult>();
         problemResult.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
         var problemDetails = problemResult.Value.ShouldBeOfType<ProblemDetails>();
-        problemDetails.Detail.ShouldBe("Operation failed");
+        problemDetails.Detail.ShouldBe(Constants.Controllers.OperationFailed);
     }
 
     [Fact]
@@ -128,8 +128,8 @@ public class ApiControllerBaseTests
         // Arrange
         var errors = new List<Error>
         {
-            Error.Validation("Email", "Email is required"),
-            Error.Validation("Password", "Password is too short")
+            Error.Validation(Constants.Controllers.EmailField, Constants.Controllers.EmailRequired),
+            Error.Validation(Constants.Controllers.PasswordField, Constants.Controllers.PasswordTooShort)
         };
         var result = ErrorOr<string>.From(errors);
 
@@ -140,10 +140,10 @@ public class ApiControllerBaseTests
         // ValidationProblem() returns ObjectResult with ValidationProblemDetails
         var objectResult = actionResult.ShouldBeOfType<ObjectResult>();
         var problemDetails = objectResult.Value.ShouldBeOfType<ValidationProblemDetails>();
-        problemDetails.Errors.ShouldContainKey("Email");
-        problemDetails.Errors.ShouldContainKey("Password");
-        problemDetails.Errors["Email"].ShouldContain("Email is required");
-        problemDetails.Errors["Password"].ShouldContain("Password is too short");
+        problemDetails.Errors.ShouldContainKey(Constants.Controllers.EmailField);
+        problemDetails.Errors.ShouldContainKey(Constants.Controllers.PasswordField);
+        problemDetails.Errors[Constants.Controllers.EmailField].ShouldContain(Constants.Controllers.EmailRequired);
+        problemDetails.Errors[Constants.Controllers.PasswordField].ShouldContain(Constants.Controllers.PasswordTooShort);
     }
 
     [Fact]
@@ -152,8 +152,8 @@ public class ApiControllerBaseTests
         // Arrange
         var errors = new List<Error>
         {
-            Error.NotFound("User.NotFound", "User not found"),
-            Error.Conflict("User.Exists", "User already exists")
+            Error.NotFound(Constants.Controllers.UserNotFoundCode, Constants.Controllers.UserNotFound),
+            Error.Conflict(Constants.Controllers.UserExistsCode, Constants.Controllers.UserAlreadyExists)
         };
         var result = ErrorOr<string>.From(errors);
 
@@ -164,7 +164,7 @@ public class ApiControllerBaseTests
         var problemResult = actionResult.ShouldBeOfType<ObjectResult>();
         problemResult.StatusCode.ShouldBe(StatusCodes.Status404NotFound);
         var problemDetails = problemResult.Value.ShouldBeOfType<ProblemDetails>();
-        problemDetails.Detail.ShouldBe("User not found");
+        problemDetails.Detail.ShouldBe(Constants.Controllers.UserNotFound);
     }
 
     // Test controller to expose protected methods
