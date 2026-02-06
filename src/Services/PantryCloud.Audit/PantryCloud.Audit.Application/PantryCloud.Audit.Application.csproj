@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="MediatR" Version="14.0.0" />
     <ProjectReference Include="..\PantryCloud.Audit.Core\PantryCloud.Audit.Core.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\PantryCloud.SharedKernel\PantryCloud.SharedKernel.csproj" />
   </ItemGroup>
 
 </Project>

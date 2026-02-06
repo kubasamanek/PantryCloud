@@ -14,9 +14,11 @@ public class PreferenceAddedAuditConsumer(
     ILogger<PreferenceAddedAuditConsumer> logger)
     : DbContextConsumerBase<PreferenceAddedEvent, AuditDbContext>(dbContext, logger)
 {
+    private readonly AuditDbContext _dbContext = dbContext;
+
     protected override async Task HandleAsync(PreferenceAddedEvent @event, ConsumeContext context)
     {
-        if (await dbContext.HouseholdAuditEntries.AnyAsync(e => e.EventId == @event.Id, context.CancellationToken))
+        if (await _dbContext.HouseholdAuditEntries.AnyAsync(e => e.EventId == @event.Id, context.CancellationToken))
         {
             Logger.LogDebug("Event {EventId} already processed, skipping", @event.Id);
             return;
@@ -37,8 +39,8 @@ public class PreferenceAddedAuditConsumer(
             EventId = @event.Id
         };
 
-        await dbContext.HouseholdAuditEntries.AddAsync(entry, context.CancellationToken);
-        await dbContext.SaveChangesAsync(context.CancellationToken);
+        await _dbContext.HouseholdAuditEntries.AddAsync(entry, context.CancellationToken);
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
 
         Logger.LogDebug("Recorded audit for PreferenceAddedEvent - UserId: {UserId}", @event.UserId);
     }

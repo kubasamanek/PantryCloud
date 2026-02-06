@@ -2,18 +2,16 @@ using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PantryCloud.Audit.Application;
 using PantryCloud.Audit.Application.Dtos;
+using PantryCloud.Audit.Application.Queries;
 using PantryCloud.SharedKernel.Controllers;
-using PantryCloud.SharedKernel.Identity;
 
 namespace PantryCloud.Audit.Presentation.Controllers;
 
 [ApiController]
 [Route("api/audit")]
 [Authorize]
-public class AuditController(IAuditQueryService auditQueryService, IUserContext userContext, IMediator mediator, IMapper mapper)
-    : ApiControllerBase(mediator, mapper)
+public class AuditController(IMediator mediator, IMapper mapper) : ApiControllerBase(mediator, mapper)
 {
     [HttpGet("households/{householdId:guid}/entries")]
     [ProducesResponseType(typeof(ListAuditEntriesResponseDto), StatusCodes.Status200OK)]
@@ -29,7 +27,8 @@ public class AuditController(IAuditQueryService auditQueryService, IUserContext 
         CancellationToken cancellationToken = default)
     {
         var request = new ListAuditEntriesRequestDto(householdId, from, to, actionType, entityType, page, pageSize);
-        var result = await auditQueryService.ListHouseholdAuditEntriesAsync(request, userContext.UserId, cancellationToken);
+        var query = new ListHouseholdAuditEntriesQuery(request);
+        var result = await Mediator.Send(query, cancellationToken);
         return FromResult(result, StatusCodes.Status200OK);
     }
 }

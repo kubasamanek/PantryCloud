@@ -27,7 +27,7 @@ public class AuditRetentionBackgroundService(
             try
             {
                 await using var scope = scopeFactory.CreateAsyncScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<Audit.Infrastructure.Persistence.AuditDbContext>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<AuditDbContext>();
 
                 var cutoff = DateTime.UtcNow.AddDays(-retentionDays);
                 var deleted = await dbContext.HouseholdAuditEntries

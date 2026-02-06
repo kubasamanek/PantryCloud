@@ -14,19 +14,21 @@ public class MemberLeftHouseholdAuditConsumer(
     ILogger<MemberLeftHouseholdAuditConsumer> logger)
     : DbContextConsumerBase<MemberLeftHouseholdEvent, AuditDbContext>(dbContext, logger)
 {
+    private readonly AuditDbContext _dbContext = dbContext;
+
     protected override async Task HandleAsync(MemberLeftHouseholdEvent @event, ConsumeContext context)
     {
-        var membership = await dbContext.UserHouseholdMemberships
+        if (await _dbContext.HouseholdAuditEntries.AnyAsync(e => e.EventId == @event.Id, context.CancellationToken))
+        {
+            await _dbContext.SaveChangesAsync(context.CancellationToken);
+            return;
+        }
+        
+        var membership = await _dbContext.UserHouseholdMemberships
             .FirstOrDefaultAsync(m => m.UserId == @event.MemberId && m.LeftAt == null, context.CancellationToken);
         if (membership != null && membership.HouseholdId == @event.HouseholdId)
         {
             membership.LeftAt = @event.LeftAt;
-        }
-
-        if (await dbContext.HouseholdAuditEntries.AnyAsync(e => e.EventId == @event.Id, context.CancellationToken))
-        {
-            await dbContext.SaveChangesAsync(context.CancellationToken);
-            return;
         }
 
         var payload = JsonSerializer.Serialize(new { @event.MemberId, @event.MemberEmail });
@@ -44,8 +46,8 @@ public class MemberLeftHouseholdAuditConsumer(
             EventId = @event.Id
         };
 
-        await dbContext.HouseholdAuditEntries.AddAsync(entry, context.CancellationToken);
-        await dbContext.SaveChangesAsync(context.CancellationToken);
+        await _dbContext.HouseholdAuditEntries.AddAsync(entry, context.CancellationToken);
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
 
         Logger.LogDebug("Recorded audit for MemberLeftHouseholdEvent - MemberId: {MemberId}", @event.MemberId);
     }

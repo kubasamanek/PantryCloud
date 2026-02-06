@@ -14,15 +14,17 @@ public class MemberJoinedHouseholdAuditConsumer(
     ILogger<MemberJoinedHouseholdAuditConsumer> logger)
     : DbContextConsumerBase<MemberJoinedHouseholdEvent, AuditDbContext>(dbContext, logger)
 {
+    private readonly AuditDbContext _dbContext = dbContext;
+
     protected override async Task HandleAsync(MemberJoinedHouseholdEvent @event, ConsumeContext context)
     {
-        if (await dbContext.HouseholdAuditEntries.AnyAsync(e => e.EventId == @event.Id, context.CancellationToken))
+        if (await _dbContext.HouseholdAuditEntries.AnyAsync(e => e.EventId == @event.Id, context.CancellationToken))
         {
             Logger.LogDebug("Event {EventId} already processed, skipping", @event.Id);
             return;
         }
 
-        var existingMembership = await dbContext.UserHouseholdMemberships
+        var existingMembership = await _dbContext.UserHouseholdMemberships
             .FirstOrDefaultAsync(m => m.UserId == @event.NewMemberId, context.CancellationToken);
 
         if (existingMembership != null)
@@ -41,7 +43,7 @@ public class MemberJoinedHouseholdAuditConsumer(
         }
         else
         {
-            await dbContext.UserHouseholdMemberships.AddAsync(new UserHouseholdMembership
+            await _dbContext.UserHouseholdMemberships.AddAsync(new UserHouseholdMembership
             {
                 UserId = @event.NewMemberId,
                 HouseholdId = @event.HouseholdId,
@@ -64,8 +66,8 @@ public class MemberJoinedHouseholdAuditConsumer(
             EventId = @event.Id
         };
 
-        await dbContext.HouseholdAuditEntries.AddAsync(entry, context.CancellationToken);
-        await dbContext.SaveChangesAsync(context.CancellationToken);
+        await _dbContext.HouseholdAuditEntries.AddAsync(entry, context.CancellationToken);
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
 
         Logger.LogDebug("Recorded audit for MemberJoinedHouseholdEvent - NewMemberId: {NewMemberId}", @event.NewMemberId);
     }
