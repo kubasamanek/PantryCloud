@@ -21,16 +21,16 @@ public class ResilientForwarderHttpClientFactoryTests
     {
         var context = new ForwarderHttpClientContext
         {
-            ClusterId = "test-cluster",
+            ClusterId = Constants.ResilientForwarder.TestClusterId,
             NewMetadata = new Dictionary<string, string>
             {
-                { "CircuitBreakerPolicy", "circuit-breaker-policy-name" }
+                { Constants.ResilientForwarder.MetadataKeyCircuitBreaker, Constants.ResilientForwarder.CircuitBreakerPolicyName }
             },
             NewConfig = new HttpClientConfig()
         };
 
         var policy = Policy.NoOpAsync<HttpResponseMessage>();
-        _policyRegistry.TryGet("circuit-breaker-policy-name", out Arg.Any<IAsyncPolicy<HttpResponseMessage>>())
+        _policyRegistry.TryGet(Constants.ResilientForwarder.CircuitBreakerPolicyName, out Arg.Any<IAsyncPolicy<HttpResponseMessage>>())
             .Returns(x => 
             {
                 x[1] = policy;
@@ -50,16 +50,16 @@ public class ResilientForwarderHttpClientFactoryTests
     {
         var context = new ForwarderHttpClientContext
         {
-            ClusterId = "test-cluster",
+            ClusterId = Constants.ResilientForwarder.TestClusterId,
             NewMetadata = new Dictionary<string, string>
             {
-                { "RetryPolicy", "retry-policy-name" }
+                { Constants.ResilientForwarder.MetadataKeyRetry, Constants.ResilientForwarder.RetryPolicyName }
             },
             NewConfig = new HttpClientConfig()
         };
 
         var policy = Policy.NoOpAsync<HttpResponseMessage>();
-        _policyRegistry.TryGet<IAsyncPolicy<HttpResponseMessage>>("retry-policy-name", out Arg.Any<IAsyncPolicy<HttpResponseMessage>>())
+        _policyRegistry.TryGet<IAsyncPolicy<HttpResponseMessage>>(Constants.ResilientForwarder.RetryPolicyName, out Arg.Any<IAsyncPolicy<HttpResponseMessage>>())
             .Returns(x => 
             {
                 x[1] = policy;
@@ -79,7 +79,7 @@ public class ResilientForwarderHttpClientFactoryTests
     {
         var context = new ForwarderHttpClientContext
         {
-            ClusterId = "test-cluster",
+            ClusterId = Constants.ResilientForwarder.TestClusterId,
             NewMetadata = new Dictionary<string, string>(),
             NewConfig = new HttpClientConfig()
         };

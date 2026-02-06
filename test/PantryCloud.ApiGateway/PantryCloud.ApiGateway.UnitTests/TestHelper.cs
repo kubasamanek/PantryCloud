@@ -9,8 +9,8 @@ internal static class TestHelper
 {
     public static HttpContext CreateHttpContext(
         string? correlationId = null,
-        string? method = "GET",
-        string? path = "/api/test",
+        string? method = Constants.Http.MethodGet,
+        string? path = Constants.Http.PathApiTest,
         bool isAuthenticated = false,
         string? userId = null)
     {
@@ -18,14 +18,14 @@ internal static class TestHelper
         {
             Request =
             {
-                Method = method ?? "GET",
-                Path = path ?? "/api/test"
+                Method = method ?? Constants.Http.MethodGet,
+                Path = path ?? Constants.Http.PathApiTest
             }
         };
 
         if (correlationId != null)
         {
-            context.Request.Headers["X-Correlation-Id"] = correlationId;
+            context.Request.Headers[Constants.Correlation.HeaderName] = correlationId;
         }
 
         var services = new ServiceCollection();

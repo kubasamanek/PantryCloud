@@ -18,16 +18,15 @@ public class CorrelationIdMiddlewareTests
         await middleware.InvokeAsync(context);
 
         nextCalled.ShouldBeTrue();
-        context.Response.Headers["X-Correlation-Id"].ToString().ShouldNotBeNullOrEmpty();
-        context.Items["CorrelationId"].ShouldNotBeNull();
-        context.Items["CorrelationId"]!.ToString().ShouldNotBeNullOrEmpty();
+        context.Response.Headers[Constants.Correlation.HeaderName].ToString().ShouldNotBeNullOrEmpty();
+        context.Items[Constants.Correlation.ContextItemKey].ShouldNotBeNull();
+        context.Items[Constants.Correlation.ContextItemKey]!.ToString().ShouldNotBeNullOrEmpty();
     }
 
     [Fact]
     public async Task InvokeAsync_ShouldUseExistingCorrelationId_WhenProvided()
     {
-        const string expectedCorrelationId = "test-correlation-id-12345";
-        var context = TestHelper.CreateHttpContext(correlationId: expectedCorrelationId);
+        var context = TestHelper.CreateHttpContext(correlationId: Constants.Correlation.TestCorrelationId);
         var nextCalled = false;
         var next = TestHelper.CreateMockNext(ctx => nextCalled = true);
         var middleware = new CorrelationIdMiddleware(next);
@@ -35,8 +34,8 @@ public class CorrelationIdMiddlewareTests
         await middleware.InvokeAsync(context);
 
         nextCalled.ShouldBeTrue();
-        context.Response.Headers["X-Correlation-Id"].ToString().ShouldBe(expectedCorrelationId);
-        context.Items["CorrelationId"]!.ToString().ShouldBe(expectedCorrelationId);
+        context.Response.Headers[Constants.Correlation.HeaderName].ToString().ShouldBe(Constants.Correlation.TestCorrelationId);
+        context.Items[Constants.Correlation.ContextItemKey]!.ToString().ShouldBe(Constants.Correlation.TestCorrelationId);
     }
 
     [Fact]
@@ -48,8 +47,8 @@ public class CorrelationIdMiddlewareTests
 
         await middleware.InvokeAsync(context);
 
-        context.Response.Headers.ContainsKey("X-Correlation-Id").ShouldBeTrue();
-        context.Response.Headers["X-Correlation-Id"].ToString().ShouldNotBeNullOrEmpty();
+        context.Response.Headers.ContainsKey(Constants.Correlation.HeaderName).ShouldBeTrue();
+        context.Response.Headers[Constants.Correlation.HeaderName].ToString().ShouldNotBeNullOrEmpty();
     }
 
     [Fact]
@@ -61,8 +60,8 @@ public class CorrelationIdMiddlewareTests
 
         await middleware.InvokeAsync(context);
 
-        context.Request.Headers.ContainsKey("X-Correlation-Id").ShouldBeTrue();
-        context.Request.Headers["X-Correlation-Id"].ToString().ShouldNotBeNullOrEmpty();
+        context.Request.Headers.ContainsKey(Constants.Correlation.HeaderName).ShouldBeTrue();
+        context.Request.Headers[Constants.Correlation.HeaderName].ToString().ShouldNotBeNullOrEmpty();
     }
 
     [Fact]
@@ -74,8 +73,8 @@ public class CorrelationIdMiddlewareTests
 
         await middleware.InvokeAsync(context);
 
-        context.Items.ContainsKey("CorrelationId").ShouldBeTrue();
-        context.Items["CorrelationId"].ShouldNotBeNull();
+        context.Items.ContainsKey(Constants.Correlation.ContextItemKey).ShouldBeTrue();
+        context.Items[Constants.Correlation.ContextItemKey].ShouldNotBeNull();
     }
 
     [Fact]

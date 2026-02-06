@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,6 +32,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Gateways\PantryCloud.ApiGateway\PantryCloud.ApiGateway.Infrastructure\PantryCloud.ApiGateway.Infrastructure.csproj" />
     <ProjectReference Include="..\..\..\src\Gateways\PantryCloud.ApiGateway\PantryCloud.ApiGateway.Core\PantryCloud.ApiGateway.Core.csproj" />
+    <ProjectReference Include="..\..\..\src\Gateways\PantryCloud.ApiGateway\PantryCloud.ApiGateway.Presentation\PantryCloud.ApiGateway.Presentation.csproj" />
   </ItemGroup>
 
 </Project>
