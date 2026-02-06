@@ -48,8 +48,8 @@ public class AuditQueryServiceTests
         {
             Id = Guid.NewGuid(),
             HouseholdId = householdId,
-            ActionType = "Created",
-            EntityType = "PantryItem",
+            ActionType = Constants.Audit.ActionCreated,
+            EntityType = Constants.Audit.EntityPantryItem,
             EntityId = Guid.NewGuid(),
             UserId = userId,
             Payload = "{}",
@@ -69,8 +69,8 @@ public class AuditQueryServiceTests
         result.IsError.ShouldBeFalse();
         result.Value.Entries.Count.ShouldBe(1);
         result.Value.TotalCount.ShouldBe(1);
-        result.Value.Entries[0].ActionType.ShouldBe("Created");
-        result.Value.Entries[0].EntityType.ShouldBe("PantryItem");
+        result.Value.Entries[0].ActionType.ShouldBe(Constants.Audit.ActionCreated);
+        result.Value.Entries[0].EntityType.ShouldBe(Constants.Audit.EntityPantryItem);
     }
 
     [Fact]
@@ -88,10 +88,10 @@ public class AuditQueryServiceTests
             JoinedAt = baseDate.AddDays(-10)
         });
         db.HouseholdAuditEntries.AddRange(
-            CreateAuditEntry(householdId, "Updated", "PantryItem", baseDate.AddDays(0)),
-            CreateAuditEntry(householdId, "Created", "PantryItem", baseDate.AddDays(1)),
-            CreateAuditEntry(householdId, "Created", "ShoppingList", baseDate.AddDays(2)),
-            CreateAuditEntry(householdId, "Joined", "Member", baseDate.AddDays(3)));
+            CreateAuditEntry(householdId, Constants.Audit.ActionUpdated, Constants.Audit.EntityPantryItem, baseDate.AddDays(0)),
+            CreateAuditEntry(householdId, Constants.Audit.ActionCreated, Constants.Audit.EntityPantryItem, baseDate.AddDays(1)),
+            CreateAuditEntry(householdId, Constants.Audit.ActionCreated, Constants.Audit.EntityShoppingList, baseDate.AddDays(2)),
+            CreateAuditEntry(householdId, Constants.Audit.ActionJoined, Constants.Audit.EntityMember, baseDate.AddDays(3)));
         await db.SaveChangesAsync();
 
         var membershipRepo = Substitute.For<IHouseholdMembershipRepository>();
@@ -102,7 +102,7 @@ public class AuditQueryServiceTests
             householdId,
             baseDate.AddDays(0.5),
             baseDate.AddDays(2.5),
-            "Created",
+            Constants.Audit.ActionCreated,
             null,
             Page: 1,
             PageSize: 10);
@@ -112,9 +112,9 @@ public class AuditQueryServiceTests
         result.IsError.ShouldBeFalse();
         result.Value.Entries.Count.ShouldBe(2);
         result.Value.TotalCount.ShouldBe(2);
-        result.Value.Entries.ShouldAllBe(e => e.ActionType == "Created");
-        result.Value.Entries.ShouldContain(e => e.EntityType == "PantryItem");
-        result.Value.Entries.ShouldContain(e => e.EntityType == "ShoppingList");
+        result.Value.Entries.ShouldAllBe(e => e.ActionType == Constants.Audit.ActionCreated);
+        result.Value.Entries.ShouldContain(e => e.EntityType == Constants.Audit.EntityPantryItem);
+        result.Value.Entries.ShouldContain(e => e.EntityType == Constants.Audit.EntityShoppingList);
     }
 
     private static HouseholdAuditEntry CreateAuditEntry(Guid householdId, string actionType, string entityType, DateTime occurredAt) =>

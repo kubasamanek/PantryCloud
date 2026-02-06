@@ -10,7 +10,7 @@ internal static class TestHelper
     public static AuditDbContext CreateInMemoryContext(string dbName)
     {
         var options = new DbContextOptionsBuilder<AuditDbContext>()
-            .UseInMemoryDatabase(dbName)
+            .UseInMemoryDatabase(dbName + "_" + Guid.NewGuid())
             .Options;
         return new AuditDbContext(options);
     }
