@@ -16,7 +16,7 @@ internal static class TestHelper
     public static ApplicationDbContext CreateInMemoryContext(string dbName)
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(dbName)
+            .UseInMemoryDatabase(dbName + "_" + Guid.NewGuid())
             .Options;
         return new ApplicationDbContext(options);
     }
@@ -36,8 +36,8 @@ internal static class TestHelper
     public static IIdentityUserContext MockIdentityUserContext(Guid? userId = null, Guid? sessionId = null)
     {
         var ctx = Substitute.For<IIdentityUserContext>();
-        ctx.UserId.Returns(userId ?? Guid.NewGuid());
-        ctx.Email.Returns("test@example.com");
+        ctx.UserId.Returns(userId ?? Constants.User.Id);
+        ctx.Email.Returns(Constants.User.Email);
         ctx.SessionId.Returns(sessionId);
         return ctx;
     }

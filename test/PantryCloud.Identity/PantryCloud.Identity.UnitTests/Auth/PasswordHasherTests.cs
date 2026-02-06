@@ -1,4 +1,4 @@
-﻿using PantryCloud.Identity.Infrastructure;
+using PantryCloud.Identity.Infrastructure;
 using Shouldly;
 
 namespace PantryCloud.Identity.UnitTests.Auth;
@@ -8,8 +8,8 @@ public class PasswordHasherTests
     [Fact]
     public void Hash_ProducesDifferentHashes_ForSamePassword_DueToRandomSalt()
     {
-        var hash1 = PasswordHasher.Hash(Constants.ExamplePassword);
-        var hash2 = PasswordHasher.Hash(Constants.ExamplePassword);
+        var hash1 = PasswordHasher.Hash(Constants.Passwords.Example);
+        var hash2 = PasswordHasher.Hash(Constants.Passwords.Example);
 
         hash1.ShouldNotBe(hash2);
         hash1.ShouldContain("-");
@@ -19,9 +19,9 @@ public class PasswordHasherTests
     [Fact]
     public void Verify_ReturnsTrue_ForCorrectPassword()
     {
-        var hash = PasswordHasher.Hash(Constants.ExamplePassword);
+        var hash = PasswordHasher.Hash(Constants.Passwords.Example);
 
-        var ok = PasswordHasher.Verify(Constants.ExamplePassword, hash);
+        var ok = PasswordHasher.Verify(Constants.Passwords.Example, hash);
 
         ok.ShouldBeTrue();
     }
@@ -29,9 +29,9 @@ public class PasswordHasherTests
     [Fact]
     public void Verify_ReturnsFalse_ForWrongPassword()
     {
-        var rightHash = PasswordHasher.Hash(Constants.ExamplePassword);
+        var rightHash = PasswordHasher.Hash(Constants.Passwords.Example);
 
-        var ok = PasswordHasher.Verify("WrongPassword", rightHash);
+        var ok = PasswordHasher.Verify(Constants.PasswordHasher.WrongPassword, rightHash);
 
         ok.ShouldBeFalse();
     }
@@ -39,7 +39,7 @@ public class PasswordHasherTests
     [Fact]
     public void Hash_Format_IsHashDashSalt_InHex_WithExpectedLengths()
     {
-        var combined = PasswordHasher.Hash(Constants.ExamplePassword);
+        var combined = PasswordHasher.Hash(Constants.Passwords.Example);
 
         var parts = combined.Split('-');
         parts.Length.ShouldBe(2);
@@ -54,22 +54,18 @@ public class PasswordHasherTests
     [Fact]
     public void Verify_Throws_OnMalformedStoredHash_NoDash()
     {
-        const string malformed = "ABCDEF"; // no '-' separator
-
         Should.Throw<IndexOutOfRangeException>(() =>
         {
-            PasswordHasher.Verify("anything", malformed);
+            PasswordHasher.Verify(Constants.PasswordHasher.VerifyTestPassword, Constants.PasswordHasher.MalformedNoDash);
         });
     }
 
     [Fact]
     public void Verify_Throws_OnMalformedStoredHash_NonHex()
     {
-        var malformed = "NOTHEX-ALSOnotHEX";
-
         Should.Throw<FormatException>(() =>
         {
-            PasswordHasher.Verify("anything", malformed);
+            PasswordHasher.Verify(Constants.PasswordHasher.VerifyTestPassword, Constants.PasswordHasher.MalformedNonHex);
         });
     }
 }
