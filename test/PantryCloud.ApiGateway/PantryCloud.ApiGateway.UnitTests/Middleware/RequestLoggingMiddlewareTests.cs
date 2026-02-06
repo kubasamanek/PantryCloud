@@ -13,8 +13,8 @@ public class RequestLoggingMiddlewareTests
     [Fact]
     public async Task InvokeAsync_ShouldLogRequest_WhenCalled()
     {
-        var context = TestHelper.CreateHttpContext(method: "GET", path: "/api/test");
-        context.Items["CorrelationId"] = "test-correlation-id";
+        var context = TestHelper.CreateHttpContext(method: Constants.Http.MethodGet, path: Constants.Http.PathApiTest);
+        context.Items[Constants.Correlation.ContextItemKey] = Constants.Correlation.TestCorrelationIdShort;
         var nextCalled = false;
         var next = TestHelper.CreateMockNext(ctx => nextCalled = true);
         var middleware = new RequestLoggingMiddleware(next, _logger);
@@ -25,7 +25,7 @@ public class RequestLoggingMiddlewareTests
         _logger.Received().Log(
             LogLevel.Information,
             Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("Incoming request")),
+            Arg.Is<object>(o => o.ToString()!.Contains(Constants.Logging.IncomingRequest)),
             Arg.Any<Exception>(),
             Arg.Any<Func<object, Exception?, string>>());
     }
@@ -33,9 +33,9 @@ public class RequestLoggingMiddlewareTests
     [Fact]
     public async Task InvokeAsync_ShouldLogCompletion_WhenRequestSucceeds()
     {
-        var context = TestHelper.CreateHttpContext(method: "GET", path: "/api/test");
-        context.Items["CorrelationId"] = "test-correlation-id";
-        context.Response.StatusCode = 200;
+        var context = TestHelper.CreateHttpContext(method: Constants.Http.MethodGet, path: Constants.Http.PathApiTest);
+        context.Items[Constants.Correlation.ContextItemKey] = Constants.Correlation.TestCorrelationIdShort;
+        context.Response.StatusCode = Constants.Http.StatusOk;
         var next = TestHelper.CreateMockNext();
         var middleware = new RequestLoggingMiddleware(next, _logger);
 
@@ -44,7 +44,7 @@ public class RequestLoggingMiddlewareTests
         _logger.Received().Log(
             LogLevel.Information,
             Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("Request completed")),
+            Arg.Is<object>(o => o.ToString()!.Contains(Constants.Logging.RequestCompleted)),
             Arg.Any<Exception>(),
             Arg.Any<Func<object, Exception?, string>>());
     }
@@ -52,9 +52,9 @@ public class RequestLoggingMiddlewareTests
     [Fact]
     public async Task InvokeAsync_ShouldLogError_WhenExceptionOccurs()
     {
-        var context = TestHelper.CreateHttpContext(method: "GET", path: "/api/test");
-        context.Items["CorrelationId"] = "test-correlation-id";
-        var expectedException = new Exception("Test exception");
+        var context = TestHelper.CreateHttpContext(method: Constants.Http.MethodGet, path: Constants.Http.PathApiTest);
+        context.Items[Constants.Correlation.ContextItemKey] = Constants.Correlation.TestCorrelationIdShort;
+        var expectedException = new Exception(Constants.Exceptions.TestException);
         var next = new RequestDelegate(_ => throw expectedException);
         var middleware = new RequestLoggingMiddleware(next, _logger);
 
@@ -63,7 +63,7 @@ public class RequestLoggingMiddlewareTests
         _logger.Received().Log(
             LogLevel.Error,
             Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("Request failed")),
+            Arg.Is<object>(o => o.ToString()!.Contains(Constants.Logging.RequestFailed)),
             Arg.Is<Exception>(e => e == expectedException),
             Arg.Any<Func<object, Exception?, string>>());
     }
@@ -71,9 +71,8 @@ public class RequestLoggingMiddlewareTests
     [Fact]
     public async Task InvokeAsync_ShouldUseCorrelationIdFromContext()
     {
-        var correlationId = "test-correlation-id-123";
         var context = TestHelper.CreateHttpContext();
-        context.Items["CorrelationId"] = correlationId;
+        context.Items[Constants.Correlation.ContextItemKey] = Constants.Correlation.TestCorrelationId;
         var next = TestHelper.CreateMockNext();
         var middleware = new RequestLoggingMiddleware(next, _logger);
 
@@ -82,7 +81,7 @@ public class RequestLoggingMiddlewareTests
         _logger.Received().Log(
             LogLevel.Information,
             Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains(correlationId)),
+            Arg.Is<object>(o => o.ToString()!.Contains(Constants.Correlation.TestCorrelationId)),
             Arg.Any<Exception>(),
             Arg.Any<Func<object, Exception?, string>>());
     }
@@ -91,7 +90,7 @@ public class RequestLoggingMiddlewareTests
     public async Task InvokeAsync_ShouldCallNextMiddleware()
     {
         var context = TestHelper.CreateHttpContext();
-        context.Items["CorrelationId"] = "test-id";
+        context.Items[Constants.Correlation.ContextItemKey] = Constants.Correlation.TestCorrelationIdShort;
         var nextCalled = false;
         var next = TestHelper.CreateMockNext(ctx => nextCalled = true);
         var middleware = new RequestLoggingMiddleware(next, _logger);
