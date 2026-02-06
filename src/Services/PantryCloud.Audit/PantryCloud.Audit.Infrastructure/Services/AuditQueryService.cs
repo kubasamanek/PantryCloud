@@ -28,8 +28,10 @@ public class AuditQueryService(
 
         if (request.To.HasValue)
         {
-            var to = request.To.Value.Date.AddDays(1);
-            query = query.Where(e => e.OccurredAt < to);
+            // To is interpreted as "through end of this date" (date portion only)
+            // time component is ignored.
+            var toExclusive = request.To.Value.Date.AddDays(1);
+            query = query.Where(e => e.OccurredAt < toExclusive);
         }
 
         if (!string.IsNullOrWhiteSpace(request.ActionType))
