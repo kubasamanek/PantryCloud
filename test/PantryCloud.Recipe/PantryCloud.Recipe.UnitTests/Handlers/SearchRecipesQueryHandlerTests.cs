@@ -18,7 +18,7 @@ public class SearchRecipesQueryHandlerTests
             .Returns(searchResponse);
 
         var handler = new SearchRecipesQueryHandler(searchService);
-        var request = new SearchRecipesRequestDto(["chicken", "rice"]);
+        var request = new SearchRecipesRequestDto([..Constants.Search.IngredientsChickenRice]);
         var query = new SearchRecipesQuery(request);
 
         var result = await handler.Handle(query, CancellationToken.None);
@@ -37,12 +37,12 @@ public class SearchRecipesQueryHandlerTests
             .Returns(searchResponse);
 
         var handler = new SearchRecipesQueryHandler(searchService);
-        var request = new SearchRecipesRequestDto(["garlic"]);
+        var request = new SearchRecipesRequestDto([..Constants.Search.IngredientsGarlic]);
         var query = new SearchRecipesQuery(request);
 
         await handler.Handle(query, CancellationToken.None);
 
-        var expectedIngredients = new List<string> { "garlic" };
+        var expectedIngredients = new List<string>(Constants.Search.IngredientsGarlic);
         await searchService.Received(1).SearchRecipesAsync(
             Arg.Is<SearchRecipesRequestDto>(r => r.Ingredients.SequenceEqual(expectedIngredients)),
             Arg.Any<CancellationToken>());

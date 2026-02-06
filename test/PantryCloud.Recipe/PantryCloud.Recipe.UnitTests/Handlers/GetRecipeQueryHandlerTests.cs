@@ -16,19 +16,19 @@ public class GetRecipeQueryHandlerTests
     [Fact]
     public async Task Handle_ShouldReturnRecipe_WhenRepositoryReturnsSuccess()
     {
-        var recipeDto = CreateMinimalRecipeDto(Constants.RecipeId, "Test Recipe");
+        var recipeDto = CreateMinimalRecipeDto(Constants.Recipe.Id, Constants.Recipe.TestTitle);
         var repo = Substitute.For<IRecipeRepository>();
-        repo.GetByIdAsync(Constants.RecipeId, Arg.Any<CancellationToken>())
+        repo.GetByIdAsync(Constants.Recipe.Id, Arg.Any<CancellationToken>())
             .Returns(recipeDto);
 
         var handler = new GetRecipeQueryHandler(repo);
-        var query = new GetRecipeQuery(new GetRecipeRequestDto(Constants.RecipeId));
+        var query = new GetRecipeQuery(new GetRecipeRequestDto(Constants.Recipe.Id));
 
         var result = await handler.Handle(query, CancellationToken.None);
 
         result.IsError.ShouldBeFalse();
-        result.Value.Recipe.Id.ShouldBe(Constants.RecipeId);
-        result.Value.Recipe.Title.ShouldBe("Test Recipe");
+        result.Value.Recipe.Id.ShouldBe(Constants.Recipe.Id);
+        result.Value.Recipe.Title.ShouldBe(Constants.Recipe.TestTitle);
     }
 
     [Fact]
@@ -39,12 +39,12 @@ public class GetRecipeQueryHandlerTests
             .Returns(ErrorOr<RecipeDto>.From([RecipeErrors.RecipeNotFound]));
 
         var handler = new GetRecipeQueryHandler(repo);
-        var query = new GetRecipeQuery(new GetRecipeRequestDto(Constants.RecipeId));
+        var query = new GetRecipeQuery(new GetRecipeRequestDto(Constants.Recipe.Id));
 
         var result = await handler.Handle(query, CancellationToken.None);
 
         result.IsError.ShouldBeTrue();
-        result.Errors.ShouldContain(e => e.Code == "Recipe.NotFound");
+        result.Errors.ShouldContain(e => e.Code == Constants.Errors.RecipeNotFound);
     }
 
     private static RecipeDto CreateMinimalRecipeDto(Guid id, string title) =>
