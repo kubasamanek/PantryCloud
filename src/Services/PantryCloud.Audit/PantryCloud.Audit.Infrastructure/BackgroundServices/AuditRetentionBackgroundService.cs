@@ -22,7 +22,8 @@ public class AuditRetentionBackgroundService(
 
         using var timer = new PeriodicTimer(interval);
 
-        do
+        // Wait for the first tick before running cleanup so we don't run immediately on startup.
+        while (await timer.WaitForNextTickAsync(stoppingToken))
         {
             try
             {
@@ -46,7 +47,6 @@ public class AuditRetentionBackgroundService(
                 logger.LogError(ex, "Error during audit retention cleanup");
             }
         }
-        while (await timer.WaitForNextTickAsync(stoppingToken));
 
         logger.LogInformation("Audit retention job stopped");
     }
