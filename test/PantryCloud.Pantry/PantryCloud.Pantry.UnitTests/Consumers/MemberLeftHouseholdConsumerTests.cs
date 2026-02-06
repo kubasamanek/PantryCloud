@@ -19,18 +19,18 @@ public class MemberLeftHouseholdConsumerTests
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
         {
-            UserId = Constants.UserId,
-            HouseholdId = Constants.HouseholdId,
-            JoinedAt = Constants.ThirtyDaysAgo
+            UserId = Constants.User.Id,
+            HouseholdId = Constants.Household.Id,
+            JoinedAt = Constants.Dates.ThirtyDaysAgo
         });
         await db.SaveChangesAsync();
 
         var leftAt = DateTime.UtcNow;
         var @event = new MemberLeftHouseholdEvent
         {
-            HouseholdId = Constants.HouseholdId,
-            MemberId = Constants.UserId,
-            MemberEmail = Constants.UserEmail,
+            HouseholdId = Constants.Household.Id,
+            MemberId = Constants.User.Id,
+            MemberEmail = Constants.User.Email,
             LeftAt = leftAt,
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -42,7 +42,7 @@ public class MemberLeftHouseholdConsumerTests
         await consumer.Consume(context);
 
         var membership = await db.UserHouseholdMemberships
-            .FirstOrDefaultAsync(m => m.UserId == Constants.UserId && m.HouseholdId == Constants.HouseholdId);
+            .FirstOrDefaultAsync(m => m.UserId == Constants.User.Id && m.HouseholdId == Constants.Household.Id);
 
         membership.ShouldNotBeNull();
         membership.LeftAt.ShouldNotBeNull();
@@ -58,9 +58,9 @@ public class MemberLeftHouseholdConsumerTests
 
         var @event = new MemberLeftHouseholdEvent
         {
-            HouseholdId = Constants.HouseholdId,
-            MemberId = Constants.UserId,
-            MemberEmail = Constants.UserEmail,
+            HouseholdId = Constants.Household.Id,
+            MemberId = Constants.User.Id,
+            MemberEmail = Constants.User.Email,
             LeftAt = DateTime.UtcNow,
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -72,7 +72,7 @@ public class MemberLeftHouseholdConsumerTests
         await consumer.Consume(context);
 
         var membership = await db.UserHouseholdMemberships
-            .FirstOrDefaultAsync(m => m.HouseholdId == Constants.HouseholdId && m.LeftAt == null);
+            .FirstOrDefaultAsync(m => m.HouseholdId == Constants.Household.Id && m.LeftAt == null);
 
         membership.ShouldBeNull();
     }
@@ -84,21 +84,21 @@ public class MemberLeftHouseholdConsumerTests
         var logger = TestHelper.MockLogger<MemberLeftHouseholdConsumer>();
         var consumer = new MemberLeftHouseholdConsumer(db, logger);
 
-        var originalLeftAt = Constants.FiveDaysAgo;
+        var originalLeftAt = Constants.Dates.FiveDaysAgo;
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
         {
-            UserId = Constants.UserId,
-            HouseholdId = Constants.HouseholdId,
-            JoinedAt = Constants.ThirtyDaysAgo,
+            UserId = Constants.User.Id,
+            HouseholdId = Constants.Household.Id,
+            JoinedAt = Constants.Dates.ThirtyDaysAgo,
             LeftAt = originalLeftAt
         });
         await db.SaveChangesAsync();
 
         var @event = new MemberLeftHouseholdEvent
         {
-            HouseholdId = Constants.HouseholdId,
-            MemberId = Constants.UserId,
-            MemberEmail = Constants.UserEmail,
+            HouseholdId = Constants.Household.Id,
+            MemberId = Constants.User.Id,
+            MemberEmail = Constants.User.Email,
             LeftAt = DateTime.UtcNow,
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -110,7 +110,7 @@ public class MemberLeftHouseholdConsumerTests
         await consumer.Consume(context);
 
         var membership = await db.UserHouseholdMemberships
-            .FirstOrDefaultAsync(m => m.UserId == Constants.UserId && m.HouseholdId == Constants.HouseholdId);
+            .FirstOrDefaultAsync(m => m.UserId == Constants.User.Id && m.HouseholdId == Constants.Household.Id);
 
         membership.ShouldNotBeNull();
         membership.LeftAt.ShouldBe(originalLeftAt);

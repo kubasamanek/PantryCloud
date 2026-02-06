@@ -13,7 +13,7 @@ internal static class TestHelper
     public static PantryDbContext CreateInMemoryContext(string dbName, IUserContext? userContext = null)
     {
         var options = new DbContextOptionsBuilder<PantryDbContext>()
-            .UseInMemoryDatabase(dbName)
+            .UseInMemoryDatabase(dbName + "_" + Guid.NewGuid())
             .Options;
         return new TestPantryDbContext(options, userContext);
     }

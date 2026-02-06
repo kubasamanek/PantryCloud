@@ -4,55 +4,95 @@ namespace PantryCloud.Pantry.UnitTests;
 
 internal static class Constants
 {
-    // User constants
-    public static readonly Guid UserId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-    public const string UserEmail = "user@example.com";
-    
-    // Household constants
-    public static readonly Guid HouseholdId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
-    public static readonly Guid OldHouseholdId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
-    
-    // Pantry item constants
-    public static readonly Guid PantryItemId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
-    public const string PantryItemName = "Test Item";
-    public const decimal PantryItemQuantity = 1.5m;
-    public static readonly Unit PantryItemUnit = Unit.Kilogram;
-    public static readonly DateTime? PantryItemExpirationDate = DateTime.UtcNow.AddDays(7);
-    public const string PantryItemCategory = "Fruits";
-    public const string PantryItemNotes = "Test notes";
-    public const string PantryItemImageUrl = "https://example.com/image.jpg";
-    
-    // Test data constants for list operations
-    public const string TestItem1Name = "Item 1";
-    public const string TestItem2Name = "Item 2";
-    public const decimal TestItem1Quantity = 1m;
-    public const decimal TestItem2Quantity = 2m;
-    public static readonly Unit TestItem1Unit = Unit.Piece;
-    public static readonly Unit TestItem2Unit = Unit.Kilogram;
-    
-    // Test data constants for filtering
-    public const string TestAppleName = "Apple";
-    public const string TestBananaName = "Banana";
-    public const string TestBreadName = "Bread";
-    public const string TestFruitsCategory = "Fruits";
-    public const string TestBakeryCategory = "Bakery";
-    
-    // Test data constants for update operations
-    public const string UpdatedItemName = "Updated Name";
-    public const decimal UpdatedItemQuantity = 2.5m;
-    public static readonly Unit UpdatedItemUnit = Unit.Liter;
-    public const string UpdatedItemCategory = "Updated Category";
-    public const string UpdatedItemNotes = "Updated Notes";
-    public const string UpdatedItemImageUrl = "https://example.com/updated.jpg";
-    public static readonly DateTime UpdatedItemExpirationDate = DateTime.UtcNow.AddDays(14);
-    
-    // Row version constants
-    public static readonly byte[] DefaultRowVersion = [1, 2, 3, 4];
-    public static readonly byte[] TestRowVersion1 = [1];
-    public static readonly byte[] TestRowVersion2 = [2];
-    
-    // Date constants
-    public static readonly DateTime ThirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
-    public static readonly DateTime TenDaysAgo = DateTime.UtcNow.AddDays(-10);
-    public static readonly DateTime FiveDaysAgo = DateTime.UtcNow.AddDays(-5);
+    public static class User
+    {
+        public static readonly Guid Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        public const string Email = "user@example.com";
+    }
+
+    public static class Household
+    {
+        public static readonly Guid Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        public static readonly Guid OldId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
+    }
+
+    public static class PantryItem
+    {
+        public static readonly Guid Id = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        public const string Name = "Test Item";
+        public const decimal Quantity = 1.5m;
+        public static readonly Unit Unit = Unit.Kilogram;
+        public const string Category = "Fruits";
+        public const string Notes = "Test notes";
+        public const string ImageUrl = "https://example.com/image.jpg";
+        public static readonly DateTime? ExpirationDate = DateTime.UtcNow.AddDays(7);
+    }
+
+    public static class UpdatedPantryItem
+    {
+        public const string Name = "Updated Name";
+        public const decimal Quantity = 2.5m;
+        public static readonly Unit Unit = Unit.Liter;
+        public const string Category = "Updated Category";
+        public const string Notes = "Updated Notes";
+        public const string ImageUrl = "https://example.com/updated.jpg";
+        public static readonly DateTime ExpirationDate = DateTime.UtcNow.AddDays(14);
+    }
+
+    public static class ListItems
+    {
+        public const string Item1Name = "Item 1";
+        public const string Item2Name = "Item 2";
+        public const decimal Item1Quantity = 1m;
+        public const decimal Item2Quantity = 2m;
+        public static readonly Unit Item1Unit = Unit.Piece;
+        public static readonly Unit Item2Unit = Unit.Kilogram;
+    }
+
+    public static class FilterItems
+    {
+        public const string AppleName = "Apple";
+        public const string BananaName = "Banana";
+        public const string BreadName = "Bread";
+        public const string FruitsCategory = "Fruits";
+        public const string BakeryCategory = "Bakery";
+    }
+
+    public static class SearchCaseInsensitive
+    {
+        public const string MilkName = "Milk";
+        public const string SearchLower = "milk";
+        public const string SearchUpper = "MILK";
+    }
+
+    public static class ExpirationCheck
+    {
+        public const string MilkName = "Milk";
+        public const string BreadName = "Bread";
+        public const string EggsName = "Eggs";
+        public const string NoExpiryName = "No expiry";
+    }
+
+    public static class RowVersion
+    {
+        public static readonly byte[] Default = [1, 2, 3, 4];
+        public static readonly byte[] Mismatched = [9, 9, 9, 9];
+        public static readonly byte[] Version1 = [1];
+        public static readonly byte[] Version2 = [2];
+    }
+
+    public static class Dates
+    {
+        public static readonly DateTime ThirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
+        public static readonly DateTime TenDaysAgo = DateTime.UtcNow.AddDays(-10);
+        public static readonly DateTime FiveDaysAgo = DateTime.UtcNow.AddDays(-5);
+    }
+
+    public static class Pagination
+    {
+        public const int Page1 = 1;
+        public const int PageSize50 = 50;
+    }
+
+    public static readonly Guid NonExistentItemId = Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee");
 }

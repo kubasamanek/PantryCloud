@@ -27,9 +27,9 @@ public class ExpirationCheckServiceTests
 
         await using var db = TestHelper.CreateInMemoryContext(nameof(RunAsync_ShouldPublishEvent_WhenItemsExpiringInNextThreeDays));
         db.PantryItems.AddRange(
-            CreatePantryItem(householdId, "Milk", today),
-            CreatePantryItem(householdId, "Bread", tomorrow),
-            CreatePantryItem(householdId, "Eggs", dayAfterTomorrow));
+            CreatePantryItem(householdId, Constants.ExpirationCheck.MilkName, today),
+            CreatePantryItem(householdId, Constants.ExpirationCheck.BreadName, tomorrow),
+            CreatePantryItem(householdId, Constants.ExpirationCheck.EggsName, dayAfterTomorrow));
         await db.SaveChangesAsync();
 
         var publishedEvents = new List<PantryItemsExpiringSoonEvent>();
@@ -53,9 +53,9 @@ public class ExpirationCheckServiceTests
         evt.HouseholdId.ShouldBe(householdId);
         evt.Items.Count.ShouldBe(3);
 
-        evt.Items.ShouldContain(i => i.Name == "Milk" && i.DaysUntilExpiry == 0);
-        evt.Items.ShouldContain(i => i.Name == "Bread" && i.DaysUntilExpiry == 1);
-        evt.Items.ShouldContain(i => i.Name == "Eggs" && i.DaysUntilExpiry == 2);
+        evt.Items.ShouldContain(i => i.Name == Constants.ExpirationCheck.MilkName && i.DaysUntilExpiry == 0);
+        evt.Items.ShouldContain(i => i.Name == Constants.ExpirationCheck.BreadName && i.DaysUntilExpiry == 1);
+        evt.Items.ShouldContain(i => i.Name == Constants.ExpirationCheck.EggsName && i.DaysUntilExpiry == 2);
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public class ExpirationCheckServiceTests
         var now = new DateTime(2026, 2, 2, 12, 0, 0, DateTimeKind.Utc);
 
         await using var db = TestHelper.CreateInMemoryContext(nameof(RunAsync_ShouldNotPublish_WhenNoExpiringItems));
-        db.PantryItems.Add(CreatePantryItem(householdId, "Milk", now.AddDays(5)));
+        db.PantryItems.Add(CreatePantryItem(householdId, Constants.ExpirationCheck.MilkName, now.AddDays(5)));
         await db.SaveChangesAsync();
 
         var messageBus = Substitute.For<IMessageBus>();
@@ -88,8 +88,8 @@ public class ExpirationCheckServiceTests
         var today = now.Date;
 
         await using var db = TestHelper.CreateInMemoryContext(nameof(RunAsync_ShouldPublishPerHousehold_WhenMultipleHouseholdsHaveExpiringItems));
-        db.PantryItems.Add(CreatePantryItem(household1, "Milk", today));
-        db.PantryItems.Add(CreatePantryItem(household2, "Bread", today));
+        db.PantryItems.Add(CreatePantryItem(household1, Constants.ExpirationCheck.MilkName, today));
+        db.PantryItems.Add(CreatePantryItem(household2, Constants.ExpirationCheck.BreadName, today));
         await db.SaveChangesAsync();
 
         var publishedEvents = new List<PantryItemsExpiringSoonEvent>();
@@ -109,8 +109,8 @@ public class ExpirationCheckServiceTests
         await service.RunAsync(CancellationToken.None);
 
         publishedEvents.Count.ShouldBe(2);
-        publishedEvents.ShouldContain(e => e.HouseholdId == household1 && e.Items.Count == 1 && e.Items[0].Name == "Milk");
-        publishedEvents.ShouldContain(e => e.HouseholdId == household2 && e.Items.Count == 1 && e.Items[0].Name == "Bread");
+        publishedEvents.ShouldContain(e => e.HouseholdId == household1 && e.Items.Count == 1 && e.Items[0].Name == Constants.ExpirationCheck.MilkName);
+        publishedEvents.ShouldContain(e => e.HouseholdId == household2 && e.Items.Count == 1 && e.Items[0].Name == Constants.ExpirationCheck.BreadName);
     }
 
     [Fact]
@@ -121,8 +121,8 @@ public class ExpirationCheckServiceTests
         var today = now.Date;
 
         await using var db = TestHelper.CreateInMemoryContext(nameof(RunAsync_ShouldIgnoreItemsWithoutExpirationDate));
-        db.PantryItems.Add(CreatePantryItem(householdId, "Milk", today));
-        db.PantryItems.Add(CreatePantryItem(householdId, "No expiry", null));
+        db.PantryItems.Add(CreatePantryItem(householdId, Constants.ExpirationCheck.MilkName, today));
+        db.PantryItems.Add(CreatePantryItem(householdId, Constants.ExpirationCheck.NoExpiryName, null));
         await db.SaveChangesAsync();
 
         var publishedEvents = new List<PantryItemsExpiringSoonEvent>();
@@ -143,7 +143,7 @@ public class ExpirationCheckServiceTests
 
         publishedEvents.ShouldHaveSingleItem();
         publishedEvents[0].Items.Count.ShouldBe(1);
-        publishedEvents[0].Items[0].Name.ShouldBe("Milk");
+        publishedEvents[0].Items[0].Name.ShouldBe(Constants.ExpirationCheck.MilkName);
     }
 
     private static PantryItem CreatePantryItem(Guid householdId, string name, DateTime? expirationDate)

@@ -16,6 +16,8 @@ on:
       - 'src/Services/PantryCloud.Pantry/**'
       - 'src/Services/PantryCloud.Household/PantryCloud.Household.Application/**'
       - 'src/BuildingBlocks/**'
+      - 'test/PantryCloud.Pantry/**'
+      - '.github/workflows/pantry.yml'
   workflow_dispatch:
 
 env:
@@ -30,8 +32,8 @@ permissions:
   contents: read
 
 jobs:
-  ci:
-    name: Build & Test
+  build:
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
@@ -49,14 +51,75 @@ jobs:
       - name: Build
         run: dotnet build ${{ env.SERVICE_PROJECT }} --no-restore --configuration Release
 
-      - name: Run Tests
+  test:
+    name: Test & Coverage
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.TEST_PROJECT }}
+
+      - name: Build tests
+        run: dotnet build ${{ env.TEST_PROJECT }} --no-restore --configuration Release
+
+      - name: Run Unit Tests with Coverage
         run: |
           dotnet test ${{ env.TEST_PROJECT }} \
+            --no-build \
             --configuration Release \
+            --collect:"XPlat Code Coverage" \
             --results-directory ./coverage \
             --logger "trx;LogFileName=test_results.trx" \
             --verbosity normal
-        continue-on-error: true
+
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      - name: Generate Coverage Report
+        run: |
+          reportgenerator \
+            "-reports:./coverage/**/coverage.cobertura.xml" \
+            "-targetdir:./coverage/report" \
+            "-reporttypes:Html;Cobertura;TextSummary"
+
+      - name: Display Coverage Summary
+        run: cat ./coverage/report/Summary.txt
+
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v5
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/**/coverage.cobertura.xml
+          flags: pantry-service
+          name: pantry-service-coverage
+          fail_ci_if_error: false
+
+      - name: Upload Test Results to Codecov
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/**/*.trx
+          report_type: test_results
+          flags: pantry-service
+
+      - name: Upload Coverage Report as Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-pantry
+          path: ./coverage/report/
+          retention-days: 30
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
@@ -68,8 +131,8 @@ jobs:
           comment_mode: off
   cd:
     name: Build & Push Docker image
-    needs: ci
-    if: github.event_name == 'push'
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
 
     steps:

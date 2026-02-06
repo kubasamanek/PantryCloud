@@ -22,9 +22,9 @@ public class MemberJoinedHouseholdConsumerTests
         var joinedAt = DateTime.UtcNow;
         var @event = new MemberJoinedHouseholdEvent
         {
-            HouseholdId = Constants.HouseholdId,
-            NewMemberId = Constants.UserId,
-            MemberEmail = Constants.UserEmail,
+            HouseholdId = Constants.Household.Id,
+            NewMemberId = Constants.User.Id,
+            MemberEmail = Constants.User.Email,
             JoinedAt = joinedAt,
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -36,7 +36,7 @@ public class MemberJoinedHouseholdConsumerTests
         await consumer.Consume(context);
 
         var membership = await db.UserHouseholdMemberships
-            .FirstOrDefaultAsync(m => m.UserId == Constants.UserId && m.HouseholdId == Constants.HouseholdId);
+            .FirstOrDefaultAsync(m => m.UserId == Constants.User.Id && m.HouseholdId == Constants.Household.Id);
 
         membership.ShouldNotBeNull();
         membership.LeftAt.ShouldBeNull();
@@ -50,12 +50,12 @@ public class MemberJoinedHouseholdConsumerTests
         var logger = TestHelper.MockLogger<MemberJoinedHouseholdConsumer>();
         var consumer = new MemberJoinedHouseholdConsumer(db, logger);
 
-        var oldJoinedAt = Constants.ThirtyDaysAgo;
+        var oldJoinedAt = Constants.Dates.ThirtyDaysAgo;
 
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
         {
-            UserId = Constants.UserId,
-            HouseholdId = Constants.OldHouseholdId,
+            UserId = Constants.User.Id,
+            HouseholdId = Constants.Household.OldId,
             JoinedAt = oldJoinedAt
         });
         await db.SaveChangesAsync();
@@ -63,9 +63,9 @@ public class MemberJoinedHouseholdConsumerTests
         var joinedAt = DateTime.UtcNow;
         var @event = new MemberJoinedHouseholdEvent
         {
-            HouseholdId = Constants.HouseholdId,
-            NewMemberId = Constants.UserId,
-            MemberEmail = Constants.UserEmail,
+            HouseholdId = Constants.Household.Id,
+            NewMemberId = Constants.User.Id,
+            MemberEmail = Constants.User.Email,
             JoinedAt = joinedAt,
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -78,10 +78,10 @@ public class MemberJoinedHouseholdConsumerTests
 
         var membership = await db.UserHouseholdMemberships
             .AsNoTracking()
-            .FirstOrDefaultAsync(m => m.UserId == Constants.UserId);
+            .FirstOrDefaultAsync(m => m.UserId == Constants.User.Id);
 
         membership.ShouldNotBeNull();
-        membership.HouseholdId.ShouldBe(Constants.HouseholdId);
+        membership.HouseholdId.ShouldBe(Constants.Household.Id);
         membership.LeftAt.ShouldBeNull();
         // JoinedAt should be updated to the new join date when switching households
         membership.JoinedAt.ShouldBe(joinedAt);
@@ -94,12 +94,12 @@ public class MemberJoinedHouseholdConsumerTests
         var logger = TestHelper.MockLogger<MemberJoinedHouseholdConsumer>();
         var consumer = new MemberJoinedHouseholdConsumer(db, logger);
 
-        var leftAt = Constants.TenDaysAgo;
+        var leftAt = Constants.Dates.TenDaysAgo;
         db.UserHouseholdMemberships.Add(new UserHouseholdMembership
         {
-            UserId = Constants.UserId,
-            HouseholdId = Constants.HouseholdId,
-            JoinedAt = Constants.ThirtyDaysAgo,
+            UserId = Constants.User.Id,
+            HouseholdId = Constants.Household.Id,
+            JoinedAt = Constants.Dates.ThirtyDaysAgo,
             LeftAt = leftAt
         });
         await db.SaveChangesAsync();
@@ -107,9 +107,9 @@ public class MemberJoinedHouseholdConsumerTests
         var joinedAt = DateTime.UtcNow;
         var @event = new MemberJoinedHouseholdEvent
         {
-            HouseholdId = Constants.HouseholdId,
-            NewMemberId = Constants.UserId,
-            MemberEmail = Constants.UserEmail,
+            HouseholdId = Constants.Household.Id,
+            NewMemberId = Constants.User.Id,
+            MemberEmail = Constants.User.Email,
             JoinedAt = joinedAt,
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -121,7 +121,7 @@ public class MemberJoinedHouseholdConsumerTests
         await consumer.Consume(context);
 
         var membership = await db.UserHouseholdMemberships
-            .FirstOrDefaultAsync(m => m.UserId == Constants.UserId && m.HouseholdId == Constants.HouseholdId);
+            .FirstOrDefaultAsync(m => m.UserId == Constants.User.Id && m.HouseholdId == Constants.Household.Id);
 
         membership.ShouldNotBeNull();
         membership.LeftAt.ShouldBeNull();
