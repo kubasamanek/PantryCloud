@@ -29,7 +29,7 @@ public class OwnershipTransferredConsumerTests
             HouseholdId = householdId,
             PreviousOwnerId = previousOwnerId,
             NewOwnerId = newOwnerId,
-            NewOwnerEmail = "newowner@example.com",
+            NewOwnerEmail = Constants.User.NewOwnerEmail,
             TransferredAt = DateTime.UtcNow,
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -43,10 +43,10 @@ public class OwnershipTransferredConsumerTests
         await notificationService.Received(1).SendToHouseholdAsync(
             householdId,
             Arg.Is<Core.Dtos.NotificationDto>(n =>
-                n.Title == "Ownership Transferred" &&
+                n.Title == Constants.NotificationTitles.OwnershipTransferred &&
                 n.Type == Core.Enums.NotificationType.Success &&
-                n.Message.Contains("newowner@example.com") &&
-                n.Message.Contains("household owner")),
+                n.Message.Contains(Constants.User.NewOwnerEmail) &&
+                n.Message.Contains(Constants.TestData.HouseholdOwnerMessage)),
             Arg.Any<CancellationToken>());
     }
 
@@ -80,7 +80,7 @@ public class OwnershipTransferredConsumerTests
         await notificationService.Received(1).SendToHouseholdAsync(
             householdId,
             Arg.Is<Core.Dtos.NotificationDto>(n =>
-                n.Title == "Ownership Transferred" &&
+                n.Title == Constants.NotificationTitles.OwnershipTransferred &&
                 n.Message.Contains(newOwnerId.ToString())),
             Arg.Any<CancellationToken>());
     }

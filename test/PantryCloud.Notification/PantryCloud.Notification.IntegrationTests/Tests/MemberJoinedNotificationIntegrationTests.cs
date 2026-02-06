@@ -31,24 +31,24 @@ public class MemberJoinedNotificationIntegrationTests(NotificationTestFixture fi
             {
                 HouseholdId = householdId,
                 NewMemberId = userB,
-                MemberEmail = "userb@test.com",
+                MemberEmail = Constants.TestData.UserBEmail,
                 JoinedAt = DateTime.UtcNow.AddMinutes(-1),
                 CorrelationId = Guid.NewGuid().ToString()
             });
-            await Task.Delay(1500);
+            await Task.Delay(Constants.Delays.ShortMs);
 
             await fixture.PublishEventAsync(new MemberJoinedHouseholdEvent
             {
                 HouseholdId = householdId,
                 NewMemberId = userA,
-                MemberEmail = "usera@test.com",
+                MemberEmail = Constants.TestData.UserAEmail,
                 JoinedAt = DateTime.UtcNow,
                 CorrelationId = Guid.NewGuid().ToString()
             });
-            await Task.Delay(2000);
+            await Task.Delay(Constants.Delays.DefaultMs);
 
-            receivedA.ShouldContain(n => n.Title == "Welcome to the Household");
-            receivedB.ShouldContain(n => n.Title == "Member Joined Household");
+            receivedA.ShouldContain(n => n.Title == Constants.NotificationTitles.WelcomeToHousehold);
+            receivedB.ShouldContain(n => n.Title == Constants.NotificationTitles.MemberJoinedHousehold);
         }
         finally
         {

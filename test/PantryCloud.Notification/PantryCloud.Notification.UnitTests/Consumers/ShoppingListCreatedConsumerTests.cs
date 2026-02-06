@@ -23,7 +23,7 @@ public class ShoppingListCreatedConsumerTests
         {
             HouseholdId = householdId,
             ShoppingListId = Guid.NewGuid(),
-            ShoppingListName = "Weekly Groceries",
+            ShoppingListName = Constants.TestData.ShoppingListName,
             CreatedByUserId = createdByUserId,
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -38,10 +38,10 @@ public class ShoppingListCreatedConsumerTests
             householdId,
             createdByUserId,
             Arg.Is<Core.Dtos.NotificationDto>(n =>
-                n.Title == "New Shopping List" &&
+                n.Title == Constants.NotificationTitles.NewShoppingList &&
                 n.Type == Core.Enums.NotificationType.Info &&
-                n.Message.Contains("Weekly Groceries") &&
-                n.Message.Contains("created")),
+                n.Message.Contains(Constants.TestData.ShoppingListName) &&
+                n.Message.Contains(Constants.TestData.Created)),
             Arg.Any<CancellationToken>());
     }
 }

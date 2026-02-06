@@ -27,7 +27,7 @@ public class MemberJoinedHouseholdConsumerTests
         {
             HouseholdId = householdId,
             NewMemberId = newMemberId,
-            MemberEmail = "test@example.com",
+            MemberEmail = Constants.User.Email,
             JoinedAt = DateTime.UtcNow,
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -41,7 +41,7 @@ public class MemberJoinedHouseholdConsumerTests
         await notificationService.Received(1).SendToUserAsync(
             newMemberId,
             Arg.Is<Core.Dtos.NotificationDto>(n =>
-                n.Title == "Welcome to the Household" &&
+                n.Title == Constants.NotificationTitles.WelcomeToHousehold &&
                 n.Type == Core.Enums.NotificationType.Success),
             Arg.Any<CancellationToken>());
 
@@ -49,9 +49,9 @@ public class MemberJoinedHouseholdConsumerTests
             householdId,
             newMemberId,
             Arg.Is<Core.Dtos.NotificationDto>(n =>
-                n.Title == "Member Joined Household" &&
+                n.Title == Constants.NotificationTitles.MemberJoinedHousehold &&
                 n.Type == Core.Enums.NotificationType.Success &&
-                n.Message.Contains("test@example.com")),
+                n.Message.Contains(Constants.User.Email)),
             Arg.Any<CancellationToken>());
     }
 
@@ -69,7 +69,7 @@ public class MemberJoinedHouseholdConsumerTests
         {
             HouseholdId = householdId,
             NewMemberId = newMemberId,
-            MemberEmail = "test@example.com",
+            MemberEmail = Constants.User.Email,
             JoinedAt = DateTime.UtcNow,
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -99,7 +99,7 @@ public class MemberJoinedHouseholdConsumerTests
         {
             UserId = memberId,
             HouseholdId = oldHouseholdId,
-            JoinedAt = DateTime.UtcNow.AddDays(-1)
+            JoinedAt = Constants.Dates.OneDayAgo
         });
         await db.SaveChangesAsync();
 
@@ -111,7 +111,7 @@ public class MemberJoinedHouseholdConsumerTests
         {
             HouseholdId = newHouseholdId,
             NewMemberId = memberId,
-            MemberEmail = "test@example.com",
+            MemberEmail = Constants.User.Email,
             JoinedAt = DateTime.UtcNow,
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -140,7 +140,7 @@ public class MemberJoinedHouseholdConsumerTests
         {
             UserId = memberId,
             HouseholdId = householdId,
-            JoinedAt = DateTime.UtcNow.AddDays(-1),
+            JoinedAt = Constants.Dates.OneDayAgo,
             LeftAt = leftAt
         });
         await db.SaveChangesAsync();
@@ -153,7 +153,7 @@ public class MemberJoinedHouseholdConsumerTests
         {
             HouseholdId = householdId,
             NewMemberId = memberId,
-            MemberEmail = "test@example.com",
+            MemberEmail = Constants.User.Email,
             JoinedAt = DateTime.UtcNow,
             CorrelationId = Guid.NewGuid().ToString()
         };

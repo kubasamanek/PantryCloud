@@ -24,9 +24,9 @@ public class PantryItemsExpiringSoonConsumerTests
             HouseholdId = householdId,
             Items =
             [
-                new ExpiringItemDto(Guid.NewGuid(), "Milk", DateTime.UtcNow, 0),
-                new ExpiringItemDto(Guid.NewGuid(), "Bread", DateTime.UtcNow.AddDays(1), 1),
-                new ExpiringItemDto(Guid.NewGuid(), "Eggs", DateTime.UtcNow.AddDays(2), 2)
+                new ExpiringItemDto(Guid.NewGuid(), Constants.TestData.ItemNameMilk, DateTime.UtcNow, 0),
+                new ExpiringItemDto(Guid.NewGuid(), Constants.TestData.ItemNameBread, DateTime.UtcNow.AddDays(1), 1),
+                new ExpiringItemDto(Guid.NewGuid(), Constants.TestData.ItemNameEggs, DateTime.UtcNow.AddDays(2), 2)
             ],
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -40,12 +40,12 @@ public class PantryItemsExpiringSoonConsumerTests
         await notificationService.Received(1).SendToHouseholdAsync(
             householdId,
             Arg.Is<Core.Dtos.NotificationDto>(n =>
-                n.Title == "Pantry Items Expiring Soon" &&
+                n.Title == Constants.NotificationTitles.PantryItemsExpiringSoon &&
                 n.Type == Core.Enums.NotificationType.Warning &&
-                n.Message.Contains("'Milk' expires today") &&
-                n.Message.Contains("'Bread' will expire in one day") &&
-                n.Message.Contains("'Eggs' will expire in two days") &&
-                n.Message.Contains("Items expiring soon")),
+                n.Message.Contains($"'{Constants.TestData.ItemNameMilk}' expires today") &&
+                n.Message.Contains($"'{Constants.TestData.ItemNameBread}' will expire in one day") &&
+                n.Message.Contains($"'{Constants.TestData.ItemNameEggs}' will expire in two days") &&
+                n.Message.Contains(Constants.TestData.ItemsExpiringSoon)),
             Arg.Any<CancellationToken>());
     }
 

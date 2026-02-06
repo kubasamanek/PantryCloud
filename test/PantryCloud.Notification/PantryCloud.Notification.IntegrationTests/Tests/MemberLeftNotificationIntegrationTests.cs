@@ -29,13 +29,13 @@ public class MemberLeftNotificationIntegrationTests(NotificationTestFixture fixt
             {
                 HouseholdId = householdId,
                 MemberId = userB,
-                MemberEmail = "userb@test.com",
+                MemberEmail = Constants.TestData.UserBEmail,
                 LeftAt = DateTime.UtcNow,
                 CorrelationId = Guid.NewGuid().ToString()
             });
-            await Task.Delay(2000);
+            await Task.Delay(Constants.Delays.DefaultMs);
 
-            receivedA.ShouldContain(n => n.Title == "Member Left Household");
+            receivedA.ShouldContain(n => n.Title == Constants.NotificationTitles.MemberLeftHousehold);
         }
         finally
         {

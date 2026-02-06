@@ -36,9 +36,9 @@ public class PreferenceAddedConsumerTests
             householdId,
             userId,
             Arg.Is<Core.Dtos.NotificationDto>(n =>
-                n.Title == "Preferences Updated" &&
+                n.Title == Constants.NotificationTitles.PreferencesUpdated &&
                 n.Type == Core.Enums.NotificationType.Info &&
-                n.Message.Contains("dietary preferences")),
+                n.Message.Contains(Constants.TestData.DietaryPreferences)),
             Arg.Any<CancellationToken>());
     }
 }

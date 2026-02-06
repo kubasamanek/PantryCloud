@@ -22,7 +22,7 @@ public class ShoppingListAllItemsCheckedConsumerTests
         {
             HouseholdId = householdId,
             ShoppingListId = Guid.NewGuid(),
-            ShoppingListName = "Weekly Groceries",
+            ShoppingListName = Constants.TestData.ShoppingListName,
             CheckedByUserId = Guid.NewGuid(),
             CorrelationId = Guid.NewGuid().ToString()
         };
@@ -36,10 +36,10 @@ public class ShoppingListAllItemsCheckedConsumerTests
         await notificationService.Received(1).SendToHouseholdAsync(
             householdId,
             Arg.Is<Core.Dtos.NotificationDto>(n =>
-                n.Title == "Shopping List Complete" &&
+                n.Title == Constants.NotificationTitles.ShoppingListComplete &&
                 n.Type == Core.Enums.NotificationType.Success &&
-                n.Message.Contains("Weekly Groceries") &&
-                n.Message.Contains("checked off")),
+                n.Message.Contains(Constants.TestData.ShoppingListName) &&
+                n.Message.Contains(Constants.TestData.CheckedOff)),
             Arg.Any<CancellationToken>());
     }
 }

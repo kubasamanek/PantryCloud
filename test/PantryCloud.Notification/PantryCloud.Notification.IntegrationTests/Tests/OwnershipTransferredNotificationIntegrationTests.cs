@@ -35,14 +35,14 @@ public class OwnershipTransferredNotificationIntegrationTests(NotificationTestFi
                 HouseholdId = householdId,
                 PreviousOwnerId = previousOwnerId,
                 NewOwnerId = newOwnerId,
-                NewOwnerEmail = "newowner@test.com",
+                NewOwnerEmail = Constants.TestData.NewOwnerEmail,
                 TransferredAt = DateTime.UtcNow,
                 CorrelationId = Guid.NewGuid().ToString()
             });
-            await Task.Delay(2000);
+            await Task.Delay(Constants.Delays.DefaultMs);
 
-            receivedA.ShouldContain(n => n.Title == "Ownership Transferred");
-            receivedB.ShouldContain(n => n.Title == "Ownership Transferred");
+            receivedA.ShouldContain(n => n.Title == Constants.NotificationTitles.OwnershipTransferred);
+            receivedB.ShouldContain(n => n.Title == Constants.NotificationTitles.OwnershipTransferred);
         }
         finally
         {
