@@ -19,7 +19,7 @@ public class DeletePantryItemCommandHandler(
         if (result.IsError)
             return result;
 
-        await messageBus.PublishAsync(new PantryItemDepletedEvent
+        await messageBus.PublishAsync(new PantryItemDeletedEvent
         {
             HouseholdId = result.Value.HouseholdId,
             ItemId = result.Value.Id,

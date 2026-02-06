@@ -32,7 +32,7 @@ public static class ServiceCollectionExtensions
         if (resilienceSettings.Retry.Enabled || resilienceSettings.CircuitBreaker.Enabled)
         {
             // Create policies per service to isolate failures
-            var serviceNames = new[] { "Identity", "Household", "Pantry", "Recipe", "ShoppingList", "Notification" };
+            var serviceNames = new[] { "Identity", "Household", "Pantry", "Recipe", "ShoppingList", "Notification", "Audit" };
             
             foreach (var service in serviceNames)
             {
@@ -177,6 +177,22 @@ public static class ServiceCollectionExtensions
                         ["PathPattern"] = "/{**catch-all}"
                     }
                 ]
+            },
+            new RouteConfig
+            {
+                RouteId = RouteConfiguration.AuditRouteId,
+                ClusterId = RouteConfiguration.AuditClusterId,
+                Match = new RouteMatch
+                {
+                    Path = "/api/audit/{**catch-all}"
+                },
+                Transforms =
+                [
+                    new Dictionary<string, string>
+                    {
+                        ["PathPattern"] = "/{**catch-all}"
+                    }
+                ]
             }
         ];
     }
@@ -196,7 +212,8 @@ public static class ServiceCollectionExtensions
             CreateClusterConfig(RouteConfiguration.PantryClusterId, services.PantryService, "Pantry"),
             CreateClusterConfig(RouteConfiguration.RecipeClusterId, services.RecipeService, "Recipe"),
             CreateClusterConfig(RouteConfiguration.ShoppingListClusterId, services.ShoppingListService, "ShoppingList"),
-            CreateClusterConfig(RouteConfiguration.NotificationClusterId, services.NotificationService, "Notification")
+            CreateClusterConfig(RouteConfiguration.NotificationClusterId, services.NotificationService, "Notification"),
+            CreateClusterConfig(RouteConfiguration.AuditClusterId, services.AuditService, "Audit")
         ];
 
         ClusterConfig CreateClusterConfig(string clusterId, string serviceAddress, string serviceName)
