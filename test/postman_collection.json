@@ -1665,9 +1665,9 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/audit/api/audit/households/{{household_id}}/entries?page=1&pageSize=50",
+              "raw": "{{base_url}}/api/audit/households/{{household_id}}/entries?page=1&pageSize=50",
               "host": ["{{base_url}}"],
-              "path": ["api", "audit", "api", "audit", "households", "{{household_id}}", "entries"],
+              "path": ["api", "audit", "households", "{{household_id}}", "entries"],
               "query": [
                 {"key": "from", "value": "", "disabled": true},
                 {"key": "to", "value": "", "disabled": true},
