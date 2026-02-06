@@ -11,14 +11,13 @@ namespace PantryCloud.Household.UnitTests.Profile;
 
 public class ProfileServiceTests
 {
-    private static readonly Guid UserId = Guid.NewGuid();
     private readonly ILogger<ProfileService> _logger = TestHelper.MockLogger<ProfileService>();
 
     [Fact]
     public async Task GetMyProfileAsync_ReturnsNotFound_WhenNoProfile()
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(GetMyProfileAsync_ReturnsNotFound_WhenNoProfile));
-        var service = new ProfileService(db, TestHelper.CreateMockUserContext(UserId, "test@example.com"), _logger);
+        var service = new ProfileService(db, TestHelper.CreateMockUserContext(Constants.User.Id, Constants.User.Email), _logger);
 
         var result = await service.GetMyProfileAsync(CancellationToken.None);
 
@@ -32,37 +31,37 @@ public class ProfileServiceTests
         await using var db = TestHelper.CreateInMemoryContext(nameof(GetMyProfileAsync_ReturnsProfile_WhenExists));
         db.MemberProfiles.Add(new MemberProfile
         {
-            UserId = UserId,
-            DisplayName = "Test User",
-            AvatarUrl = "https://example.com/avatar.png"
+            UserId = Constants.User.Id,
+            DisplayName = Constants.Profile.DisplayName,
+            AvatarUrl = Constants.Profile.AvatarUrl
         });
         await db.SaveChangesAsync();
 
-        var service = new ProfileService(db, TestHelper.CreateMockUserContext(UserId, "test@example.com"), _logger);
+        var service = new ProfileService(db, TestHelper.CreateMockUserContext(Constants.User.Id, Constants.User.Email), _logger);
 
         var result = await service.GetMyProfileAsync(CancellationToken.None);
 
         result.IsError.ShouldBeFalse();
-        result.Value.DisplayName.ShouldBe("Test User");
-        result.Value.AvatarUrl.ShouldBe("https://example.com/avatar.png");
+        result.Value.DisplayName.ShouldBe(Constants.Profile.DisplayName);
+        result.Value.AvatarUrl.ShouldBe(Constants.Profile.AvatarUrl);
     }
 
     [Fact]
     public async Task UpdateMyProfileAsync_CreatesProfile_WhenNoneExists()
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(UpdateMyProfileAsync_CreatesProfile_WhenNoneExists));
-        var service = new ProfileService(db, TestHelper.CreateMockUserContext(UserId, "test@example.com"), _logger);
+        var service = new ProfileService(db, TestHelper.CreateMockUserContext(Constants.User.Id, Constants.User.Email), _logger);
 
-        var request = new UpdateMyProfileRequestDto("My Display Name", "https://example.com/avatar.png");
+        var request = new UpdateMyProfileRequestDto(Constants.Profile.NewDisplayName, Constants.Profile.AvatarUrl);
         var result = await service.UpdateMyProfileAsync(request, CancellationToken.None);
 
         result.IsError.ShouldBeFalse();
-        result.Value.DisplayName.ShouldBe("My Display Name");
-        result.Value.AvatarUrl.ShouldBe("https://example.com/avatar.png");
+        result.Value.DisplayName.ShouldBe(Constants.Profile.NewDisplayName);
+        result.Value.AvatarUrl.ShouldBe(Constants.Profile.AvatarUrl);
 
-        var profile = await db.MemberProfiles.SingleOrDefaultAsync(p => p.UserId == UserId);
+        var profile = await db.MemberProfiles.SingleOrDefaultAsync(p => p.UserId == Constants.User.Id);
         profile.ShouldNotBeNull();
-        profile!.DisplayName.ShouldBe("My Display Name");
+        profile!.DisplayName.ShouldBe(Constants.Profile.NewDisplayName);
     }
 
     [Fact]
@@ -71,23 +70,23 @@ public class ProfileServiceTests
         await using var db = TestHelper.CreateInMemoryContext(nameof(UpdateMyProfileAsync_UpdatesExisting_WhenProfileExists));
         db.MemberProfiles.Add(new MemberProfile
         {
-            UserId = UserId,
-            DisplayName = "Old Name",
-            AvatarUrl = "https://old.com/avatar.png"
+            UserId = Constants.User.Id,
+            DisplayName = Constants.Profile.OldDisplayName,
+            AvatarUrl = Constants.Profile.OldAvatarUrl
         });
         await db.SaveChangesAsync();
 
-        var service = new ProfileService(db, TestHelper.CreateMockUserContext(UserId, "test@example.com"), _logger);
+        var service = new ProfileService(db, TestHelper.CreateMockUserContext(Constants.User.Id, Constants.User.Email), _logger);
 
-        var request = new UpdateMyProfileRequestDto("New Name", null);
+        var request = new UpdateMyProfileRequestDto(Constants.Profile.UpdatedDisplayName, null);
         var result = await service.UpdateMyProfileAsync(request, CancellationToken.None);
 
         result.IsError.ShouldBeFalse();
-        result.Value.DisplayName.ShouldBe("New Name");
+        result.Value.DisplayName.ShouldBe(Constants.Profile.UpdatedDisplayName);
         result.Value.AvatarUrl.ShouldBeNull();
 
-        var profile = await db.MemberProfiles.SingleAsync(p => p.UserId == UserId);
-        profile.DisplayName.ShouldBe("New Name");
+        var profile = await db.MemberProfiles.SingleAsync(p => p.UserId == Constants.User.Id);
+        profile.DisplayName.ShouldBe(Constants.Profile.UpdatedDisplayName);
         profile.AvatarUrl.ShouldBeNull();
     }
 }

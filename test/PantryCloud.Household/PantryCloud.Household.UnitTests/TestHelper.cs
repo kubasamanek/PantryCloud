@@ -14,7 +14,7 @@ internal static class TestHelper
     public static HouseholdDbContext CreateInMemoryContext(string dbName)
     {
         var options = new DbContextOptionsBuilder<HouseholdDbContext>()
-            .UseInMemoryDatabase(dbName)
+            .UseInMemoryDatabase(dbName + "_" + Guid.NewGuid())
             .Options;
         return new HouseholdDbContext(options);
     }
