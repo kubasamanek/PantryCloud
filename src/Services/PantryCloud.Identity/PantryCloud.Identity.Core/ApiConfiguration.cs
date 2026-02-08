@@ -20,6 +20,8 @@ public class JwtSettings
 
 public class AppSettings
 {
+    public string AuthorityBaseUrl { get; set; } = string.Empty;
+
     public string FrontendUrl { get; set; } = "http://localhost:5019";
     public bool SendEmails { get; set; } = false;
     public int ResetPasswordTokenExpirationInMinutes { get; set; } = 60;

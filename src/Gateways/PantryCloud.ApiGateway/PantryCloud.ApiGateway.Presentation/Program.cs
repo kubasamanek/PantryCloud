@@ -33,6 +33,8 @@ app.UseExceptionHandler();
 
 app.UseMiddleware<RequestLoggingMiddleware>();
 
+app.UseCors();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

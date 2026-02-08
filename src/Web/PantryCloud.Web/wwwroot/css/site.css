@@ -1,0 +1,50 @@
+.mud-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.mud-layout .mud-appbar {
+    position: sticky;
+    top: 0;
+    z-index: 1100;
+    flex-shrink: 0;
+}
+
+.mud-main-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.mud-main-content .layout-content {
+    flex: 1;
+    width: 100%;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 1.5rem 1rem;
+}
+
+@media (min-width: 600px) {
+    .mud-main-content .layout-content {
+        padding: 2rem 1.5rem;
+    }
+}
+
+.word-break-all {
+    word-break: break-all;
+}
+
+.token-expiry-label {
+    display: inline-block;
+    padding: 4px 10px;
+    margin-right: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.95);
+    color: #1a1a1a;
+    border-radius: 6px;
+    white-space: nowrap;
+}

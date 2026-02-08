@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using PantryCloud.Identity.Core;
@@ -10,6 +11,7 @@ namespace PantryCloud.Identity.Presentation.Controllers;
 
 [ApiController]
 [Route("api/jwks")]
+[AllowAnonymous]
 public class JwksController(IMediator mediator, IMapper mapper, ApiConfiguration apiConfiguration) : ApiControllerBase(mediator, mapper)
 {
     [HttpGet("/.well-known/openid-configuration/jwks")]
@@ -37,10 +39,13 @@ public class JwksController(IMediator mediator, IMapper mapper, ApiConfiguration
     [HttpGet("/.well-known/openid-configuration")]
     public IActionResult GetOpenIdConfiguration()
     {
-        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        // When behind a gateway, use the configured authority URL so the browser redirects to the gateway, not the internal host (e.g. identity-api:8080).
+        var baseUrl = !string.IsNullOrEmpty(apiConfiguration.App.AuthorityBaseUrl)
+            ? apiConfiguration.App.AuthorityBaseUrl.TrimEnd('/')
+            : $"{Request.Scheme}://{Request.Host}";
         var jwksUri = $"{baseUrl}/.well-known/openid-configuration/jwks";
-        var issuer = apiConfiguration.Jwt.Issuer;
-        
+        var issuer = !string.IsNullOrEmpty(apiConfiguration.App.AuthorityBaseUrl) ? baseUrl : apiConfiguration.Jwt.Issuer;
+
         var discoveryDocument = new
         {
             issuer,

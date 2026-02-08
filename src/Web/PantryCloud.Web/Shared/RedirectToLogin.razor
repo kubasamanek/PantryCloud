@@ -1,0 +1,11 @@
+@inject NavigationManager Navigation
+
+<MudProgressCircular Indeterminate Color="Color.Primary" />
+<MudText Typo="Typo.body2">Redirecting to login...</MudText>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}

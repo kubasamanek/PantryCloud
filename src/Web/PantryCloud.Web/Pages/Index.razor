@@ -1,0 +1,20 @@
+@page "/"
+@attribute [AllowAnonymous]
+
+<PageTitle>PantryCloud</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">Welcome to PantryCloud</MudText>
+<AuthorizeView>
+    <Authorized>
+        <MudText Typo="Typo.body1" Class="mb-4">Hello, @(context.User.Identity?.Name ?? "User")!</MudText>
+        <MudLink Href="/household" Typo="Typo.body1">Go to household</MudLink>
+    </Authorized>
+    <NotAuthorized>
+        <MudText Typo="Typo.body1" Class="mb-4">Sign in to get started.</MudText>
+        <MudStack Row="true" Spacing="2">
+            <MudLink Href="/login" Typo="Typo.body1">Sign in</MudLink>
+            <MudText Typo="Typo.body1">or</MudText>
+            <MudLink Href="/register" Typo="Typo.body1">Create account</MudLink>
+        </MudStack>
+    </NotAuthorized>
+</AuthorizeView>

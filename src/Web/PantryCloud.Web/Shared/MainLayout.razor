@@ -1,0 +1,49 @@
+@inherits LayoutComponentBase
+
+<MudLayout>
+    <MudAppBar Elevation="1" Fixed="false">
+        <MudText Typo="Typo.h6" Class="mr-4">PantryCloud</MudText>
+        <MudSpacer />
+        <AuthorizeView>
+            <Authorized>
+                <TokenExpiryDisplay />
+                <MudLink Href="/sessions" Typo="Typo.body2" Class="mr-2" Color="Color.Inherit">Sessions</MudLink>
+                <MudText Typo="Typo.body1" Class="mr-2">@(context.User.Identity?.Name ?? "User")</MudText>
+                <MudButton Variant="Variant.Text" Color="Color.Inherit" OnClick="BeginLogout">
+                    Logout
+                </MudButton>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Variant="Variant.Text" Color="Color.Inherit" OnClick="BeginLogin">
+                    Login
+                </MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudAppBar>
+    <MudMainContent>
+        <div class="layout-content">
+            @Body
+        </div>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    [Inject]
+    private NavigationManager Navigation { get; set; } = null!;
+    [Inject]
+    private ITokenStorage TokenStorage { get; set; } = null!;
+    [Inject]
+    private TokenAuthenticationStateProvider AuthStateProvider { get; set; } = null!;
+
+    private void BeginLogin()
+    {
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+
+    private async Task BeginLogout()
+    {
+        await TokenStorage.ClearAsync();
+        AuthStateProvider.NotifyLoggedOut();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}

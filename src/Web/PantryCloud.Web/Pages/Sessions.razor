@@ -1,0 +1,138 @@
+@page "/sessions"
+@attribute [Authorize]
+
+<PageTitle>Sessions - PantryCloud</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+    <MudText Typo="Typo.h5" Class="mb-4">Session management</MudText>
+    <MudText Typo="Typo.body2" Class="mb-4">
+        Active sessions where you are signed in. Revoke a session to sign out that device. Revoke all others to keep only this session.
+    </MudText>
+
+    @if (_loading && _sessions == null)
+    {
+        <MudProgressCircular Indeterminate Color="Color.Primary" />
+    }
+    else if (_sessions?.Sessions?.Count > 0)
+    {
+        <MudStack Spacing="3">
+            @if (_sessions.Sessions.Count > 1)
+            {
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Logout" OnClick="RevokeAllOthers" Disabled="_busy">
+                    Revoke all other sessions
+                </MudButton>
+            }
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudSimpleTable Dense="true" Hover="true" Class="mb-0">
+                    <thead>
+                        <tr>
+                            <th>Device</th>
+                            <th>Created</th>
+                            <th>Last used</th>
+                            <th style="width: 1px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var session in _sessions.Sessions)
+                        {
+                            <tr>
+                                <td>
+                                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                        <span>@(session.DeviceName ?? "Unknown device")</span>
+                                        @if (session.IsCurrent)
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Success">Current</MudChip>
+                                        }
+                                    </MudStack>
+                                </td>
+                                <td>@session.CreatedAt.ToLocalTime().ToString("g")</td>
+                                <td>@(session.LastUsedAt.HasValue ? session.LastUsedAt.Value.ToLocalTime().ToString("g") : "—")</td>
+                                <td>
+                                    @if (!session.IsCurrent)
+                                    {
+                                        <MudTooltip Text="Revoke this session">
+    <MudIconButton Icon="@Icons.Material.Filled.Logout" Size="Size.Small" Color="Color.Default" OnClick="@(() => RevokeSession(session.Id))" Disabled="_busy" />
+</MudTooltip>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+            </MudPaper>
+        </MudStack>
+    }
+    else if (_sessions != null)
+    {
+        <MudAlert Severity="Severity.Info">No sessions found.</MudAlert>
+    }
+    else if (!_loading)
+    {
+        <MudAlert Severity="Severity.Warning">Could not load sessions.</MudAlert>
+    }
+</MudContainer>
+
+@code {
+    [Inject] private ISessionsApi SessionsApi { get; set; } = null!;
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
+
+    private ListSessionsResponse? _sessions;
+    private bool _loading = true;
+    private bool _busy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSessionsAsync();
+    }
+
+    private async Task LoadSessionsAsync()
+    {
+        _loading = true;
+        try
+        {
+            _sessions = await SessionsApi.ListSessionsAsync();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task RevokeSession(Guid sessionId)
+    {
+        _busy = true;
+        try
+        {
+            if (await SessionsApi.RevokeSessionAsync(sessionId))
+            {
+                Snackbar.Add("Session revoked.", Severity.Success);
+                await LoadSessionsAsync();
+            }
+            else
+                Snackbar.Add("Failed to revoke session.", Severity.Error);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task RevokeAllOthers()
+    {
+        _busy = true;
+        try
+        {
+            if (await SessionsApi.RevokeAllOtherSessionsAsync())
+            {
+                Snackbar.Add("All other sessions revoked.", Severity.Success);
+                await LoadSessionsAsync();
+            }
+            else
+                Snackbar.Add("Failed to revoke sessions.", Severity.Error);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

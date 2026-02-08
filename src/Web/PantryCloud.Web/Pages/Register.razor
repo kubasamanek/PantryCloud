@@ -1,0 +1,64 @@
+@page "/register"
+@attribute [AllowAnonymous]
+
+<PageTitle>Register - PantryCloud</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Class="pa-8" Elevation="2">
+        <MudText Typo="Typo.h5" Class="mb-6">Create account</MudText>
+        <EditForm Model="_model" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <MudTextField @bind-Value="_model.Email" Label="Email" Variant="Variant.Outlined" InputType="InputType.Email" Class="mb-4" />
+            <MudTextField @bind-Value="_model.Password" Label="Password" Variant="Variant.Outlined" InputType="InputType.Password" Class="mb-4" />
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="mb-2" Disabled="_loading">
+                @(_loading ? "Creating account..." : "Register")
+            </MudButton>
+        </EditForm>
+        @if (_success && !string.IsNullOrEmpty(_verifyLink))
+        {
+            <MudAlert Severity="Severity.Success" Class="mt-4">
+                <MudText Typo="Typo.body2" Class="mb-2">Email is not configured yet. Use this link to verify your account:</MudText>
+                <MudLink Href="@_verifyLink" Target="_blank" Typo="Typo.body2" Class="word-break-all">@_verifyLink</MudLink>
+            </MudAlert>
+        }
+        <MudStack Row="true" Class="mt-4">
+            <MudLink Href="/login" Typo="Typo.body2">Already have an account? Sign in</MudLink>
+        </MudStack>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Inject] private IAuthApi AuthApi { get; set; } = null!;
+    [Inject] private NavigationManager Navigation { get; set; } = null!;
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
+
+    private readonly RegisterRequest _model = new();
+    private bool _loading;
+    private bool _success;
+    private string? _verifyLink;
+
+    private async Task HandleSubmit()
+    {
+        _loading = true;
+        _success = false;
+        _verifyLink = null;
+        try
+        {
+            var response = await AuthApi.RegisterAsync(_model);
+            if (response != null)
+            {
+                _success = true;
+                var baseUri = new Uri(Navigation.Uri).GetLeftPart(UriPartial.Authority);
+                _verifyLink = $"{baseUri}/verify-email?email={Uri.EscapeDataString(_model.Email)}&token={Uri.EscapeDataString(response.VerifyEmailToken)}";
+            }
+            else
+            {
+                Snackbar.Add("Registration failed. Email may already be in use.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}
