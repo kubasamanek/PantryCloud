@@ -10,10 +10,6 @@ public class LoginRequest
 
     [Required(ErrorMessage = "Password is required")]
     public string Password { get; set; } = "";
-
-    /// <summary>
-    /// Optional. Sent to Identity for session display (e.g. "Chrome on Windows"). If null, Identity may use X-Device-Name header or show "Unknown device".
-    /// </summary>
     public string? DeviceName { get; set; }
 }
 

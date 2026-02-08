@@ -51,8 +51,8 @@
                                     @if (!session.IsCurrent)
                                     {
                                         <MudTooltip Text="Revoke this session">
-    <MudIconButton Icon="@Icons.Material.Filled.Logout" Size="Size.Small" Color="Color.Default" OnClick="@(() => RevokeSession(session.Id))" Disabled="_busy" />
-</MudTooltip>
+                                            <MudIconButton Icon="@Icons.Material.Filled.Logout" Size="Size.Small" Color="Color.Default" OnClick="@(() => RevokeSession(session.Id))" Disabled="_busy" />
+                                        </MudTooltip>
                                     }
                                 </td>
                             </tr>

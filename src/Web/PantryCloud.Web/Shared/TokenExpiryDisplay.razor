@@ -18,12 +18,17 @@
     protected override async Task OnInitializedAsync()
     {
         await UpdateDisplayAsync();
-        _timer = new Timer(_ => _ = InvokeAsync(UpdateDisplayAsync), null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+        _timer = new Timer(_ =>
+        {
+            try { InvokeAsync(UpdateDisplayAsync); }
+            catch { /* avoid unhandled exception in timer */ }
+        }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
     }
 
     private async Task UpdateDisplayAsync()
     {
         if (_disposed) return;
+        if (TokenStorage == null || JwtHelper == null) return;
         var accessToken = await TokenStorage.GetAccessTokenAsync();
         var (_, exp, iat) = JwtHelper.DecodePayload(accessToken);
 

@@ -45,6 +45,8 @@ public class GatewayAuthorizationMessageHandler(
                     }
                     if (response.IsSuccessStatusCode)
                         return response;
+                    // Refresh succeeded but retry still failed (e.g. 401 from another service). Return response without logging out.
+                    return response;
                 }
             }
 

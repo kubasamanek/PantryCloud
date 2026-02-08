@@ -39,19 +39,22 @@ public class JwksController(IMediator mediator, IMapper mapper, ApiConfiguration
     [HttpGet("/.well-known/openid-configuration")]
     public IActionResult GetOpenIdConfiguration()
     {
-        // When behind a gateway, use the configured authority URL so the browser redirects to the gateway, not the internal host (e.g. identity-api:8080).
-        var baseUrl = !string.IsNullOrEmpty(apiConfiguration.App.AuthorityBaseUrl)
+        // Issuer: use AuthorityBaseUrl when set (so tokens and clients use the public gateway URL), else request host or Jwt.Issuer.
+        var issuer = !string.IsNullOrEmpty(apiConfiguration.App.AuthorityBaseUrl)
             ? apiConfiguration.App.AuthorityBaseUrl.TrimEnd('/')
             : $"{Request.Scheme}://{Request.Host}";
-        var jwksUri = $"{baseUrl}/.well-known/openid-configuration/jwks";
-        var issuer = !string.IsNullOrEmpty(apiConfiguration.App.AuthorityBaseUrl) ? baseUrl : apiConfiguration.Jwt.Issuer;
+        if (string.IsNullOrEmpty(apiConfiguration.App.AuthorityBaseUrl))
+            issuer = apiConfiguration.Jwt.Issuer ?? issuer;
+        // jwks_uri: use the same host that was used to fetch this document, so server-side validators (Gateway, other services) can load keys from Identity (e.g. http://identity-api:8080). If we used AuthorityBaseUrl here, validators fetching from identity-api:8080 would get jwks_uri pointing to localhost:5050 and fail to load keys.
+        var jwksUri = $"{Request.Scheme}://{Request.Host}/.well-known/openid-configuration/jwks";
+        var endpointsBase = !string.IsNullOrEmpty(apiConfiguration.App.AuthorityBaseUrl) ? apiConfiguration.App.AuthorityBaseUrl.TrimEnd('/') : $"{Request.Scheme}://{Request.Host}";
 
         var discoveryDocument = new
         {
             issuer,
             jwks_uri = jwksUri,
-            token_endpoint = $"{baseUrl}/api/auth/login",
-            authorization_endpoint = $"{baseUrl}/api/auth/login",
+            token_endpoint = $"{endpointsBase}/api/auth/login",
+            authorization_endpoint = $"{endpointsBase}/api/auth/login",
             response_types_supported = new[] { "token" },
             subject_types_supported = new[] { "public" },
             id_token_signing_alg_values_supported = new[] { "RS256" }

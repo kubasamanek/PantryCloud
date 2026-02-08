@@ -6,6 +6,8 @@ using MudBlazor.Services;
 using PantryCloud.Web;
 using PantryCloud.Web.Services;
 using PantryCloud.Web.Services.Auth;
+using PantryCloud.Web.Services.Household;
+using PantryCloud.Web.Services.Profile;
 using PantryCloud.Web.Services.Sessions;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -35,6 +37,9 @@ builder.Services.AddHttpClient("Auth", (sp, client) =>
 builder.Services.AddScoped<IDeviceNameProvider, BrowserDeviceNameProvider>();
 builder.Services.AddScoped<IAuthApi, AuthApiService>();
 builder.Services.AddScoped<ISessionsApi, SessionsApiService>();
+builder.Services.AddScoped<IProfileApi, ProfileApiService>();
+builder.Services.AddScoped<ICurrentProfileService, CurrentProfileService>();
+builder.Services.AddScoped<IHouseholdApi, HouseholdApiService>();
 
 // Gateway client with Bearer + 401 refresh
 builder.Services.AddScoped<GatewayAuthorizationMessageHandler>();

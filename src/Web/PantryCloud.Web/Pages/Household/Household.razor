@@ -1,0 +1,109 @@
+@page "/household"
+@attribute [Authorize]
+
+<PageTitle>Household - PantryCloud</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+    <MudText Typo="Typo.h5" Class="mb-6">Household</MudText>
+
+    @if (_loading && _currentHousehold == null && !_showCreateForm)
+    {
+        <MudProgressCircular Indeterminate Color="Color.Primary" />
+    }
+    else if (_currentHousehold != null)
+    {
+        <MudText Typo="Typo.body1" Class="mb-4">Your household</MudText>
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudStack Spacing="2">
+                <MudText Typo="Typo.h6">@_currentHousehold.Name</MudText>
+                @if (_householdDetail != null)
+                {
+                    <MudText Typo="Typo.body2">Created at @_householdDetail.CreatedAt.ToLocalTime().ToString("g")</MudText>
+                    <MudText Typo="Typo.body2">Owner: @_householdDetail.OwnerEmail</MudText>
+                }
+            </MudStack>
+        </MudPaper>
+    }
+    else
+    {
+        <MudText Typo="Typo.body1" Class="mb-4">Join an existing household or create a new one.</MudText>
+        <MudStack Spacing="4">
+            <MudCard Elevation="2" Class="pa-4">
+                <MudCardContent>
+                    <MudText Typo="Typo.h6" Class="mb-2">Join a household</MudText>
+                    <MudText Typo="Typo.body2" Class="mb-4">Enter an invite code to join someone else's household.</MudText>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="true">Join household (coming soon)</MudButton>
+                </MudCardContent>
+            </MudCard>
+            <MudCard Elevation="2" Class="pa-4">
+                <MudCardContent>
+                    <MudText Typo="Typo.h6" Class="mb-2">Create a household</MudText>
+                    <MudText Typo="Typo.body2" Class="mb-4">Set up your own household and invite others.</MudText>
+                    <EditForm Model="_createModel" OnValidSubmit="HandleCreateSubmit">
+                        <DataAnnotationsValidator />
+                        <MudTextField @bind-Value="_createModel.Name" Label="Household name" Variant="Variant.Outlined" Class="mb-4" Required="true" />
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Disabled="_createLoading">
+                            @(_createLoading ? "Creating..." : "Create household")
+                        </MudButton>
+                    </EditForm>
+                </MudCardContent>
+            </MudCard>
+        </MudStack>
+    }
+</MudContainer>
+
+@code {
+    [Inject] private IHouseholdApi HouseholdApi { get; set; } = null!;
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
+
+    private GetCurrentHouseholdResponse? _currentHousehold;
+    private CreateHouseholdResponse? _householdDetail;
+    private bool _loading = true;
+    private bool _showCreateForm;
+    private readonly CreateHouseholdRequest _createModel = new();
+    private bool _createLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCurrentHouseholdAsync();
+    }
+
+    private async Task LoadCurrentHouseholdAsync()
+    {
+        _loading = true;
+        try
+        {
+            _currentHousehold = await HouseholdApi.GetCurrentHouseholdAsync();
+            if (_currentHousehold == null)
+                _showCreateForm = true;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task HandleCreateSubmit()
+    {
+        _createLoading = true;
+        try
+        {
+            var response = await HouseholdApi.CreateHouseholdAsync(_createModel);
+            if (response != null)
+            {
+                _householdDetail = response;
+                _currentHousehold = new GetCurrentHouseholdResponse(response.Id, response.Name);
+                _showCreateForm = false;
+                Snackbar.Add("Household created.", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Request failed. Please try again.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _createLoading = false;
+        }
+    }
+}

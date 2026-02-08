@@ -1,0 +1,80 @@
+@page "/profile"
+@attribute [Authorize]
+
+<PageTitle>Profile - PantryCloud</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Class="pa-8" Elevation="2">
+        <MudText Typo="Typo.h5" Class="mb-6">Your profile</MudText>
+        @if (_loaded && string.IsNullOrWhiteSpace(_model.DisplayName))
+        {
+            <MudAlert Severity="Severity.Info" Class="mb-4">No profile set yet. Fill in your display name below to create one.</MudAlert>
+        }
+        <EditForm Model="_model" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <MudTextField @bind-Value="_model.DisplayName" Label="Display name" Variant="Variant.Outlined" Class="mb-4" Required="true" />
+            <MudTextField @bind-Value="_model.AvatarUrl" Label="Avatar URL (optional)" Variant="Variant.Outlined" Class="mb-4" />
+            @if (!string.IsNullOrWhiteSpace(_model.AvatarUrl))
+            {
+                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+                    <MudText Typo="Typo.caption">Preview:</MudText>
+                    <MudAvatar Size="Size.Small" image="@_model.AvatarUrl" />
+                </MudStack>
+            }
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="mb-2" Disabled="_loading">
+                @(_loading ? "Saving..." : "Save profile")
+            </MudButton>
+        </EditForm>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Inject] private IProfileApi ProfileApi { get; set; } = null!;
+    [Inject] private ICurrentProfileService CurrentProfile { get; set; } = null!;
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
+
+    private readonly UpdateProfileRequest _model = new();
+    private bool _loading;
+    private bool _loaded;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProfileAsync();
+    }
+
+    private async Task LoadProfileAsync()
+    {
+        _loaded = false;
+        var profile = await ProfileApi.GetMyProfileAsync();
+        _loaded = true;
+        if (profile != null)
+        {
+            _model.DisplayName = profile.DisplayName;
+            _model.AvatarUrl = profile.AvatarUrl;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        _loading = true;
+        try
+        {
+            var response = await ProfileApi.UpdateProfileAsync(_model);
+            if (response != null)
+            {
+                Snackbar.Add("Profile updated.", Severity.Success);
+                _model.DisplayName = response.DisplayName;
+                _model.AvatarUrl = response.AvatarUrl;
+                await CurrentProfile.RefreshAsync();
+            }
+            else
+            {
+                Snackbar.Add("Failed to update profile.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

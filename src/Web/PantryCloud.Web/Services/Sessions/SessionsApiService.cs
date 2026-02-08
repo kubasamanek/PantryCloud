@@ -30,4 +30,10 @@ public class SessionsApiService(IHttpClientFactory httpClientFactory) : ISession
         var response = await Client.DeleteAsync($"{BasePath}/sessions/others", cancellationToken);
         return response.IsSuccessStatusCode;
     }
+
+    public async Task<bool> LogoutAsync(string refreshToken, CancellationToken cancellationToken = default)
+    {
+        var response = await Client.PostAsJsonAsync($"{BasePath}/logout", new { refreshToken }, cancellationToken);
+        return response.IsSuccessStatusCode;
+    }
 }

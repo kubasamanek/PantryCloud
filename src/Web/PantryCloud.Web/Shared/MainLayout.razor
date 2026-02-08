@@ -1,14 +1,16 @@
 @inherits LayoutComponentBase
+@implements IDisposable
 
 <MudLayout>
     <MudAppBar Elevation="1" Fixed="false">
-        <MudText Typo="Typo.h6" Class="mr-4">PantryCloud</MudText>
+        <MudLink Href="/" Typo="Typo.h6" Class="mr-4" Color="Color.Inherit" Style="text-decoration: none;">PantryCloud</MudLink>
         <MudSpacer />
         <AuthorizeView>
             <Authorized>
                 <TokenExpiryDisplay />
+                <MudLink Href="/profile" Typo="Typo.body2" Class="mr-2" Color="Color.Inherit">Profile</MudLink>
                 <MudLink Href="/sessions" Typo="Typo.body2" Class="mr-2" Color="Color.Inherit">Sessions</MudLink>
-                <MudText Typo="Typo.body1" Class="mr-2">@(context.User.Identity?.Name ?? "User")</MudText>
+                <MudText Typo="Typo.body1" Class="mr-2">@_displayName</MudText>
                 <MudButton Variant="Variant.Text" Color="Color.Inherit" OnClick="BeginLogout">
                     Logout
                 </MudButton>
@@ -33,7 +35,47 @@
     [Inject]
     private ITokenStorage TokenStorage { get; set; } = null!;
     [Inject]
+    private ISessionsApi SessionsApi { get; set; } = null!;
+    [Inject]
     private TokenAuthenticationStateProvider AuthStateProvider { get; set; } = null!;
+    [Inject]
+    private ICurrentProfileService CurrentProfile { get; set; } = null!;
+    [Inject]
+    private AuthenticationStateProvider AuthState { get; set; } = null!;
+
+    private string _displayName = "User";
+    private string? _authName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthState.GetAuthenticationStateAsync();
+        if (state.User.Identity?.IsAuthenticated == true)
+        {
+            _authName = state.User.Identity?.Name;
+            await CurrentProfile.EnsureLoadedAsync();
+            UpdateDisplayName();
+            CurrentProfile.ProfileUpdated += OnProfileUpdated;
+        }
+    }
+
+    private void UpdateDisplayName()
+    {
+        _displayName = CurrentProfile.DisplayName ?? _authName ?? "User";
+    }
+
+    private async void OnProfileUpdated()
+    {
+        await InvokeAsync(() =>
+        {
+            UpdateDisplayName();
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose()
+    {
+        CurrentProfile.ProfileUpdated -= OnProfileUpdated;
+    }
 
     private void BeginLogin()
     {
@@ -42,8 +84,21 @@
 
     private async Task BeginLogout()
     {
-        await TokenStorage.ClearAsync();
-        AuthStateProvider.NotifyLoggedOut();
-        Navigation.NavigateTo("/login", forceLoad: true);
+        try
+        {
+            var refreshToken = await TokenStorage.GetRefreshTokenAsync();
+            if (!string.IsNullOrWhiteSpace(refreshToken))
+                await SessionsApi.LogoutAsync(refreshToken);
+        }
+        catch
+        {
+            // Best-effort: ensure we clear local state even if server logout fails
+        }
+        finally
+        {
+            await TokenStorage.ClearAsync();
+            AuthStateProvider.NotifyLoggedOut();
+            Navigation.NavigateTo("/login", forceLoad: true);
+        }
     }
 }

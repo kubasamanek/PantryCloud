@@ -1,0 +1,26 @@
+using System.Net.Http.Json;
+
+namespace PantryCloud.Web.Services.Profile;
+
+public class ProfileApiService(IHttpClientFactory httpClientFactory) : IProfileApi
+{
+    private const string BasePath = "api/household/api/households";
+
+    private HttpClient Client => httpClientFactory.CreateClient("Gateway");
+
+    public async Task<GetMyProfileResponse?> GetMyProfileAsync(CancellationToken cancellationToken = default)
+    {
+        var response = await Client.GetAsync($"{BasePath}/me/profile", cancellationToken);
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<GetMyProfileResponse>(cancellationToken)
+            : null;
+    }
+
+    public async Task<UpdateProfileResponse?> UpdateProfileAsync(UpdateProfileRequest request, CancellationToken cancellationToken = default)
+    {
+        var response = await Client.PutAsJsonAsync($"{BasePath}/me/profile", request, cancellationToken);
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<UpdateProfileResponse>(cancellationToken)
+            : null;
+    }
+}

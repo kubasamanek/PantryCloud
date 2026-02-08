@@ -114,6 +114,7 @@ public static class ServiceCollectionExtensions
             {
                 RouteId = RouteConfiguration.HouseholdRouteId,
                 ClusterId = RouteConfiguration.HouseholdClusterId,
+                AuthorizationPolicy = "Anonymous",
                 Match = new RouteMatch
                 {
                     Path = "/api/household/{**catch-all}"

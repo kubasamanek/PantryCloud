@@ -6,8 +6,10 @@
 <MudText Typo="Typo.h4" Class="mb-4">Welcome to PantryCloud</MudText>
 <AuthorizeView>
     <Authorized>
-        <MudText Typo="Typo.body1" Class="mb-4">Hello, @(context.User.Identity?.Name ?? "User")!</MudText>
-        <MudLink Href="/household" Typo="Typo.body1">Go to household</MudLink>
+        <MudText Typo="Typo.body1" Class="mb-4">Hello, @_displayName!</MudText>
+        <MudStack Spacing="1" Class="mb-4">
+            <HouseholdSummary />
+        </MudStack>
     </Authorized>
     <NotAuthorized>
         <MudText Typo="Typo.body1" Class="mb-4">Sign in to get started.</MudText>
@@ -18,3 +20,20 @@
         </MudStack>
     </NotAuthorized>
 </AuthorizeView>
+
+@code {
+    [Inject] private ICurrentProfileService CurrentProfile { get; set; } = null!;
+    [Inject] private AuthenticationStateProvider AuthState { get; set; } = null!;
+
+    private string _displayName = "User";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthState.GetAuthenticationStateAsync();
+        if (state.User.Identity?.IsAuthenticated == true)
+        {
+            await CurrentProfile.EnsureLoadedAsync();
+            _displayName = CurrentProfile.DisplayName ?? state.User.Identity?.Name ?? "User";
+        }
+    }
+}
