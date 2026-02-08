@@ -43,7 +43,25 @@
             {
                 await TokenStorage.SetTokensAsync(response.AccessToken, response.RefreshToken);
                 AuthStateProvider.NotifyLoggedIn();
-                Navigation.NavigateTo("/household", forceLoad: true);
+                var uri = Navigation.Uri;
+                var returnUrlPrefix = "returnUrl=";
+                var idx = uri.IndexOf(returnUrlPrefix, StringComparison.OrdinalIgnoreCase);
+                if (idx >= 0)
+                {
+                    var encoded = uri[(idx + returnUrlPrefix.Length)..].Split('&')[0];
+                    if (!string.IsNullOrEmpty(encoded))
+                    {
+                        var decoded = Uri.UnescapeDataString(encoded);
+                        if (decoded.StartsWith("/", StringComparison.Ordinal) || decoded.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                            Navigation.NavigateTo(decoded, forceLoad: true);
+                        else
+                            Navigation.NavigateTo("/household", forceLoad: true);
+                    }
+                    else
+                        Navigation.NavigateTo("/household", forceLoad: true);
+                }
+                else
+                    Navigation.NavigateTo("/household", forceLoad: true);
             }
             else
             {

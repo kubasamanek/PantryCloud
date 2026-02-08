@@ -9,6 +9,7 @@ namespace PantryCloud.Web.Services.Auth;
 /// </summary>
 public sealed class JwtClaimsHelper
 {
+    private const string SubClaim = "sub";
     private const string EmailClaim = "email";
     private const string ExpClaim = "exp";
     private const string IatClaim = "iat";
@@ -45,6 +46,35 @@ public sealed class JwtClaimsHelper
         catch
         {
             return (null, null, null);
+        }
+    }
+
+    /// <summary>
+    /// Returns the user id (sub claim) from the access token payload, or null if missing or invalid.
+    /// </summary>
+    public Guid? GetUserId(string? accessToken)
+    {
+        if (string.IsNullOrWhiteSpace(accessToken))
+            return null;
+
+        var parts = accessToken.Split('.');
+        if (parts.Length != 3)
+            return null;
+
+        try
+        {
+            var payload = Base64UrlDecode(parts[1]);
+            if (string.IsNullOrEmpty(payload))
+                return null;
+
+            using var doc = JsonDocument.Parse(payload);
+            var root = doc.RootElement;
+            var sub = root.TryGetProperty(SubClaim, out var s) ? s.GetString() : null;
+            return Guid.TryParse(sub, out var userId) ? userId : null;
+        }
+        catch
+        {
+            return null;
         }
     }
 

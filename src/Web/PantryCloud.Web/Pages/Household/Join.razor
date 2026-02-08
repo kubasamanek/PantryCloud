@@ -1,0 +1,69 @@
+@page "/join"
+@attribute [Authorize]
+
+<PageTitle>Join household - PantryCloud</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Class="pa-6" Elevation="2">
+        @if (!string.IsNullOrEmpty(_code))
+        {
+            <MudText Typo="Typo.h5" Class="mb-4">Join household</MudText>
+            <MudText Typo="Typo.body2" Class="mb-4">You were invited to join a household. Confirm to join.</MudText>
+            <MudTextField Value="@_code" Label="Invite code" Variant="Variant.Outlined" ReadOnly="true" Class="mb-4" />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AcceptInvite" Disabled="_busy" FullWidth="true">
+                @(_busy ? "Joining..." : "Join household")
+            </MudButton>
+        }
+        else
+        {
+            <MudText Typo="Typo.h5" Class="mb-4">Join a household</MudText>
+            <MudText Typo="Typo.body2" Class="mb-4">Use the invite link from your household owner. If you have a link, open it while signed in.</MudText>
+            <MudLink Href="/household" Typo="Typo.body1">Go to household</MudLink>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Inject] private IHouseholdApi HouseholdApi { get; set; } = null!;
+    [Inject] private NavigationManager Navigation { get; set; } = null!;
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
+
+    private string? _code;
+    private bool _busy;
+
+    protected override void OnInitialized()
+    {
+        var u = Navigation.Uri;
+        var idx = u.IndexOf("code=", StringComparison.OrdinalIgnoreCase);
+        if (idx >= 0)
+        {
+            idx += 5;
+            var end = u.IndexOf('&', idx);
+            var segment = end < 0 ? u[idx..] : u.Substring(idx, end - idx);
+            _code = Uri.UnescapeDataString(segment).Trim();
+        }
+    }
+
+    private async Task AcceptInvite()
+    {
+        if (string.IsNullOrEmpty(_code)) return;
+        _busy = true;
+        try
+        {
+            var response = await HouseholdApi.AcceptInvitationAsync(_code);
+            if (response != null && response.HouseholdId.HasValue)
+            {
+                Snackbar.Add("Joined household.", Severity.Success);
+                Navigation.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                Snackbar.Add("Invalid or expired invite link.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

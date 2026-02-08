@@ -12,17 +12,103 @@
     }
     else if (_currentHousehold != null)
     {
-        <MudText Typo="Typo.body1" Class="mb-4">Your household</MudText>
-        <MudPaper Class="pa-4" Elevation="2">
+        <MudPaper Class="pa-4 mb-4" Elevation="2">
             <MudStack Spacing="2">
                 <MudText Typo="Typo.h6">@_currentHousehold.Name</MudText>
-                @if (_householdDetail != null)
+                @if (_members != null)
                 {
-                    <MudText Typo="Typo.body2">Created at @_householdDetail.CreatedAt.ToLocalTime().ToString("g")</MudText>
-                    <MudText Typo="Typo.body2">Owner: @_householdDetail.OwnerEmail</MudText>
+                    var owner = _members.Members.FirstOrDefault(m => m.Role == 0);
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Owner: @(owner?.DisplayName ?? "—")</MudText>
                 }
             </MudStack>
         </MudPaper>
+
+        @* Members table *@
+        @if (_members != null)
+        {
+            <MudText Typo="Typo.h6" Class="mb-2">Members</MudText>
+            <MudTable Items="@_members.Members" Hover="true" Breakpoint="Breakpoint.Sm" Class="mb-4">
+                <HeaderContent>
+                    <MudTh>Member</MudTh>
+                    <MudTh>Role</MudTh>
+                    <MudTh>Diet</MudTh>
+                    @if (_isOwner)
+                    {
+                        <MudTh Style="width: 100px;">Actions</MudTh>
+                    }
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Member">
+                        <MudStack Spacing="1" Row="true" AlignItems="AlignItems.Center">
+                            <MudAvatar Size="Size.Small" image="@context.AvatarUrl" Color="Color.Primary">@((context.DisplayName ?? "M").Substring(0, 1).ToUpperInvariant())</MudAvatar>
+                            <MudText Typo="Typo.body2">@(context.DisplayName ?? "Member") @(context.UserId == _currentUserId ? " (You)" : "")</MudText>
+                        </MudStack>
+                    </MudTd>
+                    <MudTd DataLabel="Role">@HouseholdDisplayHelper.RoleLabel(context.Role)</MudTd>
+                    <MudTd DataLabel="Diet">@HouseholdDisplayHelper.DietaryProfileLabel(context.DietaryProfile) @(context.ExcludedIngredients?.Count > 0 ? $"· Excl. {context.ExcludedIngredients.Count}" : "")</MudTd>
+                    @if (_isOwner)
+                    {
+                        <MudTd DataLabel="Actions">
+                            @if (context.UserId != _currentUserId && context.Role != 0)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.PersonRemove" Size="Size.Small" Color="Color.Default" OnClick="@(() => ConfirmKick(context))" Disabled="_busy" title="Kick member" />
+                            }
+                        </MudTd>
+                    }
+                </RowTemplate>
+            </MudTable>
+        }
+
+        @* Actions: Leave (non-owner), Transfer (owner), Invite (owner) *@
+        <MudStack Spacing="2" Class="mb-4">
+            @if (_isOwner)
+            {
+                <MudDivider />
+                <MudText Typo="Typo.subtitle1">Invite by email</MudText>
+                <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                    <MudTextField @bind-Value="_inviteEmail" Label="Email" Variant="Variant.Outlined" Style="max-width: 280px;" />
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SendInvite" Disabled="_busy || string.IsNullOrWhiteSpace(_inviteEmail)">
+                        @(_inviteLoading ? "Sending..." : "Send invite")
+                    </MudButton>
+                </MudStack>
+                @if (!string.IsNullOrEmpty(_inviteLink))
+                {
+                    <MudAlert Severity="Severity.Info" Dense="true">Link expires in 2 minutes. Share it with the invitee.</MudAlert>
+                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                        <MudTextField Value="@_inviteLink" ReadOnly="true" Variant="Variant.Outlined" Style="flex: 1;" />
+                        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.ContentCopy" OnClick="CopyInviteLink">Copy link</MudButton>
+                    </MudStack>
+                }
+                @if (_members != null && _members.Members.Count > 1)
+                {
+                    <MudDivider />
+                    <MudText Typo="Typo.subtitle1">Transfer ownership</MudText>
+                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                        <MudMenu AnchorOrigin="Origin.BottomCenter" Variant="Variant.Outlined" buttonColor="Color.Primary" Style="max-width: 280px;">
+                            <ActivatorContent>
+                                <MudButton EndIcon="@Icons.Material.Filled.ArrowDropDown" Variant="Variant.Outlined">
+                                    @(_transferTargetMember != null ? (_transferTargetMember.DisplayName ?? "Member") : "Select new owner")
+                                </MudButton>
+                            </ActivatorContent>
+                            <ChildContent>
+                                <MudList T="object" Style="max-height: 280px; overflow-y: auto;">
+                                    @foreach (var m in _transferTargetList)
+                                    {
+                                        <MudListItem T="object" @onclick="@(() => SelectTransferTarget(m))">@(m.DisplayName ?? "Member")</MudListItem>
+                                    }
+                                </MudList>
+                            </ChildContent>
+                        </MudMenu>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ConfirmTransfer" Disabled="_busy || _transferTargetMember == null">Transfer</MudButton>
+                    </MudStack>
+                }
+            }
+            @if (!_isOwner)
+            {
+                <MudDivider />
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Logout" OnClick="ConfirmLeave" Disabled="_busy">Leave household</MudButton>
+            }
+        </MudStack>
     }
     else
     {
@@ -31,8 +117,11 @@
             <MudCard Elevation="2" Class="pa-4">
                 <MudCardContent>
                     <MudText Typo="Typo.h6" Class="mb-2">Join a household</MudText>
-                    <MudText Typo="Typo.body2" Class="mb-4">Enter an invite code to join someone else's household.</MudText>
-                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="true">Join household (coming soon)</MudButton>
+                    <MudText Typo="Typo.body2" Class="mb-4">Paste the invite code from your link, or use the link directly from <MudLink Href="/join" Typo="Typo.body2">/join</MudLink>.</MudText>
+                    <MudTextField @bind-Value="_joinCode" Label="Invite code" Variant="Variant.Outlined" Class="mb-4" Placeholder="Paste code from invite link" />
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="JoinHousehold" Disabled="_busy || string.IsNullOrWhiteSpace(_joinCode)">
+                        @(_joinLoading ? "Joining..." : "Join household")
+                    </MudButton>
                 </MudCardContent>
             </MudCard>
             <MudCard Elevation="2" Class="pa-4">
@@ -55,16 +144,33 @@
 @code {
     [Inject] private IHouseholdApi HouseholdApi { get; set; } = null!;
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
+    [Inject] private IDialogService DialogService { get; set; } = null!;
+    [Inject] private ITokenStorage TokenStorage { get; set; } = null!;
+    [Inject] private JwtClaimsHelper JwtHelper { get; set; } = null!;
+    [Inject] private NavigationManager Navigation { get; set; } = null!;
+    [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
 
     private GetCurrentHouseholdResponse? _currentHousehold;
-    private CreateHouseholdResponse? _householdDetail;
+    private GetHouseholdMembersResponse? _members;
     private bool _loading = true;
     private bool _showCreateForm;
-    private readonly CreateHouseholdRequest _createModel = new();
+    private bool _busy;
     private bool _createLoading;
+    private bool _joinLoading;
+    private bool _inviteLoading;
+    private Guid? _currentUserId;
+    private bool _isOwner;
+    private readonly CreateHouseholdRequest _createModel = new();
+    private string _joinCode = "";
+    private string _inviteEmail = "";
+    private string _inviteLink = "";
+    private MemberWithProfileDto? _transferTargetMember;
+    private List<MemberWithProfileDto> _transferTargetList = [];
 
     protected override async Task OnInitializedAsync()
     {
+        var token = await TokenStorage.GetAccessTokenAsync();
+        _currentUserId = JwtHelper.GetUserId(token);
         await LoadCurrentHouseholdAsync();
     }
 
@@ -75,7 +181,20 @@
         {
             _currentHousehold = await HouseholdApi.GetCurrentHouseholdAsync();
             if (_currentHousehold == null)
+            {
                 _showCreateForm = true;
+                _members = null;
+                _isOwner = false;
+            }
+            else
+            {
+                _members = await HouseholdApi.GetHouseholdMembersAsync();
+                var me = _members?.Members?.FirstOrDefault(m => m.UserId == _currentUserId);
+                _isOwner = me?.Role == 0;
+                _transferTargetList = _members?.Members?.Where(m => m.Role != 0).ToList() ?? [];
+                if (_transferTargetList.Count == 0 && _members?.Members?.Count >= 2)
+                    _transferTargetList = _members.Members.Skip(1).ToList();
+            }
         }
         finally
         {
@@ -91,9 +210,9 @@
             var response = await HouseholdApi.CreateHouseholdAsync(_createModel);
             if (response != null)
             {
-                _householdDetail = response;
                 _currentHousehold = new GetCurrentHouseholdResponse(response.Id, response.Name);
                 _showCreateForm = false;
+                await LoadCurrentHouseholdAsync();
                 Snackbar.Add("Household created.", Severity.Success);
             }
             else
@@ -104,6 +223,149 @@
         finally
         {
             _createLoading = false;
+        }
+    }
+
+    private async Task JoinHousehold()
+    {
+        if (string.IsNullOrWhiteSpace(_joinCode)) return;
+        _busy = true;
+        _joinLoading = true;
+        try
+        {
+            var response = await HouseholdApi.AcceptInvitationAsync(_joinCode.Trim());
+            if (response != null && response.HouseholdId.HasValue)
+            {
+                _joinCode = "";
+                await LoadCurrentHouseholdAsync();
+                Snackbar.Add("Joined household.", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Invalid or expired invite link.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _busy = false;
+            _joinLoading = false;
+        }
+    }
+
+    private async Task SendInvite()
+    {
+        if (string.IsNullOrWhiteSpace(_inviteEmail) || _currentHousehold == null) return;
+        _inviteLoading = true;
+        try
+        {
+            var response = await HouseholdApi.SendInvitationAsync(_inviteEmail.Trim(), _currentHousehold.Id.ToString());
+            if (response != null)
+            {
+                var baseUri = new Uri(Navigation.Uri).GetLeftPart(UriPartial.Authority);
+                _inviteLink = $"{baseUri}/join?code={Uri.EscapeDataString(response.Code)}";
+                Snackbar.Add("Invite created. Share the link within 2 minutes.", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Failed to send invite. You must be the owner.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _inviteLoading = false;
+        }
+    }
+
+    private async Task CopyInviteLink()
+    {
+        if (string.IsNullOrEmpty(_inviteLink)) return;
+        try
+        {
+            await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", _inviteLink);
+            Snackbar.Add("Link copied to clipboard.", Severity.Success);
+        }
+        catch
+        {
+            Snackbar.Add("Could not copy.", Severity.Warning);
+        }
+    }
+
+    private async Task ConfirmLeave()
+    {
+        var confirmed = await DialogService.ShowMessageBox("Leave household", "Are you sure you want to leave this household?", "Leave", "Cancel");
+        if (confirmed != true) return;
+        _busy = true;
+        try
+        {
+            var response = await HouseholdApi.LeaveHouseholdAsync();
+            if (response != null)
+            {
+                Snackbar.Add("You left the household.", Severity.Success);
+                await LoadCurrentHouseholdAsync();
+            }
+            else
+            {
+                Snackbar.Add("Could not leave. You may be the owner.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task ConfirmKick(MemberWithProfileDto member)
+    {
+        var confirmed = await DialogService.ShowMessageBox("Kick member", $"Remove {member.DisplayName ?? "this member"} from the household?", "Kick", "Cancel");
+        if (confirmed != true) return;
+        _busy = true;
+        try
+        {
+            if (await HouseholdApi.KickMemberAsync(member.UserId))
+            {
+                Snackbar.Add("Member removed.", Severity.Success);
+                await LoadCurrentHouseholdAsync();
+            }
+            else
+            {
+                Snackbar.Add("Failed to remove member.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private void SelectTransferTarget(MemberWithProfileDto m)
+    {
+        _transferTargetMember = m;
+        StateHasChanged();
+    }
+
+    private async Task ConfirmTransfer()
+    {
+        if (_transferTargetMember == null) return;
+        var name = _transferTargetMember.DisplayName ?? "this member";
+        var confirmed = await DialogService.ShowMessageBox("Transfer ownership", $"Transfer ownership to {name}? You will become a member.", "Transfer", "Cancel");
+        if (confirmed != true) return;
+        _busy = true;
+        try
+        {
+            if (await HouseholdApi.TransferOwnershipAsync(_transferTargetMember.UserId) != null)
+            {
+                _transferTargetMember = null;
+                Snackbar.Add("Ownership transferred.", Severity.Success);
+                await LoadCurrentHouseholdAsync();
+            }
+            else
+            {
+                Snackbar.Add("Failed to transfer ownership.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _busy = false;
         }
     }
 }
