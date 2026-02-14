@@ -3,13 +3,18 @@
 
 <PageTitle>Recipes - PantryCloud</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
-    <MudText Typo="Typo.h5" Class="mb-4">Recipes</MudText>
-    <MudPaper Class="pa-8" Elevation="2">
-        <MudStack Spacing="3" AlignItems="AlignItems.Center" Justify="Justify.Center" Class="py-8">
-            <MudIcon Icon="@Icons.Material.Filled.MenuBook" Size="Size.Large" Color="Color.Primary" />
-            <MudText Typo="Typo.h6">Recipes will appear here</MudText>
-            <MudText Typo="Typo.body2" Color="Color.Secondary">This section is not yet connected. It will show your recipes once the service is integrated.</MudText>
-        </MudStack>
-    </MudPaper>
+<MudContainer Class="mt-8">
+    <MudStack Spacing="2" AlignItems="AlignItems.Center">
+        <MudProgressCircular Indeterminate Color="Color.Primary" Size="Size.Small" />
+        <MudText Typo="Typo.body2">Redirecting to Pantry…</MudText>
+    </MudStack>
 </MudContainer>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        Navigation.NavigateTo(Routes.Pantry, replace: true);
+    }
+}

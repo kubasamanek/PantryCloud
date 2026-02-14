@@ -110,6 +110,56 @@
                 }
             </MudStack>
         </MudPaper>
+
+        @* Recipes from your pantry — only when pantry is loaded and user has household *@
+        @if (_listResponse != null)
+        {
+            <MudPaper Class="pa-4 mt-6" Elevation="2">
+                <MudText Typo="Typo.h6" Class="mb-3">Recipes from your pantry</MudText>
+                @if (_listResponse.Items == null || _listResponse.Items.Count == 0)
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Add pantry items to get recipe suggestions.</MudText>
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Restaurant" OnClick="@(async () => await SuggestRecipes())" Disabled="@_recipesLoading" Class="mb-3">
+                        @(_recipesLoading ? "Loading…" : "Suggest recipes")
+                    </MudButton>
+                    @if (_recipesError)
+                    {
+                        <MudAlert Severity="Severity.Warning" Class="mt-2">Could not load suggestions. Try again.</MudAlert>
+                    }
+                    else if (_recommendRecipes != null && _recommendRecipes.Count > 0)
+                    {
+                        <MudGrid Spacing="3">
+                            @foreach (var recipe in _recommendRecipes)
+                            {
+                                <MudItem size="Size.Md" sizeMd="4">
+                                    <MudCard Class="cursor-pointer" @onclick="@(() => OpenRecipeDetail(recipe.Id))">
+                                        <MudCardContent>
+                                            <MudText Typo="Typo.subtitle1">@recipe.Title</MudText>
+                                            @if (!string.IsNullOrWhiteSpace(recipe.Description))
+                                            {
+                                                <MudText Typo="Typo.body2" Class="mt-1">@(recipe.Description.Length > 120 ? recipe.Description[..120] + "…" : recipe.Description)</MudText>
+                                            }
+                                            <MudStack Row="true" Spacing="1" Class="mt-2">
+                                                <MudChip T="string" Size="Size.Small">@recipe.PrepTimeMinutes min prep</MudChip>
+                                                <MudChip T="string" Size="Size.Small">@recipe.CookTimeMinutes min cook</MudChip>
+                                                <MudChip T="string" Size="Size.Small">@recipe.Servings servings</MudChip>
+                                            </MudStack>
+                                        </MudCardContent>
+                                    </MudCard>
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    }
+                    else if (_recommendRecipes != null && _recommendRecipes.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">No recipe suggestions for your current pantry items.</MudText>
+                    }
+                }
+            </MudPaper>
+        }
     }
 </MudContainer>
 
@@ -118,6 +168,7 @@
     private const int ExpirationWarningDays = 7;
 
     [Inject] private IPantryApi PantryApi { get; set; } = null!;
+    [Inject] private IRecipeApi RecipeApi { get; set; } = null!;
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
     [Inject] private IDialogService DialogService { get; set; } = null!;
 
@@ -131,6 +182,10 @@
     private int _page = 1;
 
     private int _totalPages => _listResponse == null ? 0 : Math.Max(1, (int)Math.Ceiling(_listResponse.TotalCount / (double)_listResponse.PageSize));
+
+    private List<RecipeDto>? _recommendRecipes;
+    private bool _recipesLoading;
+    private bool _recipesError;
 
     protected override async Task OnInitializedAsync()
     {
@@ -276,5 +331,46 @@
         {
             Snackbar.Add("Request failed. Please try again.", Severity.Error);
         }
+    }
+
+    private async Task SuggestRecipes(CancellationToken ct = default)
+    {
+        var ingredientNames = _listResponse?.Items?
+            .Select(i => i.Name?.Trim())
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(n => n!)
+            .ToList() ?? new List<string>();
+        _recipesLoading = true;
+        _recipesError = false;
+        _recommendRecipes = null;
+        StateHasChanged();
+        try
+        {
+            var request = new RecommendRecipesRequest
+            {
+                IngredientHints = ingredientNames,
+                Limit = 10
+            };
+            var response = await RecipeApi.RecommendAsync(request, ct);
+            _recommendRecipes = response?.Recipes?.ToList();
+            _recipesError = response == null;
+        }
+        catch
+        {
+            _recommendRecipes = null;
+            _recipesError = true;
+        }
+        finally
+        {
+            _recipesLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OpenRecipeDetail(Guid recipeId)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        await DialogService.ShowAsync<RecipeDetailDialog>("Recipe", new DialogParameters { ["RecipeId"] = recipeId }, options);
     }
 }

@@ -1,0 +1,62 @@
+@* Dialog for Add or Edit shopping list item. Emits form data on submit; page calls API. *@
+<div class="pa-6">
+    <MudStack Spacing="3">
+        <EditForm Model="_model" OnValidSubmit="Submit" FormName="ShoppingListItemForm">
+            <DataAnnotationsValidator />
+            <MudTextField @bind-Value="_model.Name" Label="Name" Variant="Variant.Outlined" Class="mb-3" Required="true" />
+            <MudStack Row="true" Spacing="2" Class="mb-3">
+                <MudNumericField @bind-Value="_model.Quantity" Label="Quantity" Variant="Variant.Outlined" Min="0" Step="0.1m" Class="flex-grow-1" Required="true" />
+                <MudSelect T="int" @bind-Value="_model.Unit" Label="Unit" Variant="Variant.Outlined" Class="flex-grow-1">
+                    @foreach (var u in UnitDisplayHelper.AllUnits)
+                    {
+                        <MudSelectItem Value="@u">@UnitDisplayHelper.UnitLabel(u)</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudStack>
+            <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd">
+                <MudButton OnClick="Cancel">Cancel</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Disabled="@_saving">
+                    @(_saving ? "Saving..." : (IsEdit ? "Update" : "Add"))
+                </MudButton>
+            </MudStack>
+        </EditForm>
+    </MudStack>
+</div>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public ShoppingListItemDto? Item { get; set; }
+
+    private ShoppingListItemFormModel _model = new();
+    private bool _saving;
+
+    protected override void OnInitialized()
+    {
+        if (IsEdit && Item != null)
+        {
+            _model.Name = Item.Name;
+            _model.Quantity = Item.Quantity;
+            _model.Unit = Item.Unit;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void Submit()
+    {
+        _saving = true;
+        if (IsEdit && Item != null)
+            MudDialog.Close(DialogResult.Ok(new ShoppingListItemFormResult(Item.Id, _model.Name, _model.Quantity, _model.Unit, Item.RowVersion)));
+        else
+            MudDialog.Close(DialogResult.Ok(new ShoppingListItemFormResult(null, _model.Name, _model.Quantity, _model.Unit, null)));
+    }
+
+    private class ShoppingListItemFormModel
+    {
+        public string Name { get; set; } = "";
+        public decimal Quantity { get; set; } = 1;
+        public int Unit { get; set; }
+    }
+}

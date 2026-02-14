@@ -143,6 +143,7 @@ public static class ServiceCollectionExtensions
                     }
                 ]
             },
+            // Client uses /api/recipe/... (singular); backend expects /api/recipes/... (plural).
             new RouteConfig
             {
                 RouteId = RouteConfiguration.RecipeRouteId,
@@ -155,7 +156,7 @@ public static class ServiceCollectionExtensions
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/{**catch-all}"
+                        ["PathPattern"] = "/api/recipes/{**catch-all}"
                     }
                 ]
             },
@@ -171,7 +172,7 @@ public static class ServiceCollectionExtensions
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/{**catch-all}"
+                        ["PathPattern"] = "/api/shopping-lists/{**catch-all}"
                     }
                 ]
             },
