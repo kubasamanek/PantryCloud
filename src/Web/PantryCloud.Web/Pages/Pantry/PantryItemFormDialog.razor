@@ -1,0 +1,73 @@
+@* Dialog for Add or Edit pantry item. Emits form data on submit; page calls API. *@
+<div class="pa-6">
+    <MudStack Spacing="3">
+    <EditForm Model="_model" OnValidSubmit="Submit" FormName="PantryItemForm">
+        <DataAnnotationsValidator />
+        <MudTextField @bind-Value="_model.Name" Label="Name" Variant="Variant.Outlined" Class="mb-3" Required="true" />
+        <MudStack Row="true" Spacing="2" Class="mb-3">
+            <MudNumericField @bind-Value="_model.Quantity" Label="Quantity" Variant="Variant.Outlined" Min="0" Step="0.1m" Class="flex-grow-1" Required="true" />
+            <MudSelect T="int" @bind-Value="_model.Unit" Label="Unit" Variant="Variant.Outlined" Class="flex-grow-1">
+                @foreach (var u in UnitDisplayHelper.AllUnits)
+                {
+                    <MudSelectItem Value="@u">@UnitDisplayHelper.UnitLabel(u)</MudSelectItem>
+                }
+            </MudSelect>
+        </MudStack>
+        <MudDatePicker @bind-Date="_expirationDate" Label="Expiration date (optional)" Variant="Variant.Outlined" DateFormat="yyyy-MM-dd" Class="mb-3" />
+        <MudTextField @bind-Value="_model.Category" Label="Category (optional)" Variant="Variant.Outlined" Class="mb-3" />
+        <MudTextField @bind-Value="_model.Notes" Label="Notes (optional)" Variant="Variant.Outlined" Lines="2" Class="mb-3" />
+        <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd">
+            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Disabled="@_saving">
+                @(_saving ? "Saving..." : (IsEdit ? "Update" : "Add"))
+            </MudButton>
+        </MudStack>
+    </EditForm>
+    </MudStack>
+</div>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public PantryItemDto? Item { get; set; }
+
+    private PantryItemFormModel _model = new();
+    private DateTime? _expirationDate;
+    private bool _saving;
+
+    protected override void OnInitialized()
+    {
+        if (IsEdit && Item != null)
+        {
+            _model.Name = Item.Name;
+            _model.Quantity = Item.Quantity;
+            _model.Unit = Item.Unit;
+            _model.Category = Item.Category ?? "";
+            _model.Notes = Item.Notes ?? "";
+            _expirationDate = Item.ExpirationDate.HasValue ? Item.ExpirationDate.Value.Date : null;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void Submit()
+    {
+        _saving = true;
+        var expDate = _expirationDate.HasValue ? (DateTime?)DateTime.SpecifyKind(_expirationDate.Value, DateTimeKind.Utc) : null;
+        if (IsEdit && Item != null)
+            MudDialog.Close(DialogResult.Ok(new PantryItemFormResult(Item.Id, _model.Name, _model.Quantity, _model.Unit, expDate, _model.Category, _model.Notes, Item.RowVersion)));
+        else
+            MudDialog.Close(DialogResult.Ok(new PantryItemFormResult(null, _model.Name, _model.Quantity, _model.Unit, expDate, _model.Category, _model.Notes, null)));
+    }
+
+    private class PantryItemFormModel
+    {
+        public string Name { get; set; } = "";
+        public decimal Quantity { get; set; } = 1;
+        public int Unit { get; set; }
+        public string? Category { get; set; }
+        public string? Notes { get; set; }
+    }
+}
+

@@ -9,4 +9,9 @@ public static class ApiPaths
     /// Base path for household and profile endpoints (household service).
     /// </summary>
     public const string Households = "api/household/api/households";
+
+    /// <summary>
+    /// Base path for pantry endpoints (pantry service).
+    /// </summary>
+    public const string Pantry = "api/pantry";
 }

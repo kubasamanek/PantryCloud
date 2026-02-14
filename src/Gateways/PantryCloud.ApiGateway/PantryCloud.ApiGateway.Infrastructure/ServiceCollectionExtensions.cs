@@ -139,7 +139,7 @@ public static class ServiceCollectionExtensions
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/{**catch-all}"
+                        ["PathPattern"] = "/api/pantry/{**catch-all}"
                     }
                 ]
             },
