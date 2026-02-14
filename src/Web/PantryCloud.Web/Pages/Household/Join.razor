@@ -18,7 +18,7 @@
         {
             <MudText Typo="Typo.h5" Class="mb-4">Join a household</MudText>
             <MudText Typo="Typo.body2" Class="mb-4">Use the invite link from your household owner. If you have a link, open it while signed in.</MudText>
-            <MudLink Href="/household" Typo="Typo.body1">Go to household</MudLink>
+            <MudLink Href="@Routes.Household" Typo="Typo.body1">Go to household</MudLink>
         }
     </MudPaper>
 </MudContainer>
@@ -54,7 +54,7 @@
             if (response != null && response.HouseholdId.HasValue)
             {
                 Snackbar.Add("Joined household.", Severity.Success);
-                Navigation.NavigateTo("/", forceLoad: true);
+                Navigation.NavigateTo(Routes.Home, forceLoad: true);
             }
             else
             {

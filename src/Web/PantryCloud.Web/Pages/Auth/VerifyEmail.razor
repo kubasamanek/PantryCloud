@@ -1,4 +1,5 @@
 @page "/verify-email"
+@layout AuthLayout
 @attribute [AllowAnonymous]
 
 <PageTitle>Verify email - PantryCloud</PageTitle>
@@ -8,7 +9,7 @@
         @if (_invalidLink)
         {
             <MudAlert Severity="Severity.Error">Invalid or expired verification link.</MudAlert>
-            <MudLink Href="/login" Class="mt-4">Sign in</MudLink>
+            <MudLink Href="@Routes.Login" Class="mt-4">Sign in</MudLink>
         }
         else if (_loading)
         {
@@ -18,12 +19,12 @@
         else if (_verified)
         {
             <MudAlert Severity="Severity.Success">Your email has been verified. You can sign in now.</MudAlert>
-            <MudButton Href="/login" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">Sign in</MudButton>
+            <MudButton Href="@Routes.Login" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">Sign in</MudButton>
         }
         else if (_failed)
         {
             <MudAlert Severity="Severity.Error">Verification failed. The link may have expired.</MudAlert>
-            <MudLink Href="/login" Class="mt-4">Sign in</MudLink>
+            <MudLink Href="@Routes.Login" Class="mt-4">Sign in</MudLink>
         }
     </MudPaper>
 </MudContainer>

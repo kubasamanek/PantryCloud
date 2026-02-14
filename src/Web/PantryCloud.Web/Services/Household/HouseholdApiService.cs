@@ -1,11 +1,12 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using PantryCloud.Web.Constants;
 
 namespace PantryCloud.Web.Services.Household;
 
 public class HouseholdApiService(IHttpClientFactory httpClientFactory) : IHouseholdApi
 {
-    private const string BasePath = "api/household/api/households";
+    private static readonly string BasePath = ApiPaths.Households;
 
     private static readonly JsonSerializerOptions MembersJsonOptions = new()
     {

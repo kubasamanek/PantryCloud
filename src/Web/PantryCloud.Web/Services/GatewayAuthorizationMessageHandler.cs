@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
+using PantryCloud.Web.Constants;
 using PantryCloud.Web.Services.Auth;
 
 namespace PantryCloud.Web.Services;
@@ -14,7 +15,6 @@ public class GatewayAuthorizationMessageHandler(
     : DelegatingHandler
 {
     private readonly string _gatewayBaseUrl = options.Value.BaseUrl.TrimEnd('/');
-
     private NavigationManager Navigation { get; } = navigation;
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -52,7 +52,7 @@ public class GatewayAuthorizationMessageHandler(
 
             await tokenStorage.ClearAsync(cancellationToken);
             authStateProvider.NotifyLoggedOut();
-            Navigation.NavigateTo("/login", forceLoad: true);
+            Navigation.NavigateTo(Routes.Login, forceLoad: true);
         }
 
         return response;
@@ -61,9 +61,8 @@ public class GatewayAuthorizationMessageHandler(
     private bool IsGatewayRequest(Uri? requestUri)
     {
         if (requestUri == null || !requestUri.IsAbsoluteUri) return false;
-        var gateway = _gatewayBaseUrl.TrimEnd('/');
-        var uri = requestUri.GetLeftPart(UriPartial.Authority).TrimEnd('/');
-        return uri.Equals(gateway, StringComparison.OrdinalIgnoreCase)
+        var uriAuthority = requestUri.GetLeftPart(UriPartial.Authority).TrimEnd('/');
+        return uriAuthority.Equals(_gatewayBaseUrl, StringComparison.OrdinalIgnoreCase)
             || requestUri.AbsoluteUri.StartsWith(_gatewayBaseUrl + "/", StringComparison.OrdinalIgnoreCase);
     }
 }

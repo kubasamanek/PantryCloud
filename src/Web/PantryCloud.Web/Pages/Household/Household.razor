@@ -6,7 +6,7 @@
 <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
     <MudText Typo="Typo.h5" Class="mb-6">Household</MudText>
 
-    @if (_loading && _currentHousehold == null && !_showCreateForm)
+    @if (IsLoading && _currentHousehold == null && !_showCreateForm)
     {
         <MudProgressCircular Indeterminate Color="Color.Primary" />
     }
@@ -23,43 +23,12 @@
             </MudStack>
         </MudPaper>
 
-        @* Members table *@
-        @if (_members != null)
-        {
-            <MudText Typo="Typo.h6" Class="mb-2">Members</MudText>
-            <MudTable Items="@_members.Members" Hover="true" Breakpoint="Breakpoint.Sm" Class="mb-4">
-                <HeaderContent>
-                    <MudTh>Member</MudTh>
-                    <MudTh>Role</MudTh>
-                    <MudTh>Diet</MudTh>
-                    @if (_isOwner)
-                    {
-                        <MudTh Style="width: 100px;">Actions</MudTh>
-                    }
-                </HeaderContent>
-                <RowTemplate>
-                    <MudTd DataLabel="Member">
-                        <MudStack Spacing="1" Row="true" AlignItems="AlignItems.Center">
-                            <MudAvatar Size="Size.Small" image="@context.AvatarUrl" Color="Color.Primary">@((context.DisplayName ?? "M").Substring(0, 1).ToUpperInvariant())</MudAvatar>
-                            <MudText Typo="Typo.body2">@(context.DisplayName ?? "Member") @(context.UserId == _currentUserId ? " (You)" : "")</MudText>
-                        </MudStack>
-                    </MudTd>
-                    <MudTd DataLabel="Role">@HouseholdDisplayHelper.RoleLabel(context.Role)</MudTd>
-                    <MudTd DataLabel="Diet">@HouseholdDisplayHelper.DietaryProfileLabel(context.DietaryProfile) @(context.ExcludedIngredients?.Count > 0 ? $"· Excl. {context.ExcludedIngredients.Count}" : "")</MudTd>
-                    @if (_isOwner)
-                    {
-                        <MudTd DataLabel="Actions">
-                            @if (context.UserId != _currentUserId && context.Role != 0)
-                            {
-                                <MudIconButton Icon="@Icons.Material.Filled.PersonRemove" Size="Size.Small" Color="Color.Default" OnClick="@(() => ConfirmKick(context))" Disabled="_busy" title="Kick member" />
-                            }
-                        </MudTd>
-                    }
-                </RowTemplate>
-            </MudTable>
-        }
+        <HouseholdMembersTable Members="_members"
+                               CurrentUserId="_currentUserId"
+                               IsOwner="_isOwner"
+                               IsBusy="IsBusy"
+                               OnKick="ConfirmKick" />
 
-        @* Actions: Leave (non-owner), Transfer (owner), Invite (owner) *@
         <MudStack Spacing="2" Class="mb-4">
             @if (_isOwner)
             {
@@ -67,7 +36,7 @@
                 <MudText Typo="Typo.subtitle1">Invite by email</MudText>
                 <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
                     <MudTextField @bind-Value="_inviteEmail" Label="Email" Variant="Variant.Outlined" Style="max-width: 280px;" />
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SendInvite" Disabled="_busy || string.IsNullOrWhiteSpace(_inviteEmail)">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SendInvite" Disabled="@(IsBusy || string.IsNullOrWhiteSpace(_inviteEmail))">
                         @(_inviteLoading ? "Sending..." : "Send invite")
                     </MudButton>
                 </MudStack>
@@ -76,37 +45,22 @@
                     <MudAlert Severity="Severity.Info" Dense="true">Link expires in 2 minutes. Share it with the invitee.</MudAlert>
                     <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
                         <MudTextField Value="@_inviteLink" ReadOnly="true" Variant="Variant.Outlined" Style="flex: 1;" />
-                        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.ContentCopy" OnClick="CopyInviteLink">Copy link</MudButton>
+                        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.ContentCopy" OnClick="CopyInviteLink" aria-label="Copy invite link">Copy link</MudButton>
                     </MudStack>
                 }
                 @if (_members != null && _members.Members.Count > 1)
                 {
-                    <MudDivider />
-                    <MudText Typo="Typo.subtitle1">Transfer ownership</MudText>
-                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                        <MudMenu AnchorOrigin="Origin.BottomCenter" Variant="Variant.Outlined" buttonColor="Color.Primary" Style="max-width: 280px;">
-                            <ActivatorContent>
-                                <MudButton EndIcon="@Icons.Material.Filled.ArrowDropDown" Variant="Variant.Outlined">
-                                    @(_transferTargetMember != null ? (_transferTargetMember.DisplayName ?? "Member") : "Select new owner")
-                                </MudButton>
-                            </ActivatorContent>
-                            <ChildContent>
-                                <MudList T="object" Style="max-height: 280px; overflow-y: auto;">
-                                    @foreach (var m in _transferTargetList)
-                                    {
-                                        <MudListItem T="object" @onclick="@(() => SelectTransferTarget(m))">@(m.DisplayName ?? "Member")</MudListItem>
-                                    }
-                                </MudList>
-                            </ChildContent>
-                        </MudMenu>
-                        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ConfirmTransfer" Disabled="_busy || _transferTargetMember == null">Transfer</MudButton>
-                    </MudStack>
+                    <HouseholdTransferSection TransferTargetMember="_transferTargetMember"
+                                              TransferTargetList="_transferTargetList"
+                                              IsBusy="IsBusy"
+                                              OnSelectTarget="SelectTransferTarget"
+                                              OnTransfer="ConfirmTransfer" />
                 }
             }
             @if (!_isOwner)
             {
                 <MudDivider />
-                <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Logout" OnClick="ConfirmLeave" Disabled="_busy">Leave household</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Logout" OnClick="ConfirmLeave" Disabled="@IsBusy">Leave household</MudButton>
             }
         </MudStack>
     }
@@ -117,9 +71,9 @@
             <MudCard Elevation="2" Class="pa-4">
                 <MudCardContent>
                     <MudText Typo="Typo.h6" Class="mb-2">Join a household</MudText>
-                    <MudText Typo="Typo.body2" Class="mb-4">Paste the invite code from your link, or use the link directly from <MudLink Href="/join" Typo="Typo.body2">/join</MudLink>.</MudText>
+                    <MudText Typo="Typo.body2" Class="mb-4">Paste the invite code from your link, or use the link directly from <MudLink Href="@Routes.Join" Typo="Typo.body2">@Routes.Join</MudLink>.</MudText>
                     <MudTextField @bind-Value="_joinCode" Label="Invite code" Variant="Variant.Outlined" Class="mb-4" Placeholder="Paste code from invite link" />
-                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="JoinHousehold" Disabled="_busy || string.IsNullOrWhiteSpace(_joinCode)">
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="JoinHousehold" Disabled="@(IsBusy || string.IsNullOrWhiteSpace(_joinCode))">
                         @(_joinLoading ? "Joining..." : "Join household")
                     </MudButton>
                 </MudCardContent>
@@ -131,7 +85,7 @@
                     <EditForm Model="_createModel" OnValidSubmit="HandleCreateSubmit">
                         <DataAnnotationsValidator />
                         <MudTextField @bind-Value="_createModel.Name" Label="Household name" Variant="Variant.Outlined" Class="mb-4" Required="true" />
-                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Disabled="_createLoading">
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Disabled="@_createLoading">
                             @(_createLoading ? "Creating..." : "Create household")
                         </MudButton>
                     </EditForm>
@@ -152,12 +106,10 @@
 
     private GetCurrentHouseholdResponse? _currentHousehold;
     private GetHouseholdMembersResponse? _members;
-    private bool _loading = true;
     private bool _showCreateForm;
-    private bool _busy;
-    private bool _createLoading;
-    private bool _joinLoading;
     private bool _inviteLoading;
+    private bool _joinLoading;
+    private bool _createLoading;
     private Guid? _currentUserId;
     private bool _isOwner;
     private readonly CreateHouseholdRequest _createModel = new();
@@ -166,6 +118,9 @@
     private string _inviteLink = "";
     private MemberWithProfileDto? _transferTargetMember;
     private List<MemberWithProfileDto> _transferTargetList = [];
+
+    private bool IsLoading { get; set; } = true;
+    private bool IsBusy { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -176,7 +131,7 @@
 
     private async Task LoadCurrentHouseholdAsync()
     {
-        _loading = true;
+        IsLoading = true;
         try
         {
             _currentHousehold = await HouseholdApi.GetCurrentHouseholdAsync();
@@ -198,7 +153,7 @@
         }
         finally
         {
-            _loading = false;
+            IsLoading = false;
         }
     }
 
@@ -229,7 +184,7 @@
     private async Task JoinHousehold()
     {
         if (string.IsNullOrWhiteSpace(_joinCode)) return;
-        _busy = true;
+        IsBusy = true;
         _joinLoading = true;
         try
         {
@@ -247,7 +202,7 @@
         }
         finally
         {
-            _busy = false;
+            IsBusy = false;
             _joinLoading = false;
         }
     }
@@ -262,7 +217,7 @@
             if (response != null)
             {
                 var baseUri = new Uri(Navigation.Uri).GetLeftPart(UriPartial.Authority);
-                _inviteLink = $"{baseUri}/join?code={Uri.EscapeDataString(response.Code)}";
+                _inviteLink = $"{baseUri}{Routes.Join}?code={Uri.EscapeDataString(response.Code)}";
                 Snackbar.Add("Invite created. Share the link within 2 minutes.", Severity.Success);
             }
             else
@@ -294,7 +249,7 @@
     {
         var confirmed = await DialogService.ShowMessageBox("Leave household", "Are you sure you want to leave this household?", "Leave", "Cancel");
         if (confirmed != true) return;
-        _busy = true;
+        IsBusy = true;
         try
         {
             var response = await HouseholdApi.LeaveHouseholdAsync();
@@ -310,7 +265,7 @@
         }
         finally
         {
-            _busy = false;
+            IsBusy = false;
         }
     }
 
@@ -318,7 +273,7 @@
     {
         var confirmed = await DialogService.ShowMessageBox("Kick member", $"Remove {member.DisplayName ?? "this member"} from the household?", "Kick", "Cancel");
         if (confirmed != true) return;
-        _busy = true;
+        IsBusy = true;
         try
         {
             if (await HouseholdApi.KickMemberAsync(member.UserId))
@@ -333,14 +288,15 @@
         }
         finally
         {
-            _busy = false;
+            IsBusy = false;
         }
     }
 
-    private void SelectTransferTarget(MemberWithProfileDto m)
+    private Task SelectTransferTarget(MemberWithProfileDto m)
     {
         _transferTargetMember = m;
         StateHasChanged();
+        return Task.CompletedTask;
     }
 
     private async Task ConfirmTransfer()
@@ -349,7 +305,7 @@
         var name = _transferTargetMember.DisplayName ?? "this member";
         var confirmed = await DialogService.ShowMessageBox("Transfer ownership", $"Transfer ownership to {name}? You will become a member.", "Transfer", "Cancel");
         if (confirmed != true) return;
-        _busy = true;
+        IsBusy = true;
         try
         {
             if (await HouseholdApi.TransferOwnershipAsync(_transferTargetMember.UserId) != null)
@@ -365,7 +321,7 @@
         }
         finally
         {
-            _busy = false;
+            IsBusy = false;
         }
     }
 }

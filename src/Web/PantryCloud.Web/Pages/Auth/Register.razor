@@ -1,4 +1,5 @@
 @page "/register"
+@layout AuthLayout
 @attribute [AllowAnonymous]
 
 <PageTitle>Register - PantryCloud</PageTitle>
@@ -22,7 +23,7 @@
             </MudAlert>
         }
         <MudStack Row="true" Class="mt-4">
-            <MudLink Href="/login" Typo="Typo.body2">Already have an account? Sign in</MudLink>
+            <MudLink Href="@Routes.Login" Typo="Typo.body2">Already have an account? Sign in</MudLink>
         </MudStack>
     </MudPaper>
 </MudContainer>
@@ -49,7 +50,7 @@
             {
                 _success = true;
                 var baseUri = new Uri(Navigation.Uri).GetLeftPart(UriPartial.Authority);
-                _verifyLink = $"{baseUri}/verify-email?email={Uri.EscapeDataString(_model.Email)}&token={Uri.EscapeDataString(response.VerifyEmailToken)}";
+                _verifyLink = $"{baseUri}{Routes.VerifyEmail}?email={Uri.EscapeDataString(_model.Email)}&token={Uri.EscapeDataString(response.VerifyEmailToken)}";
             }
             else
             {

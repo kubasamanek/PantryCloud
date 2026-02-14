@@ -1,0 +1,29 @@
+@* Presentational: transfer ownership dropdown and transfer button. *@
+<MudDivider />
+<MudText Typo="Typo.subtitle1">Transfer ownership</MudText>
+<MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+    <MudMenu AnchorOrigin="Origin.BottomCenter" Variant="Variant.Outlined" buttonColor="Color.Primary" Style="max-width: 280px;">
+        <ActivatorContent>
+            <MudButton EndIcon="@Icons.Material.Filled.ArrowDropDown" Variant="Variant.Outlined">
+                @(TransferTargetMember != null ? (TransferTargetMember.DisplayName ?? "Member") : "Select new owner")
+            </MudButton>
+        </ActivatorContent>
+        <ChildContent>
+            <MudList T="object" Style="max-height: 280px; overflow-y: auto;">
+                @foreach (var m in TransferTargetList)
+                {
+                    <MudListItem T="object" @onclick="@(() => OnSelectTarget.InvokeAsync(m))">@(m.DisplayName ?? "Member")</MudListItem>
+                }
+            </MudList>
+        </ChildContent>
+    </MudMenu>
+    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="OnTransfer" Disabled="@(IsBusy || TransferTargetMember == null)">Transfer</MudButton>
+</MudStack>
+
+@code {
+    [Parameter] public MemberWithProfileDto? TransferTargetMember { get; set; }
+    [Parameter] public IReadOnlyList<MemberWithProfileDto> TransferTargetList { get; set; } = [];
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public EventCallback<MemberWithProfileDto> OnSelectTarget { get; set; }
+    [Parameter] public EventCallback OnTransfer { get; set; }
+}

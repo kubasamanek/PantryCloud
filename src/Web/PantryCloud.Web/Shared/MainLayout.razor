@@ -2,16 +2,17 @@
 @implements IDisposable
 
 <MudLayout>
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Breakpoint="Breakpoint.Md" Elevation="2">
+        <NavMenu />
+    </MudDrawer>
     <MudAppBar Elevation="1" Fixed="false">
-        <MudLink Href="/" Typo="Typo.h6" Class="mr-4" Color="Color.Inherit" Style="text-decoration: none;">PantryCloud</MudLink>
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" OnClick="ToggleDrawer" Class="mr-2" aria-label="Toggle menu" />
+        <MudLink Href="@Routes.Home" Typo="Typo.h6" Class="mr-4" Color="Color.Inherit" Style="text-decoration: none;">PantryCloud</MudLink>
         <MudSpacer />
         <AuthorizeView>
             <Authorized>
                 <TokenExpiryDisplay />
-                <MudLink Href="/profile" Typo="Typo.body2" Class="mr-2" Color="Color.Inherit">Profile</MudLink>
-                <MudLink Href="/preferences" Typo="Typo.body2" Class="mr-2" Color="Color.Inherit">Preferences</MudLink>
-                <MudLink Href="/sessions" Typo="Typo.body2" Class="mr-2" Color="Color.Inherit">Sessions</MudLink>
-                <MudText Typo="Typo.body1" Class="mr-2">@_displayName</MudText>
+                <MudText Typo="Typo.body2" Class="mr-2" Style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@_displayName</MudText>
                 <MudButton Variant="Variant.Text" Color="Color.Inherit" OnClick="BeginLogout">
                     Logout
                 </MudButton>
@@ -44,8 +45,14 @@
     [Inject]
     private AuthenticationStateProvider AuthState { get; set; } = null!;
 
+    private bool _drawerOpen = true;
     private string _displayName = "User";
     private string? _authName;
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -80,7 +87,7 @@
 
     private void BeginLogin()
     {
-        Navigation.NavigateTo("/login", forceLoad: true);
+        Navigation.NavigateTo(Routes.Login, forceLoad: true);
     }
 
     private async Task BeginLogout()
@@ -99,7 +106,7 @@
         {
             await TokenStorage.ClearAsync();
             AuthStateProvider.NotifyLoggedOut();
-            Navigation.NavigateTo("/login", forceLoad: true);
+            Navigation.NavigateTo(Routes.Login, forceLoad: true);
         }
     }
 }

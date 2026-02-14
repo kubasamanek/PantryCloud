@@ -1,4 +1,5 @@
 @page "/login"
+@layout AuthLayout
 @attribute [AllowAnonymous]
 
 <PageTitle>Login - PantryCloud</PageTitle>
@@ -10,13 +11,13 @@
             <DataAnnotationsValidator />
             <MudTextField @bind-Value="_model.Email" Label="Email" Variant="Variant.Outlined" InputType="InputType.Email" Class="mb-4" />
             <MudTextField @bind-Value="_model.Password" Label="Password" Variant="Variant.Outlined" InputType="InputType.Password" Class="mb-4" />
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="mb-2" Disabled="_loading">
-                @(_loading ? "Signing in..." : "Sign in")
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="mb-2" Disabled="@IsBusy">
+                @(IsBusy ? "Signing in..." : "Sign in")
             </MudButton>
         </EditForm>
         <MudStack Row="true" Class="mt-4" Justify="Justify.SpaceBetween">
-            <MudLink Href="/forgot-password" Typo="Typo.body2">Forgot password?</MudLink>
-            <MudLink Href="/register" Typo="Typo.body2">Create account</MudLink>
+            <MudLink Href="@Routes.ForgotPassword" Typo="Typo.body2">Forgot password?</MudLink>
+            <MudLink Href="@Routes.Register" Typo="Typo.body2">Create account</MudLink>
         </MudStack>
     </MudPaper>
 </MudContainer>
@@ -30,11 +31,11 @@
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
 
     private readonly LoginRequest _model = new();
-    private bool _loading;
+    private bool IsBusy;
 
     private async Task HandleSubmit()
     {
-        _loading = true;
+        IsBusy = true;
         try
         {
             _model.DeviceName = await DeviceNameProvider.GetDeviceNameAsync();
@@ -43,25 +44,8 @@
             {
                 await TokenStorage.SetTokensAsync(response.AccessToken, response.RefreshToken);
                 AuthStateProvider.NotifyLoggedIn();
-                var uri = Navigation.Uri;
-                var returnUrlPrefix = "returnUrl=";
-                var idx = uri.IndexOf(returnUrlPrefix, StringComparison.OrdinalIgnoreCase);
-                if (idx >= 0)
-                {
-                    var encoded = uri[(idx + returnUrlPrefix.Length)..].Split('&')[0];
-                    if (!string.IsNullOrEmpty(encoded))
-                    {
-                        var decoded = Uri.UnescapeDataString(encoded);
-                        if (decoded.StartsWith("/", StringComparison.Ordinal) || decoded.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                            Navigation.NavigateTo(decoded, forceLoad: true);
-                        else
-                            Navigation.NavigateTo("/household", forceLoad: true);
-                    }
-                    else
-                        Navigation.NavigateTo("/household", forceLoad: true);
-                }
-                else
-                    Navigation.NavigateTo("/household", forceLoad: true);
+                var returnPath = NavigationHelper.GetReturnUrlOrDefault(Navigation, Routes.Household);
+                Navigation.NavigateTo(returnPath, forceLoad: true);
             }
             else
             {
@@ -70,7 +54,7 @@
         }
         finally
         {
-            _loading = false;
+            IsBusy = false;
         }
     }
 }

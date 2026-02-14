@@ -1,3 +1,12 @@
+/* Theme variables (mirror MudTheme palette for custom elements) */
+:root {
+    --app-primary: #0D7377;
+    --app-secondary: #455A64;
+    --app-background: #FAFAFA;
+    --app-surface: #FFFFFF;
+    --app-content-max-width: 1200px;
+}
+
 .mud-layout {
     min-height: 100vh;
     display: flex;
@@ -21,7 +30,7 @@
 .mud-main-content .layout-content {
     flex: 1;
     width: 100%;
-    max-width: 1200px;
+    max-width: var(--app-content-max-width);
     margin-left: auto;
     margin-right: auto;
     padding: 1.5rem 1rem;
@@ -31,6 +40,47 @@
     .mud-main-content .layout-content {
         padding: 2rem 1.5rem;
     }
+}
+
+/* Initial loading screen (before Blazor loads) */
+.app-loading {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: var(--app-background);
+    font-family: 'Plus Jakarta Sans', Roboto, sans-serif;
+}
+.app-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--app-surface);
+    border-top-color: var(--app-primary);
+    border-radius: 50%;
+    animation: app-loading-spin 0.8s linear infinite;
+}
+@keyframes app-loading-spin {
+    to { transform: rotate(360deg); }
+}
+.app-loading-text {
+    margin-top: 1rem;
+    color: var(--app-secondary);
+    font-size: 0.9rem;
+}
+
+/* Auth pages: centered card, no app bar or drawer */
+.auth-layout {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--app-background);
+    padding: 1rem;
+}
+.auth-layout-content {
+    width: 100%;
+    max-width: 420px;
 }
 
 .word-break-all {
@@ -43,8 +93,9 @@
     margin-right: 8px;
     font-size: 0.8rem;
     font-weight: 600;
-    background: rgba(255, 255, 255, 0.95);
-    color: #1a1a1a;
+    background: var(--app-surface);
+    color: var(--app-primary);
     border-radius: 6px;
     white-space: nowrap;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }

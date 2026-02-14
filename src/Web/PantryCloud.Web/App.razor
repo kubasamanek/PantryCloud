@@ -21,5 +21,20 @@
 </CascadingAuthenticationState>
 
 @code {
-    private static readonly MudTheme Theme = new();
+    // Design: primary teal, neutral surface/background. See THEME.md and site.css variables.
+    private static readonly MudTheme Theme = new()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "#0D7377",
+            Secondary = "#455A64",
+            Background = "#FAFAFA",
+            Surface = "#FFFFFF",
+            AppbarBackground = "#0D7377"
+        },
+        LayoutProperties = new LayoutProperties()
+        {
+            DefaultBorderRadius = "8px"
+        }
+    };
 }

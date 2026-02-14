@@ -34,16 +34,16 @@
                         </MudCard>
                     }
                 </MudStack>
-                <MudLink Href="/household" Typo="Typo.body2" Class="mt-2">Manage household</MudLink>
+                <MudLink Href="@Routes.Household" Typo="Typo.body2" Class="mt-2">Manage household</MudLink>
             }
         </MudStack>
     </Authorized>
     <NotAuthorized>
         <MudText Typo="Typo.body1" Class="mb-4">Sign in to get started.</MudText>
         <MudStack Row="true" Spacing="2">
-            <MudLink Href="/login" Typo="Typo.body1">Sign in</MudLink>
+            <MudLink Href="@Routes.Login" Typo="Typo.body1">Sign in</MudLink>
             <MudText Typo="Typo.body1">or</MudText>
-            <MudLink Href="/register" Typo="Typo.body1">Create account</MudLink>
+            <MudLink Href="@Routes.Register" Typo="Typo.body1">Create account</MudLink>
         </MudStack>
     </NotAuthorized>
 </AuthorizeView>

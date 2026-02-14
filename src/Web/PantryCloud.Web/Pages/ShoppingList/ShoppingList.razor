@@ -1,0 +1,15 @@
+@page "/shopping-list"
+@attribute [Authorize]
+
+<PageTitle>Shopping list - PantryCloud</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+    <MudText Typo="Typo.h5" Class="mb-4">Shopping list</MudText>
+    <MudPaper Class="pa-8" Elevation="2">
+        <MudStack Spacing="3" AlignItems="AlignItems.Center" Justify="Justify.Center" Class="py-8">
+            <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Size="Size.Large" Color="Color.Primary" />
+            <MudText Typo="Typo.h6">Your shopping list will appear here</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">This section is not yet connected. It will show your household shopping list once the service is integrated.</MudText>
+        </MudStack>
+    </MudPaper>
+</MudContainer>

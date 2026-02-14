@@ -1,11 +1,11 @@
 using System.Net.Http.Json;
+using PantryCloud.Web.Constants;
 
 namespace PantryCloud.Web.Services.Profile;
 
 public class ProfileApiService(IHttpClientFactory httpClientFactory) : IProfileApi
 {
-    private const string BasePath = "api/household/api/households";
-
+    private static readonly string BasePath = ApiPaths.Households;
     private HttpClient Client => httpClientFactory.CreateClient("Gateway");
 
     public async Task<GetMyProfileResponse?> GetMyProfileAsync(CancellationToken cancellationToken = default)
