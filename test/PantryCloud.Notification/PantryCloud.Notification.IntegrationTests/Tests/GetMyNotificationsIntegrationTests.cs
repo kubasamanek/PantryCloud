@@ -60,8 +60,8 @@ public class GetMyNotificationsIntegrationTests(NotificationTestFixture fixture)
         });
         await Task.Delay(Constants.Delays.DefaultMs);
 
-        var listA = await fixture.GetMyNotificationsAsync(tokenA, 50, null);
-        var listB = await fixture.GetMyNotificationsAsync(tokenB, 50, null);
+        var listA = await fixture.GetMyNotificationsAsync(tokenA);
+        var listB = await fixture.GetMyNotificationsAsync(tokenB);
 
         listA.ShouldContain(n => n.Title == Constants.NotificationTitles.MemberJoinedHousehold);
         listB.ShouldContain(n => n.Title == Constants.NotificationTitles.WelcomeToHousehold);
