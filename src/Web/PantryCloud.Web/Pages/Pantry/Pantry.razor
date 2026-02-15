@@ -40,8 +40,8 @@
             <MudStack Spacing="3">
                 <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudStack Row="true" Spacing="2">
-                        <MudTextField @bind-Value="_searchTerm" Label="Search" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Style="max-width: 240px;" />
-                        <MudTextField @bind-Value="_categoryFilter" Label="Category" Variant="Variant.Outlined" Style="max-width: 160px;" />
+                        <MudTextField @bind-Value="_searchTerm" Label="Search" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Style="max-width: 240px;"/>
+                        <MudTextField @bind-Value="_categoryFilter" Label="Category" Variant="Variant.Outlined" Style="max-width: 160px;"/>
                         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ApplyFilters">Search</MudButton>
                     </MudStack>
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenAddDialog">Add item</MudButton>
@@ -92,8 +92,8 @@
                                 <MudTd DataLabel="Category">@(context.Category ?? "—")</MudTd>
                                 <MudTd DataLabel="Notes">@(context.Notes != null && context.Notes.Length > 40 ? context.Notes[..40] + "…" : context.Notes ?? "—")</MudTd>
                                 <MudTd DataLabel="Actions">
-                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary" OnClick="@(() => OpenEditDialog(context))" aria-label="Edit item" />
-                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="@(() => ConfirmDelete(context))" aria-label="Delete item" />
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary" OnClick="@(() => OpenEditDialog(context))" aria-label="Edit item"/>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="@(() => ConfirmDelete(context))" aria-label="Delete item"/>
                                 </MudTd>
                             </RowTemplate>
                         </MudTable>
@@ -228,16 +228,16 @@
     private static (string? ChipText, Color Color) GetExpirationChip(DateTime? expirationDate)
     {
         if (!expirationDate.HasValue) return (null, Color.Default);
+        
         var today = DateTime.UtcNow.Date;
         var exp = expirationDate.Value;
         var expDateOnly = new DateTime(exp.Year, exp.Month, exp.Day);
         var days = (expDateOnly - today).Days;
-        return days switch
-        {
-            < 0 => ("Expired", Color.Error),
-            <= ExpirationWarningDays => ($"Expires in {days} day(s)", Color.Warning),
-            _ => (null, Color.Default)
-        };
+
+        if (days < 0) return ("Expired", Color.Error);
+        if (days <= ExpirationWarningDays) return ($"Expires in {days} day(s)", Color.Warning);
+        
+        return (null, Color.Default);
     }
 
     private void ApplyFilters() => _ = LoadListAsync();
