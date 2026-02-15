@@ -118,6 +118,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipelines", "Pipelines", "{
 		.github\workflows\recipe.yml = .github\workflows\recipe.yml
 		.github\workflows\audit.yml = .github\workflows\audit.yml
 		.github\workflows\frontend.yml = .github\workflows\frontend.yml
+		.github\workflows\dotnet-service-pipeline.yml = .github\workflows\dotnet-service-pipeline.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployments", "Deployments", "{5E6219B9-5B71-4C81-A5EE-CC779BBDB4C2}"
