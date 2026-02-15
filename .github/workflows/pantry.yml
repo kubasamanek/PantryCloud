@@ -22,7 +22,7 @@ on:
 
 jobs:
   pipeline:
-    uses: ./.github/workflows/dotnet-service-pipeline.yml
+    uses: ./.github/workflows/base.yml
     with:
       service_project_path: src/Services/PantryCloud.Pantry/PantryCloud.Pantry.Presentation/PantryCloud.Pantry.Presentation.csproj
       unit_test_project_path: test/PantryCloud.Pantry/PantryCloud.Pantry.UnitTests/PantryCloud.Pantry.UnitTests.csproj

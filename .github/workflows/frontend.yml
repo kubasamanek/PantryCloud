@@ -17,7 +17,7 @@ on:
 
 jobs:
   pipeline:
-    uses: ./.github/workflows/dotnet-service-pipeline.yml
+    uses: ./.github/workflows/base.yml
     with:
       service_project_path: src/Web/PantryCloud.Web/PantryCloud.Web.csproj
       # No tests for Frontend

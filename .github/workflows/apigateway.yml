@@ -21,7 +21,7 @@ on:
 
 jobs:
   pipeline:
-    uses: ./.github/workflows/dotnet-service-pipeline.yml
+    uses: ./.github/workflows/base.yml
     with:
       service_project_path: src/Gateways/PantryCloud.ApiGateway/PantryCloud.ApiGateway.Presentation/PantryCloud.ApiGateway.Presentation.csproj
       unit_test_project_path: test/PantryCloud.ApiGateway/PantryCloud.ApiGateway.UnitTests/PantryCloud.ApiGateway.UnitTests.csproj

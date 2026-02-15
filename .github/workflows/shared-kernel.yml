@@ -18,7 +18,7 @@ on:
 
 jobs:
   pipeline:
-    uses: ./.github/workflows/dotnet-service-pipeline.yml
+    uses: ./.github/workflows/base.yml
     with:
       service_project_path: src/BuildingBlocks/PantryCloud.SharedKernel/PantryCloud.SharedKernel.csproj
       unit_test_project_path: test/PantryCloud.SharedKernel/PantryCloud.SharedKernel.UnitTests/PantryCloud.SharedKernel.UnitTests.csproj
