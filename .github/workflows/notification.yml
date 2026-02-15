@@ -9,6 +9,7 @@ on:
       - 'src/BuildingBlocks/**'
       - 'test/PantryCloud.Notification/**'
       - '.github/workflows/notification.yml'
+      - '.github/workflows/base.yml'
   pull_request:
     branches:
       - develop
@@ -17,6 +18,7 @@ on:
       - 'src/BuildingBlocks/**'
       - 'test/PantryCloud.Notification/**'
       - '.github/workflows/notification.yml'
+      - '.github/workflows/base.yml'
   workflow_dispatch:
 
 jobs:

@@ -9,6 +9,7 @@ on:
       - 'src/BuildingBlocks/**'
       - 'test/PantryCloud.Audit/**'
       - '.github/workflows/audit.yml'
+      - '.github/workflows/base.yml'
   pull_request:
     branches:
       - develop

@@ -8,6 +8,7 @@ on:
       - 'src/BuildingBlocks/PantryCloud.SharedKernel/**'
       - 'test/PantryCloud.SharedKernel/**'
       - '.github/workflows/shared-kernel.yml'
+      - '.github/workflows/base.yml'
   pull_request:
     branches:
       - develop

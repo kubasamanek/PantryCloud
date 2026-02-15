@@ -7,12 +7,14 @@ on:
     paths:
       - 'src/Web/PantryCloud.Web/**'
       - '.github/workflows/frontend.yml'
+      - '.github/workflows/base.yml'
   pull_request:
     branches:
       - develop
     paths:
       - 'src/Web/PantryCloud.Web/**'
       - '.github/workflows/frontend.yml'
+      - '.github/workflows/base.yml'
   workflow_dispatch:
 
 jobs:

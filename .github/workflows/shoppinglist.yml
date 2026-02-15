@@ -10,6 +10,7 @@ on:
       - 'src/BuildingBlocks/**'
       - 'test/PantryCloud.ShoppingList/**'
       - '.github/workflows/shoppinglist.yml'
+      - '.github/workflows/base.yml'
   pull_request:
     branches:
       - develop

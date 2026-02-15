@@ -8,6 +8,7 @@ on:
       - 'src/Services/PantryCloud.Household/**'
       - 'src/BuildingBlocks/**'
       - '.github/workflows/household.yml'
+      - '.github/workflows/base.yml'
   pull_request:
     branches:
       - develop
@@ -16,6 +17,7 @@ on:
       - 'src/BuildingBlocks/**'
       - 'test/PantryCloud.Household/**'
       - '.github/workflows/household.yml'
+      - '.github/workflows/base.yml'
   workflow_dispatch:
 
 jobs:
