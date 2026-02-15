@@ -9,7 +9,7 @@
     protected override async Task OnInitializedAsync()
     {
         var history = await NotificationApi.GetMyNotificationsAsync(50, null);
-        if (history != null && history.Count > 0)
+        if (history is { Count: > 0 })
             StateService.AddRange(history);
         await HubClient.StartAsync();
     }

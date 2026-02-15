@@ -102,8 +102,8 @@
                             <MudText Typo="Typo.body2">@_listResponse.TotalCount item(s)</MudText>
                             <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
                                 <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="PreviousPage" Disabled="@(_page <= 1)">Previous</MudButton>
-                                <MudText Typo="Typo.body2">Page @_page of @_totalPages</MudText>
-                                <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="NextPage" Disabled="@(_page >= _totalPages)">Next</MudButton>
+                                <MudText Typo="Typo.body2">Page @_page of @TotalPages</MudText>
+                                <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="NextPage" Disabled="@(_page >= TotalPages)">Next</MudButton>
                             </MudStack>
                         </MudStack>
                     }
@@ -111,12 +111,11 @@
             </MudStack>
         </MudPaper>
 
-        @* Recipes from your pantry — only when pantry is loaded and user has household *@
         @if (_listResponse != null)
         {
             <MudPaper Class="pa-4 mt-6" Elevation="2">
                 <MudText Typo="Typo.h6" Class="mb-3">Recipes from your pantry</MudText>
-                @if (_listResponse.Items == null || _listResponse.Items.Count == 0)
+                @if (_listResponse.Items.Count == 0)
                 {
                     <MudText Typo="Typo.body2" Color="Color.Secondary">Add pantry items to get recipe suggestions.</MudText>
                 }
@@ -181,7 +180,7 @@
     private string _categoryFilter = "";
     private int _page = 1;
 
-    private int _totalPages => _listResponse == null ? 0 : Math.Max(1, (int)Math.Ceiling(_listResponse.TotalCount / (double)_listResponse.PageSize));
+    private int TotalPages => _listResponse == null ? 0 : Math.Max(1, (int)Math.Ceiling(_listResponse.TotalCount / (double)_listResponse.PageSize));
 
     private List<RecipeDto>? _recommendRecipes;
     private bool _recipesLoading;
@@ -233,9 +232,12 @@
         var exp = expirationDate.Value;
         var expDateOnly = new DateTime(exp.Year, exp.Month, exp.Day);
         var days = (expDateOnly - today).Days;
-        if (days < 0) return ("Expired", Color.Error);
-        if (days <= ExpirationWarningDays) return ($"Expires in {days} day(s)", Color.Warning);
-        return (null, Color.Default);
+        return days switch
+        {
+            < 0 => ("Expired", Color.Error),
+            <= ExpirationWarningDays => ($"Expires in {days} day(s)", Color.Warning),
+            _ => (null, Color.Default)
+        };
     }
 
     private void ApplyFilters() => _ = LoadListAsync();
@@ -247,12 +249,12 @@
 
     private void NextPage()
     {
-        if (_page < _totalPages) { _page++; _ = LoadListAsync(); }
+        if (_page < TotalPages) { _page++; _ = LoadListAsync(); }
     }
 
     private async Task OpenAddDialog()
     {
-        var parameters = new DialogParameters { ["IsEdit"] = false, ["Item"] = (PantryItemDto?)null };
+        var parameters = new DialogParameters { ["IsEdit"] = false, ["Item"] = null };
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = false };
         var dialog = await DialogService.ShowAsync<PantryItemFormDialog>("Add item", parameters, options);
         var result = await dialog.Result;
@@ -340,7 +342,8 @@
             .Where(n => !string.IsNullOrWhiteSpace(n))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Select(n => n!)
-            .ToList() ?? new List<string>();
+            .ToList() ?? [];
+        
         _recipesLoading = true;
         _recipesError = false;
         _recommendRecipes = null;

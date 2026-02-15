@@ -32,7 +32,7 @@
     [Parameter] public bool IsEdit { get; set; }
     [Parameter] public PantryItemDto? Item { get; set; }
 
-    private PantryItemFormModel _model = new();
+    private readonly PantryItemFormModel _model = new();
     private DateTime? _expirationDate;
     private bool _saving;
 

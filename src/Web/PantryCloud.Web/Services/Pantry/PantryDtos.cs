@@ -2,10 +2,6 @@ using System.Text.Json.Serialization;
 
 namespace PantryCloud.Web.Services.Pantry;
 
-/// <summary>
-/// Request/response DTOs for Pantry API. Unit is int (backend enum serialized as number).
-/// RowVersion is byte[] (JSON base64).
-/// </summary>
 public record CreatePantryItemRequest
 {
     [JsonPropertyName("name")] public string Name { get; set; } = "";
@@ -102,7 +98,4 @@ public record PantryUpdateResult
 /// </summary>
 public record PantryItemFormResult(Guid? EditId, string Name, decimal Quantity, int Unit, DateTime? ExpirationDate, string? Category, string? Notes, byte[]? RowVersion);
 
-/// <summary>
-/// Result of list pantry items call. Use to distinguish 404 (no household) from 401 (auth) or other errors.
-/// </summary>
 public record ListPantryItemsResult(ListPantryItemsResponse? Data, bool NoHousehold, bool Unauthorized);

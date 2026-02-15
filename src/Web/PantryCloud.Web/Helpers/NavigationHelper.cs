@@ -20,16 +20,23 @@ public static class NavigationHelper
         var uri = navigation.Uri;
         var idx = uri.IndexOf(ReturnUrlQueryPrefix, StringComparison.OrdinalIgnoreCase);
         if (idx < 0)
+        {
             return defaultPath;
+        }
 
         idx += ReturnUrlQueryPrefix.Length;
         var segment = uri[idx..].Split('&')[0];
         if (string.IsNullOrWhiteSpace(segment))
+        {
             return defaultPath;
+        }
 
         var decoded = Uri.UnescapeDataString(segment.Trim());
-        if (decoded.StartsWith("/", StringComparison.Ordinal) || decoded.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        if (decoded.StartsWith("/", StringComparison.Ordinal) ||
+            decoded.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
             return decoded;
+        }
 
         return defaultPath;
     }

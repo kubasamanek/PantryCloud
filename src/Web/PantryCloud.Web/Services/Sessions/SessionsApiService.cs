@@ -2,9 +2,6 @@ using System.Net.Http.Json;
 
 namespace PantryCloud.Web.Services.Sessions;
 
-/// <summary>
-/// Calls Identity session endpoints via the Gateway (uses Bearer token from Gateway client).
-/// </summary>
 public class SessionsApiService(IHttpClientFactory httpClientFactory) : ISessionsApi
 {
     private const string BasePath = "api/identity/api/auth";

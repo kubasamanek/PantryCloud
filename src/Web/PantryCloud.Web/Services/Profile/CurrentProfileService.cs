@@ -11,7 +11,10 @@ public class CurrentProfileService(IProfileApi profileApi) : ICurrentProfileServ
     public async Task EnsureLoadedAsync(CancellationToken cancellationToken = default)
     {
         if (_loaded)
+        {
             return;
+        }
+        
         await LoadAsync(cancellationToken);
         _loaded = true;
     }

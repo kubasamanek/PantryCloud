@@ -19,8 +19,7 @@ internal sealed class HouseholdRoleJsonConverter : JsonConverter<int>
             if (string.Equals(s, "Owner", StringComparison.OrdinalIgnoreCase)) return 0;
             if (string.Equals(s, "Member", StringComparison.OrdinalIgnoreCase)) return 1;
         }
-        if (reader.TokenType == JsonTokenType.Null || reader.TokenType == JsonTokenType.None)
-            return 1;
+
         return 1;
     }
 

@@ -4,7 +4,7 @@ public class NotificationStateService : INotificationStateService
 {
     private readonly List<NotificationMessage> _items = [];
     private readonly HashSet<Guid> _readIds = [];
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
 
     public event Action? StateChanged;
 
@@ -13,7 +13,9 @@ public class NotificationStateService : INotificationStateService
         get
         {
             lock (_lock)
+            {
                 return _items.Count(m => !_readIds.Contains(m.Id));
+            }
         }
     }
 
@@ -65,7 +67,9 @@ public class NotificationStateService : INotificationStateService
     public void MarkAsRead(Guid id)
     {
         lock (_lock)
+        {
             _readIds.Add(id);
+        }
         StateChanged?.Invoke();
     }
 
@@ -82,6 +86,8 @@ public class NotificationStateService : INotificationStateService
     public bool IsRead(Guid id)
     {
         lock (_lock)
+        {
             return _readIds.Contains(id);
+        }
     }
 }

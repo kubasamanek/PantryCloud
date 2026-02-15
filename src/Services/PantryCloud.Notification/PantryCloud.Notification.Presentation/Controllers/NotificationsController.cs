@@ -9,7 +9,6 @@ namespace PantryCloud.Notification.Presentation.Controllers;
 
 /// <summary>
 /// Serves GET /me for current user's notification history.
-/// Gateway forwards /api/notification/me to this app as /me.
 /// </summary>
 [ApiController]
 [Route("")]
@@ -32,7 +31,10 @@ public class NotificationsController(IUserNotificationRepository repository) : C
     {
         var userId = GetCurrentUserId();
         if (userId == null)
+        {
             return Unauthorized();
+        }
+        
         var effectiveLimit = Math.Clamp(limit, 1, 100);
         var list = await repository.GetByUserIdAsync(userId.Value, effectiveLimit, since, cancellationToken);
         return Ok(list);
@@ -42,6 +44,7 @@ public class NotificationsController(IUserNotificationRepository repository) : C
     {
         var sub = User.FindFirstValue(ClaimTypes.NameIdentifier)
                   ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        
         return Guid.TryParse(sub, out var id) ? id : null;
     }
 }

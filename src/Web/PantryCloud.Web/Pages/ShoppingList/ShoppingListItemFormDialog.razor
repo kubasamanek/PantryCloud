@@ -29,7 +29,7 @@
     [Parameter] public bool IsEdit { get; set; }
     [Parameter] public ShoppingListItemDto? Item { get; set; }
 
-    private ShoppingListItemFormModel _model = new();
+    private readonly ShoppingListItemFormModel _model = new();
     private bool _saving;
 
     protected override void OnInitialized()

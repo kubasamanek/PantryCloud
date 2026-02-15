@@ -2,11 +2,6 @@ using System.Text.Json.Serialization;
 
 namespace PantryCloud.Web.Services.ShoppingList;
 
-/// <summary>
-/// Request/response DTOs for Shopping List API. Unit and ItemSource are int (backend enums as number). RowVersion is byte[] (JSON base64).
-/// </summary>
-
-// Lists
 public record CreateShoppingListRequest
 {
     [JsonPropertyName("name")] public string Name { get; set; } = "";
@@ -20,10 +15,6 @@ public record CreateShoppingListResponse
     [JsonPropertyName("createdBy")] public Guid CreatedBy { get; init; }
     [JsonPropertyName("createdAt")] public DateTime CreatedAt { get; init; }
 }
-
-/// <summary>
-/// Result of create list call; signals 409 duplicate name so UI can show specific message.
-/// </summary>
 public record CreateShoppingListResult
 {
     public CreateShoppingListResponse? Value { get; init; }
@@ -79,17 +70,15 @@ public record ShoppingListItemDto
     [JsonPropertyName("rowVersion")] public byte[] RowVersion { get; init; } = [];
 }
 
-// List result types (for no-household / unauthorized)
 public record ListShoppingListsResult(ListShoppingListsResponse? Data, bool NoHousehold, bool Unauthorized);
 public record GetShoppingListResult(GetShoppingListResponse? Data, bool NoHousehold, bool Unauthorized);
 
-// Items
 public record AddShoppingListItemRequest
 {
     [JsonPropertyName("name")] public string Name { get; set; } = "";
     [JsonPropertyName("quantity")] public decimal Quantity { get; set; } = 1;
     [JsonPropertyName("unit")] public int Unit { get; set; }
-    [JsonPropertyName("source")] public int Source { get; set; } = 0; // Manual
+    [JsonPropertyName("source")] public int Source { get; set; } = 0;
 }
 
 public record AddShoppingListItemResponse

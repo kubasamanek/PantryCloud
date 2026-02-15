@@ -6,7 +6,7 @@ namespace PantryCloud.Web.Services.Household;
 
 public class HouseholdApiService(IHttpClientFactory httpClientFactory) : IHouseholdApi
 {
-    private static readonly string BasePath = ApiPaths.Households;
+    private const string BasePath = ApiPaths.Households;
 
     private static readonly JsonSerializerOptions MembersJsonOptions = new()
     {

@@ -12,10 +12,14 @@ public class NotificationApiService(IHttpClientFactory httpClientFactory) : INot
     {
         var query = $"{BasePath}/me?limit={Math.Clamp(limit, 1, 100)}";
         if (since.HasValue)
+        {
             query += "&since=" + Uri.EscapeDataString(since.Value.ToString("O"));
+        }
         var response = await Client.GetAsync(query, cancellationToken);
         if (!response.IsSuccessStatusCode)
+        {
             return null;
+        }
         var list = await response.Content.ReadFromJsonAsync<List<NotificationMessage>>(cancellationToken);
         return list ?? [];
     }

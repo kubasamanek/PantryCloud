@@ -8,11 +8,10 @@ namespace PantryCloud.Notification.Core.Entities;
 /// </summary>
 public class UserNotification : BaseEntity
 {
-    public Guid UserId { get; set; }
-    /// <summary>Original notification Id from the DTO (for client deduplication with SignalR).</summary>
-    public Guid SourceNotificationId { get; set; }
-    public string Title { get; set; } = "";
-    public string Message { get; set; } = "";
-    public NotificationType Type { get; set; }
-    public DateTime CreatedAt { get; set; }
+    public Guid UserId { get; init; }
+    public Guid SourceNotificationId { get; init; }
+    public string Title { get; init; } = "";
+    public string Message { get; init; } = "";
+    public NotificationType Type { get; init; }
+    public DateTime CreatedAt { get; init; }
 }

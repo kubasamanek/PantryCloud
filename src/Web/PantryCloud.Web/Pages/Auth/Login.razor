@@ -11,8 +11,8 @@
             <DataAnnotationsValidator />
             <MudTextField @bind-Value="_model.Email" Label="Email" Variant="Variant.Outlined" InputType="InputType.Email" Class="mb-4" />
             <MudTextField @bind-Value="_model.Password" Label="Password" Variant="Variant.Outlined" InputType="InputType.Password" Class="mb-4" />
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="mb-2" Disabled="@IsBusy">
-                @(IsBusy ? "Signing in..." : "Sign in")
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="mb-2" Disabled="@_isBusy">
+                @(_isBusy ? "Signing in..." : "Sign in")
             </MudButton>
         </EditForm>
         <MudStack Row="true" Class="mt-4" Justify="Justify.SpaceBetween">
@@ -31,11 +31,11 @@
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
 
     private readonly LoginRequest _model = new();
-    private bool IsBusy;
+    private bool _isBusy;
 
     private async Task HandleSubmit()
     {
-        IsBusy = true;
+        _isBusy = true;
         try
         {
             _model.DeviceName = await DeviceNameProvider.GetDeviceNameAsync();
@@ -54,7 +54,7 @@
         }
         finally
         {
-            IsBusy = false;
+            _isBusy = false;
         }
     }
 }

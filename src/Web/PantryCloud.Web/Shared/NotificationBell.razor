@@ -117,9 +117,13 @@
     private static string FormatTime(DateTime createdAt)
     {
         var diff = DateTime.UtcNow - createdAt;
-        if (diff.TotalMinutes < 1) return "Just now";
-        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes}m ago";
-        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours}h ago";
-        return createdAt.ToLocalTime().ToString("g");
+        return diff.TotalMinutes switch
+        {
+            < 1 => "Just now",
+            < 60 => $"{(int)diff.TotalMinutes}m ago",
+            _ => diff.TotalHours < 24 
+                ? $"{(int)diff.TotalHours}h ago" 
+                : createdAt.ToLocalTime().ToString("g")
+        };
     }
 }

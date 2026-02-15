@@ -2,7 +2,6 @@ namespace PantryCloud.Web.Helpers;
 
 /// <summary>
 /// Display labels for Pantry Unit (backend enum serialized as int).
-/// Matches PantryCloud.SharedKernel.Enums.Unit.
 /// </summary>
 public static class UnitDisplayHelper
 {
@@ -23,9 +22,6 @@ public static class UnitDisplayHelper
         12 => "Gallon",
         _ => "Piece"
     };
-
-    /// <summary>
-    /// All unit values for dropdowns (0..12).
-    /// </summary>
+    
     public static IReadOnlyList<int> AllUnits { get; } = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 }

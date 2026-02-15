@@ -9,7 +9,7 @@ public class NotificationHubClient(
     IOptions<GatewayOptions> gatewayOptions) : IAsyncDisposable, INotificationHubClient
 {
     private HubConnection? _connection;
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
 
     public event Action<NotificationMessage>? OnNotification;
     public event Action<HubConnectionState>? OnStateChanged;
@@ -20,10 +20,11 @@ public class NotificationHubClient(
     {
         if (_connection != null)
         {
-            if (_connection.State == HubConnectionState.Connected)
+            if (_connection.State is HubConnectionState.Connected or HubConnectionState.Connecting)
+            {
                 return;
-            if (_connection.State == HubConnectionState.Connecting)
-                return;
+            }
+
             await _connection.DisposeAsync();
             _connection = null;
         }

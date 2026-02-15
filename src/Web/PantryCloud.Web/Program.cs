@@ -33,11 +33,12 @@ builder.Services.AddScoped<JwtClaimsHelper>();
 builder.Services.AddScoped<AuthenticationStateProvider, TokenAuthenticationStateProvider>();
 builder.Services.AddScoped(sp => (TokenAuthenticationStateProvider)sp.GetRequiredService<AuthenticationStateProvider>());
 
-// Auth API (no Bearer) for login/register/refresh/forgot/reset
-builder.Services.AddHttpClient("Auth", (sp, client) =>
+// Auth API (no Bearer)
+builder.Services.AddHttpClient("Auth", (_, client) =>
 {
     client.BaseAddress = gatewayUri;
 });
+
 builder.Services.AddScoped<IDeviceNameProvider, BrowserDeviceNameProvider>();
 builder.Services.AddScoped<IAuthApi, AuthApiService>();
 builder.Services.AddScoped<ISessionsApi, SessionsApiService>();

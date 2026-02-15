@@ -1,7 +1,7 @@
 namespace PantryCloud.Web.Constants;
 
 /// <summary>
-/// Application route paths. Use for NavigationManager.NavigateTo and MudLink Href.
+/// Application route paths.
 /// </summary>
 public static class Routes
 {

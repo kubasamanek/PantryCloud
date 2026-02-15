@@ -55,11 +55,15 @@ public sealed class JwtClaimsHelper
     public Guid? GetUserId(string? accessToken)
     {
         if (string.IsNullOrWhiteSpace(accessToken))
+        {
             return null;
+        }
 
         var parts = accessToken.Split('.');
         if (parts.Length != 3)
+        {
             return null;
+        }
 
         try
         {

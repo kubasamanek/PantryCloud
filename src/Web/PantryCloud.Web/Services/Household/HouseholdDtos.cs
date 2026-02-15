@@ -22,7 +22,6 @@ public record CreateHouseholdResponse(
     [property: JsonPropertyName("ownerEmail")] string OwnerEmail,
     [property: JsonPropertyName("createdAt")] DateTime CreatedAt);
 
-// Invitations
 public record SendInvitationRequest(
     [property: JsonPropertyName("toEmail")] string ToEmail,
     [property: JsonPropertyName("householdId")] string HouseholdId);
@@ -39,14 +38,12 @@ public record AcceptInvitationResponse(
     [property: JsonPropertyName("memberEmail")] string? MemberEmail,
     [property: JsonPropertyName("joinedAt")] DateTime? JoinedAt);
 
-// Leave
 public record LeaveHouseholdResponse(
     [property: JsonPropertyName("householdId")] Guid? HouseholdId,
     [property: JsonPropertyName("memberId")] Guid? MemberId,
     [property: JsonPropertyName("memberEmail")] string? MemberEmail,
     [property: JsonPropertyName("leftAt")] DateTime? LeftAt);
 
-// Transfer ownership
 public record TransferOwnershipRequest(
     [property: JsonPropertyName("newOwnerUserId")] Guid NewOwnerUserId);
 
@@ -56,7 +53,6 @@ public record TransferOwnershipResponse(
     [property: JsonPropertyName("newOwnerId")] Guid NewOwnerId,
     [property: JsonPropertyName("transferredAt")] DateTime TransferredAt);
 
-// Members (from me/members/preferences). Role: 0=Owner, 1=Member (converter accepts number or string from API).
 public record MemberWithProfileDto(
     [property: JsonPropertyName("userId")] Guid UserId,
     [property: JsonConverter(typeof(HouseholdRoleJsonConverter))]
@@ -69,7 +65,6 @@ public record MemberWithProfileDto(
 public record GetHouseholdMembersResponse(
     [property: JsonPropertyName("members")] List<MemberWithProfileDto> Members);
 
-// Preferences. Backend DietaryProfile enum: 0=None, 1=Vegetarian, 2=Vegan
 public record GetMyPreferencesResponse(
     [property: JsonPropertyName("dietaryProfile")] int DietaryProfile,
     [property: JsonPropertyName("excludedIngredients")] List<string> ExcludedIngredients);
@@ -80,7 +75,7 @@ public record UpdateMyPreferencesRequest
     public int DietaryProfile { get; set; }
 
     [JsonPropertyName("excludedIngredients")]
-    public List<string> ExcludedIngredients { get; set; } = new();
+    public List<string> ExcludedIngredients { get; set; } = [];
 }
 
 public record UpdateMyPreferencesResponse(

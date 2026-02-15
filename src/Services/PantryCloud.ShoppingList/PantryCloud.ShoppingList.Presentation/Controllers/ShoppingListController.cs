@@ -11,7 +11,7 @@ namespace PantryCloud.ShoppingList.Presentation.Controllers;
 
 [ApiController]
 [Route("api/shopping-lists")]
-public class  ShoppingListController(IMediator mediator, IMapper mapper) : ApiControllerBase(mediator, mapper)
+public class ShoppingListController(IMediator mediator, IMapper mapper) : ApiControllerBase(mediator, mapper)
 {
     [Authorize]
     [HttpPost]

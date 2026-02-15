@@ -44,14 +44,11 @@
         if (prefs != null)
         {
             _model.DietaryProfile = prefs.DietaryProfile;
-            _model.ExcludedIngredients = prefs.ExcludedIngredients ?? new List<string>();
+            _model.ExcludedIngredients = prefs.ExcludedIngredients ?? [];
             _excludedIngredientsText = prefs.ExcludedIngredients != null ? string.Join(", ", prefs.ExcludedIngredients) : "";
-            _loaded = true;
         }
-        else
-        {
-            _loaded = true;
-        }
+
+        _loaded = true;
     }
 
     private async Task HandleSubmit()
@@ -60,6 +57,7 @@
             .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
             .Where(s => !string.IsNullOrEmpty(s))
             .ToList();
+        
         _saving = true;
         try
         {

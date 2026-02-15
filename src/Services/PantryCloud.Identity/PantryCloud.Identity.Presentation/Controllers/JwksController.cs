@@ -39,15 +39,21 @@ public class JwksController(IMediator mediator, IMapper mapper, ApiConfiguration
     [HttpGet("/.well-known/openid-configuration")]
     public IActionResult GetOpenIdConfiguration()
     {
-        // Issuer: use AuthorityBaseUrl when set (so tokens and clients use the public gateway URL), else request host or Jwt.Issuer.
+        // Issuer: use AuthorityBaseUrl when set, else request host or Jwt.Issuer.
         var issuer = !string.IsNullOrEmpty(apiConfiguration.App.AuthorityBaseUrl)
             ? apiConfiguration.App.AuthorityBaseUrl.TrimEnd('/')
             : $"{Request.Scheme}://{Request.Host}";
+
         if (string.IsNullOrEmpty(apiConfiguration.App.AuthorityBaseUrl))
-            issuer = apiConfiguration.Jwt.Issuer ?? issuer;
-        // jwks_uri: use the same host that was used to fetch this document, so server-side validators (Gateway, other services) can load keys from Identity (e.g. http://identity-api:8080). If we used AuthorityBaseUrl here, validators fetching from identity-api:8080 would get jwks_uri pointing to localhost:5050 and fail to load keys.
+        {
+            issuer = apiConfiguration.Jwt.Issuer; 
+        }
+        
+        // jwks_uri: use the same host that was used to fetch this document
         var jwksUri = $"{Request.Scheme}://{Request.Host}/.well-known/openid-configuration/jwks";
-        var endpointsBase = !string.IsNullOrEmpty(apiConfiguration.App.AuthorityBaseUrl) ? apiConfiguration.App.AuthorityBaseUrl.TrimEnd('/') : $"{Request.Scheme}://{Request.Host}";
+        var endpointsBase = !string.IsNullOrEmpty(apiConfiguration.App.AuthorityBaseUrl) 
+            ? apiConfiguration.App.AuthorityBaseUrl.TrimEnd('/') 
+            : $"{Request.Scheme}://{Request.Host}";
 
         var discoveryDocument = new
         {

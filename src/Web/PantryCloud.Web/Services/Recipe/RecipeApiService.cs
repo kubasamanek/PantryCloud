@@ -5,7 +5,7 @@ namespace PantryCloud.Web.Services.Recipe;
 
 public class RecipeApiService(IHttpClientFactory httpClientFactory) : IRecipeApi
 {
-    private static readonly string BasePath = ApiPaths.Recipe;
+    private const string BasePath = ApiPaths.Recipe;
     private HttpClient Client => httpClientFactory.CreateClient("Gateway");
 
     public async Task<RecommendRecipesResponse?> RecommendAsync(RecommendRecipesRequest request, CancellationToken cancellationToken = default)

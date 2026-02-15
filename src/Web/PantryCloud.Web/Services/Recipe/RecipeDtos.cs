@@ -2,10 +2,6 @@ using System.Text.Json.Serialization;
 
 namespace PantryCloud.Web.Services.Recipe;
 
-/// <summary>
-/// Request/response DTOs for Recipe API. Unit and RecipeSource are int (backend enums as number).
-/// </summary>
-
 public record PreferencesFilterDto
 {
     [JsonPropertyName("dietaryProfile")] public string? DietaryProfile { get; set; }

@@ -140,11 +140,10 @@
     private bool _noHousehold;
     private bool _unauthorized;
     private bool _listsLoadError;
-    private Guid? _selectedListId;
     private GetShoppingListResponse? _currentList;
     private bool _detailLoading;
 
-    private Guid? SelectedListId { get => _selectedListId; set => _selectedListId = value; }
+    private Guid? SelectedListId { get; set; }
 
     private string GetListCardStyle(Guid listId)
     {
@@ -190,7 +189,7 @@
 
     private async Task SelectList(Guid id)
     {
-        _selectedListId = id;
+        SelectedListId = id;
         await LoadListDetailAsync(id);
     }
 
@@ -241,7 +240,7 @@
         {
             Snackbar.Add("List created.", Severity.Success);
             await LoadListsAsync();
-            _selectedListId = createResult.Value.Id;
+            SelectedListId = createResult.Value.Id;
             await LoadListDetailAsync(createResult.Value.Id);
         }
         else
@@ -256,9 +255,9 @@
         if (ok)
         {
             Snackbar.Add("List removed.", Severity.Success);
-            if (_selectedListId == list.Id)
+            if (SelectedListId == list.Id)
             {
-                _selectedListId = null;
+                SelectedListId = null;
                 _currentList = null;
             }
             await LoadListsAsync();
@@ -270,7 +269,7 @@
     private async Task OpenAddItemDialog()
     {
         if (SelectedListId == null) return;
-        var parameters = new DialogParameters { ["IsEdit"] = false, ["Item"] = (ShoppingListItemDto?)null };
+        var parameters = new DialogParameters { ["IsEdit"] = false, ["Item"] = null };
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium };
         var dialog = await DialogService.ShowAsync<ShoppingListItemFormDialog>("Add item", parameters, options);
         var result = await dialog.Result;

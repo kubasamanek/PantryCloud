@@ -31,7 +31,6 @@
 
 @code {
     [Inject] private IAuthApi AuthApi { get; set; } = null!;
-    [Inject] private NavigationManager Navigation { get; set; } = null!;
 
     [SupplyParameterFromQuery] public string? Email { get; set; }
     [SupplyParameterFromQuery] public string? Token { get; set; }

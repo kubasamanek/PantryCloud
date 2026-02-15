@@ -6,16 +6,21 @@ namespace PantryCloud.Web.Services.Pantry;
 
 public class PantryApiService(IHttpClientFactory httpClientFactory) : IPantryApi
 {
-    private static readonly string BasePath = ApiPaths.Pantry;
+    private const string BasePath = ApiPaths.Pantry;
     private HttpClient Client => httpClientFactory.CreateClient("Gateway");
 
     public async Task<ListPantryItemsResult> ListItemsAsync(string? category, string? searchTerm, int page, int pageSize, CancellationToken cancellationToken = default)
     {
         var query = $"{BasePath}/items?page={page}&pageSize={pageSize}";
         if (!string.IsNullOrWhiteSpace(category))
+        {
             query += "&category=" + Uri.EscapeDataString(category);
+        }
+
         if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
             query += "&searchTerm=" + Uri.EscapeDataString(searchTerm);
+        }
         var response = await Client.GetAsync(query, cancellationToken);
         if (response.IsSuccessStatusCode)
         {
@@ -47,9 +52,14 @@ public class PantryApiService(IHttpClientFactory httpClientFactory) : IPantryApi
     {
         var response = await Client.PutAsJsonAsync($"{BasePath}/items/{id}", request, cancellationToken);
         if (response.StatusCode == HttpStatusCode.Conflict)
+        {
             return new PantryUpdateResult { IsConcurrencyConflict = true };
+        }
+
         if (!response.IsSuccessStatusCode)
+        {
             return new PantryUpdateResult();
+        }
         var value = await response.Content.ReadFromJsonAsync<UpdatePantryItemResponse>(cancellationToken);
         return new PantryUpdateResult { Value = value };
     }

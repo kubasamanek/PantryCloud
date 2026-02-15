@@ -143,7 +143,6 @@ public static class ServiceCollectionExtensions
                     }
                 ]
             },
-            // Client uses /api/recipe/... (singular); backend expects /api/recipes/... (plural).
             new RouteConfig
             {
                 RouteId = RouteConfiguration.RecipeRouteId,
