@@ -50,6 +50,7 @@ public static class ServiceCollectionExtensions
         services.AddMessaging(configuration, typeof(MemberLeftHouseholdConsumer).Assembly);
 
         services.AddScoped<IHouseholdMembershipRepository, HouseholdMembershipRepository>();
+        services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
 
         return services;

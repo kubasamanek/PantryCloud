@@ -59,6 +59,19 @@ services:
     networks:
       - pantry-network
 
+  # --- FRONTEND ---
+  web:
+    container_name: pantry-web
+    build:
+      context: ../
+      dockerfile: src/Web/PantryCloud.Web/Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - pantry-network
+
   # --- GATEWAY ---
   api-gateway:
     container_name: pantry-gateway
@@ -103,10 +116,11 @@ services:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=identity_db;Username=admin;Password=password;
       - Jwt__Issuer=pantry-identity
       - Jwt__Audience=pantry-cloud
-      - Jwt__ExpirationInMinutes=60
+      - Jwt__ExpirationInMinutes=5
       - Jwt__PrivateKeyPath=/app/secrets/private.pem
       - Jwt__PublicKeyPath=/app/secrets/public.pem
       - App__FrontendUrl=http://localhost:3000
+      - App__AuthorityBaseUrl=http://localhost:5050/api/identity
       - App__ResetPasswordTokenExpirationInMinutes=60
       - App__VerifyEmailTokenExpirationInMinutes=60
       - Email__Host=localhost

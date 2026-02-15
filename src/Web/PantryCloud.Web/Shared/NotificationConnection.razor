@@ -1,0 +1,21 @@
+@* Renders nothing; starts the notification SignalR connection and fetches history when user is authorized; stops on dispose. *@
+@implements IAsyncDisposable
+
+@code {
+    [Inject] private INotificationHubClient HubClient { get; set; } = null!;
+    [Inject] private INotificationStateService StateService { get; set; } = null!;
+    [Inject] private INotificationApi NotificationApi { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var history = await NotificationApi.GetMyNotificationsAsync(50, null);
+        if (history is { Count: > 0 })
+            StateService.AddRange(history);
+        await HubClient.StartAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await HubClient.StopAsync(CancellationToken.None);
+    }
+}

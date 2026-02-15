@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -117,6 +117,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipelines", "Pipelines", "{
 		.github\workflows\shoppinglist.yml = .github\workflows\shoppinglist.yml
 		.github\workflows\recipe.yml = .github\workflows\recipe.yml
 		.github\workflows\audit.yml = .github\workflows\audit.yml
+		.github\workflows\frontend.yml = .github\workflows\frontend.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployments", "Deployments", "{5E6219B9-5B71-4C81-A5EE-CC779BBDB4C2}"
@@ -124,6 +125,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployments", "Deployments"
 		deployments\docker-compose.yml = deployments\docker-compose.yml
 		deployments\init-scripts\init-db.sql = deployments\init-scripts\init-db.sql
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{E8D7C6B5-A432-4F01-9E8D-7C6B5A432109}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PantryCloud.Web", "src\Web\PantryCloud.Web\PantryCloud.Web.csproj", "{B1A2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Gateway", "Gateway", "{C3A202AD-EADD-4864-49DF-ED20E2971546}"
 EndProject
@@ -601,6 +606,18 @@ Global
 		{64A7AAE2-FD90-4AD0-9648-11BDA2E40001}.Release|x64.Build.0 = Release|Any CPU
 		{64A7AAE2-FD90-4AD0-9648-11BDA2E40001}.Release|x86.ActiveCfg = Release|Any CPU
 		{64A7AAE2-FD90-4AD0-9648-11BDA2E40001}.Release|x86.Build.0 = Release|Any CPU
+		{B1A2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1A2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1A2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B1A2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}.Debug|x64.Build.0 = Debug|Any CPU
+		{B1A2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B1A2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}.Debug|x86.Build.0 = Debug|Any CPU
+		{B1A2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1A2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1A2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}.Release|x64.ActiveCfg = Release|Any CPU
+		{B1A2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}.Release|x64.Build.0 = Release|Any CPU
+		{B1A2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}.Release|x86.ActiveCfg = Release|Any CPU
+		{B1A2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}.Release|x86.Build.0 = Release|Any CPU
 		{19BBBE81-473B-43C0-AB92-E9638AF88255}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{19BBBE81-473B-43C0-AB92-E9638AF88255}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19BBBE81-473B-43C0-AB92-E9638AF88255}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -840,6 +857,8 @@ Global
 		{E7E70ED1-72E2-48AE-B808-A0FF3E724FA8} = {F39D8068-369F-41D6-B3BB-C655D2603AF9}
 		{0132303A-398E-4914-9E9F-3C59141C4C8C} = {C3A202AD-EADD-4864-49DF-ED20E2971546}
 		{F39D8068-369F-41D6-B3BB-C655D2603AF9} = {C3A202AD-EADD-4864-49DF-ED20E2971546}
+		{E8D7C6B5-A432-4F01-9E8D-7C6B5A432109} = {5854FF58-B8C5-05C6-5BF2-ACE42193F22B}
+		{B1A2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D} = {E8D7C6B5-A432-4F01-9E8D-7C6B5A432109}
 		{06470F13-D646-4954-ED4A-FA216054436A} = {5854FF58-B8C5-05C6-5BF2-ACE42193F22B}
 		{8F92B431-7114-C16D-7B8D-1A63B3CF6875} = {06470F13-D646-4954-ED4A-FA216054436A}
 		{6DD4B4A3-43E7-4E9D-8F7E-A5D33B56352C} = {8F92B431-7114-C16D-7B8D-1A63B3CF6875}

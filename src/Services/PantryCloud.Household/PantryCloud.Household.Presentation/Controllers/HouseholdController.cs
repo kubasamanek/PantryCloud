@@ -12,7 +12,7 @@ namespace PantryCloud.Household.Presentation.Controllers;
 [ApiController]
 [Route("api/households")]
 [Authorize]
-public class HouseholdController(IMediator mediator, IMapper mapper) : ApiControllerBase(mediator, mapper)
+public class HouseholdController(IMediator mediator, IMapper mapper, ILogger<HouseholdController> logger) : ApiControllerBase(mediator, mapper)
 {
     [Authorize]
     [HttpPost("")]

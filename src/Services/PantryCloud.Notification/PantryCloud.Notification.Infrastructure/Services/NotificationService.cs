@@ -9,6 +9,7 @@ namespace PantryCloud.Notification.Infrastructure.Services;
 public class NotificationService(
     IHubContext<NotificationHub> hubContext,
     IHouseholdMembershipRepository membershipRepository,
+    IUserNotificationRepository notificationRepository,
     ILogger<NotificationService> logger) : INotificationService
 {
     private const string NotificationMethod = "ReceiveNotification";
@@ -21,6 +22,7 @@ public class NotificationService(
             "Sending notification to user {UserId} - Id: {NotificationId}, Title: {Title}",
             userId, notification.Id, notification.Title);
         await hubContext.Clients.Group(groupName).SendAsync(NotificationMethod, notification, cancellationToken);
+        await notificationRepository.AddAsync(userId, notification, cancellationToken);
     }
 
     public async Task SendToHouseholdAsync(Guid householdId, NotificationDto notification, CancellationToken cancellationToken = default)
@@ -36,6 +38,7 @@ public class NotificationService(
             "Sending notification to household {HouseholdId} ({MemberCount} members) - Id: {NotificationId}, Title: {Title}",
             householdId, memberIds.Count, notification.Id, notification.Title);
         await SendToUserIdsAsync(memberIds, notification, cancellationToken);
+        await notificationRepository.AddForUsersAsync(memberIds, notification, cancellationToken);
     }
 
     public async Task SendToHouseholdExceptAsync(Guid householdId, Guid excludeUserId, NotificationDto notification, CancellationToken cancellationToken = default)
@@ -51,6 +54,7 @@ public class NotificationService(
             "Sending notification to household {HouseholdId} excluding {ExcludeUserId} ({MemberCount} recipients) - Id: {NotificationId}, Title: {Title}",
             householdId, excludeUserId, memberIds.Count, notification.Id, notification.Title);
         await SendToUserIdsAsync(memberIds, notification, cancellationToken);
+        await notificationRepository.AddForUsersAsync(memberIds, notification, cancellationToken);
     }
 
     private async Task SendToUserIdsAsync(IReadOnlyList<Guid> userIds, NotificationDto notification, CancellationToken cancellationToken)

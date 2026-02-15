@@ -24,6 +24,17 @@ public static class ServiceCollectionExtensions
 
         services.AddJwtBearerFromConfiguration(configuration, "App:IdentityUrl");
 
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.WithOrigins("http://localhost:3000")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+        });
+
         services.AddAuthorization();
 
         var resilienceSettings = apiConfiguration.Gateway.Resilience;
@@ -86,6 +97,7 @@ public static class ServiceCollectionExtensions
             {
                 RouteId = RouteConfiguration.IdentityRouteId,
                 ClusterId = RouteConfiguration.IdentityClusterId,
+                AuthorizationPolicy = "Anonymous",
                 Match = new RouteMatch
                 {
                     Path = "/api/identity/{**catch-all}"
@@ -102,6 +114,7 @@ public static class ServiceCollectionExtensions
             {
                 RouteId = RouteConfiguration.HouseholdRouteId,
                 ClusterId = RouteConfiguration.HouseholdClusterId,
+                AuthorizationPolicy = "Anonymous",
                 Match = new RouteMatch
                 {
                     Path = "/api/household/{**catch-all}"
@@ -126,7 +139,7 @@ public static class ServiceCollectionExtensions
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/{**catch-all}"
+                        ["PathPattern"] = "/api/pantry/{**catch-all}"
                     }
                 ]
             },
@@ -142,7 +155,7 @@ public static class ServiceCollectionExtensions
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/{**catch-all}"
+                        ["PathPattern"] = "/api/recipes/{**catch-all}"
                     }
                 ]
             },
@@ -158,7 +171,7 @@ public static class ServiceCollectionExtensions
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/{**catch-all}"
+                        ["PathPattern"] = "/api/shopping-lists/{**catch-all}"
                     }
                 ]
             },

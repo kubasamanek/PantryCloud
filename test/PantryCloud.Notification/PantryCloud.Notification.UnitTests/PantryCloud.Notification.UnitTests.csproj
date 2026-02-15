@@ -33,6 +33,7 @@
     <ProjectReference Include="..\..\..\src\Services\PantryCloud.Notification\PantryCloud.Notification.Application\PantryCloud.Notification.Application.csproj" />
     <ProjectReference Include="..\..\..\src\Services\PantryCloud.Notification\PantryCloud.Notification.Core\PantryCloud.Notification.Core.csproj" />
     <ProjectReference Include="..\..\..\src\Services\PantryCloud.Notification\PantryCloud.Notification.Infrastructure\PantryCloud.Notification.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\Services\PantryCloud.Notification\PantryCloud.Notification.Presentation\PantryCloud.Notification.Presentation.csproj" />
   </ItemGroup>
 
 </Project>

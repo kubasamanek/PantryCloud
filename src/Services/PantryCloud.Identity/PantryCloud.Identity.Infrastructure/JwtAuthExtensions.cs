@@ -33,7 +33,7 @@ public static class JwtAuthExtensions
 
         services.AddHttpContextAccessor();
         services.AddScoped<IUserContext, UserContext>();
-        services.AddScoped<PantryCloud.Identity.Application.IIdentityUserContext, IdentityUserContext>();
+        services.AddScoped<Application.IIdentityUserContext, IdentityUserContext>();
         services.AddAuthorization();
 
         return services;

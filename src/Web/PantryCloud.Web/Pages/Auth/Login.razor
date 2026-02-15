@@ -1,0 +1,60 @@
+@page "/login"
+@layout AuthLayout
+@attribute [AllowAnonymous]
+
+<PageTitle>Login - PantryCloud</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Class="pa-8" Elevation="2">
+        <MudText Typo="Typo.h5" Class="mb-6">Sign in</MudText>
+        <EditForm Model="_model" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <MudTextField @bind-Value="_model.Email" Label="Email" Variant="Variant.Outlined" InputType="InputType.Email" Class="mb-4" />
+            <MudTextField @bind-Value="_model.Password" Label="Password" Variant="Variant.Outlined" InputType="InputType.Password" Class="mb-4" />
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="mb-2" Disabled="@_isBusy">
+                @(_isBusy ? "Signing in..." : "Sign in")
+            </MudButton>
+        </EditForm>
+        <MudStack Row="true" Class="mt-4" Justify="Justify.SpaceBetween">
+            <MudLink Href="@Routes.ForgotPassword" Typo="Typo.body2">Forgot password?</MudLink>
+            <MudLink Href="@Routes.Register" Typo="Typo.body2">Create account</MudLink>
+        </MudStack>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Inject] private IAuthApi AuthApi { get; set; } = null!;
+    [Inject] private IDeviceNameProvider DeviceNameProvider { get; set; } = null!;
+    [Inject] private ITokenStorage TokenStorage { get; set; } = null!;
+    [Inject] private TokenAuthenticationStateProvider AuthStateProvider { get; set; } = null!;
+    [Inject] private NavigationManager Navigation { get; set; } = null!;
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
+
+    private readonly LoginRequest _model = new();
+    private bool _isBusy;
+
+    private async Task HandleSubmit()
+    {
+        _isBusy = true;
+        try
+        {
+            _model.DeviceName = await DeviceNameProvider.GetDeviceNameAsync();
+            var response = await AuthApi.LoginAsync(_model);
+            if (response != null)
+            {
+                await TokenStorage.SetTokensAsync(response.AccessToken, response.RefreshToken);
+                AuthStateProvider.NotifyLoggedIn();
+                var returnPath = NavigationHelper.GetReturnUrlOrDefault(Navigation, Routes.Household);
+                Navigation.NavigateTo(returnPath, forceLoad: true);
+            }
+            else
+            {
+                Snackbar.Add("Invalid email or password.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+}

@@ -45,6 +45,7 @@ app.UseExceptionHandler();
 
 app.MapHealthChecks("/health").AllowAnonymous();
 
+app.MapControllers();
 app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();

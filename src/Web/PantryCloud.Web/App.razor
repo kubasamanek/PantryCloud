@@ -1,0 +1,39 @@
+<CascadingAuthenticationState>
+    <Router AppAssembly="typeof(Program).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
+                <NotAuthorized>
+                    <RedirectToLogin />
+                </NotAuthorized>
+            </AuthorizeRouteView>
+        </Found>
+        <NotFound>
+            <PageTitle>Not found</PageTitle>
+            <LayoutView Layout="typeof(MainLayout)">
+                <MudText Typo="Typo.h6">Sorry, there's nothing at this address.</MudText>
+            </LayoutView>
+        </NotFound>
+    </Router>
+    <MudThemeProvider Theme="Theme" />
+    <MudPopoverProvider />
+    <MudDialogProvider />
+    <MudSnackbarProvider />
+</CascadingAuthenticationState>
+
+@code {
+    private static readonly MudTheme Theme = new()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "#0D7377",
+            Secondary = "#455A64",
+            Background = "#FAFAFA",
+            Surface = "#FFFFFF",
+            AppbarBackground = "#0D7377"
+        },
+        LayoutProperties = new LayoutProperties()
+        {
+            DefaultBorderRadius = "8px"
+        }
+    };
+}

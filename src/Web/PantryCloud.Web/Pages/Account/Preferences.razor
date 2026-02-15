@@ -1,0 +1,78 @@
+@page "/preferences"
+@attribute [Authorize]
+
+<PageTitle>Preferences - PantryCloud</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Class="pa-6" Elevation="2">
+        <MudText Typo="Typo.h5" Class="mb-6">Dietary preferences</MudText>
+        @if (_loading && !_loaded)
+        {
+            <MudProgressCircular Indeterminate Color="Color.Primary" Size="Size.Small" />
+        }
+        else
+        {
+            <EditForm Model="_model" OnValidSubmit="HandleSubmit">
+                <MudSelect T="int" @bind-Value="_model.DietaryProfile" Label="Dietary profile" Variant="Variant.Outlined" Class="mb-4">
+                    <MudSelectItem Value="@(0)">None</MudSelectItem>
+                    <MudSelectItem Value="@(1)">Vegetarian</MudSelectItem>
+                    <MudSelectItem Value="@(2)">Vegan</MudSelectItem>
+                </MudSelect>
+                <MudTextField @bind-Value="_excludedIngredientsText" Label="Excluded ingredients (comma-separated)" Variant="Variant.Outlined" Class="mb-4" Placeholder="e.g. nuts, shellfish" />
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Disabled="_saving">
+                    @(_saving ? "Saving..." : "Save preferences")
+                </MudButton>
+            </EditForm>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Inject] private IHouseholdApi HouseholdApi { get; set; } = null!;
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
+
+    private readonly UpdateMyPreferencesRequest _model = new();
+    private string _excludedIngredientsText = "";
+    private bool _loading = true;
+    private bool _loaded;
+    private bool _saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var prefs = await HouseholdApi.GetMyPreferencesAsync();
+        _loading = false;
+        if (prefs != null)
+        {
+            _model.DietaryProfile = prefs.DietaryProfile;
+            _model.ExcludedIngredients = prefs.ExcludedIngredients ?? [];
+            _excludedIngredientsText = prefs.ExcludedIngredients != null ? string.Join(", ", prefs.ExcludedIngredients) : "";
+        }
+
+        _loaded = true;
+    }
+
+    private async Task HandleSubmit()
+    {
+        _model.ExcludedIngredients = _excludedIngredientsText
+            .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Where(s => !string.IsNullOrEmpty(s))
+            .ToList();
+        
+        _saving = true;
+        try
+        {
+            if (await HouseholdApi.UpdateMyPreferencesAsync(_model) != null)
+            {
+                Snackbar.Add("Preferences saved.", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Failed to save. You may need to be in a household.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}
