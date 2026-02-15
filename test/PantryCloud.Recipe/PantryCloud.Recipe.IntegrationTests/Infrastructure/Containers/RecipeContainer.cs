@@ -20,6 +20,7 @@ public static class RecipeContainer
             ["ASPNETCORE_HTTP_PORTS"] = IntegrationConstants.Recipe.HttpPorts,
             ["ConnectionStrings__DefaultConnection"] = mongoConnectionString,
             ["ApiConfiguration__MongoDb__DatabaseName"] = IntegrationConstants.Mongo.DatabaseName,
+            ["MongoDb__DatabaseName"] = IntegrationConstants.Mongo.DatabaseName,
             ["Jwt__IssuerSigningKey"] = jwtIssuerSigningKeyBase64,
             ["Jwt__Issuer"] = TestConstants.Jwt.Issuer,
             ["Jwt__Audience"] = TestConstants.Jwt.Audience

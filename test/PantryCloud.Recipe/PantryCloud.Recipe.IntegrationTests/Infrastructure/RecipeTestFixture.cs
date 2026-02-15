@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 using DotNet.Testcontainers.Builders;
+using PantryCloud.Recipe.Application.Dtos;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
 using DotNet.Testcontainers.Networks;
@@ -53,8 +54,10 @@ public sealed class RecipeTestFixture : IAsyncLifetime
         BaseAddress = $"http://127.0.0.1:{_recipeApi.GetMappedPublicPort(IntegrationConstants.Recipe.Port)}/";
         HttpClient = new HttpClient { BaseAddress = new Uri(BaseAddress) };
 
+        // Warm up the API with a valid authenticated request (valid search body: at least one ingredient)
         using var warmup = CreateClientWithToken(Guid.NewGuid());
-        _ = await warmup.PostAsync(TestConstants.Endpoints.Search, new StringContent("{}", System.Text.Encoding.UTF8, "application/json"));
+        var warmupBody = JsonSerializer.Serialize(new SearchRecipesRequestDto(new List<string> { "warmup" }));
+        _ = await warmup.PostAsync(TestConstants.Endpoints.Search, new StringContent(warmupBody, System.Text.Encoding.UTF8, "application/json"));
     }
 
     public HttpClient CreateClient() => new() { BaseAddress = new Uri(BaseAddress) };

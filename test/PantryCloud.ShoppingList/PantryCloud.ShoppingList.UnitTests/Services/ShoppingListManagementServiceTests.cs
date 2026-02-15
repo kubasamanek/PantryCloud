@@ -179,7 +179,7 @@ public class ShoppingListManagementServiceTests
         var result = await sut.AddShoppingListItemAsync(Constants.NonExistentListId, request, CancellationToken.None);
 
         result.IsError.ShouldBeTrue();
-        result.FirstError.Code.ShouldBe(Constants.Errors.UnauthorizedAccess);
+        result.FirstError.Code.ShouldBe(Constants.Errors.ShoppingListNotFound);
     }
 
     [Fact]
