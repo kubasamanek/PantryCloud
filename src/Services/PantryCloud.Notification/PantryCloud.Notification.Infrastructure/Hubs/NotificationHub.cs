@@ -39,14 +39,14 @@ public class NotificationHub(ILogger<NotificationHub> logger) : Hub
             Context.ConnectionId, exception?.Message);
         await base.OnDisconnectedAsync(exception);
     }
-    
+
     public async Task JoinUserGroup(string userId)
     {
         var groupName = $"{NotificationGroupPrefix}{userId}";
         await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
         logger.LogInformation("Client {ConnectionId} joined group {GroupName}", Context.ConnectionId, groupName);
     }
-    
+
     public async Task LeaveUserGroup(string userId)
     {
         var groupName = $"{NotificationGroupPrefix}{userId}";

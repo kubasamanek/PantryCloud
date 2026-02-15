@@ -32,7 +32,7 @@ public class AuditableEntityInterceptor(IUserContext userContext) : SaveChangesI
             return;
 
         var entries = context.ChangeTracker.Entries<AuditableEntity>();
-        
+
         // Only access UserId if there are actually AuditableEntity entries to update
         // This prevents exceptions during operations like registration/login where there's no authenticated user
         if (!entries.Any())

@@ -14,7 +14,7 @@ public class GetRecipeQueryHandler(IRecipeRepository repository)
         CancellationToken cancellationToken)
     {
         var result = await repository.GetByIdAsync(request.Request.Id, cancellationToken);
-        
+
         if (result.IsError)
         {
             return result.Errors;

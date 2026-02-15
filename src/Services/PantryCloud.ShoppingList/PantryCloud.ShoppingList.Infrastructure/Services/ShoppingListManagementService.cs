@@ -15,7 +15,7 @@ namespace PantryCloud.ShoppingList.Infrastructure.Services;
 public class ShoppingListManagementService(
     ShoppingListDbContext dbContext,
     IUserContext userContext,
-    ILogger<ShoppingListManagementService> logger) 
+    ILogger<ShoppingListManagementService> logger)
     : BaseDbContextService<ShoppingListManagementService, ShoppingListDbContext>(dbContext, userContext, logger), IShoppingListManagementService
 {
     public async Task<ErrorOr<CreateShoppingListResponseDto>> CreateShoppingListAsync(CreateShoppingListRequestDto request, CancellationToken cancellationToken)
@@ -168,7 +168,7 @@ public class ShoppingListManagementService(
 
         return new ListShoppingListsResponseDto(lists, totalCount, request.Page, request.PageSize);
     }
-    
+
     public async Task<ErrorOr<AddShoppingListItemResponseDto>> AddShoppingListItemAsync(Guid listId, AddShoppingListItemRequestDto request, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Adding item '{Name}' to shopping list {ListId} for user {UserId}", request.Name, listId, UserId);

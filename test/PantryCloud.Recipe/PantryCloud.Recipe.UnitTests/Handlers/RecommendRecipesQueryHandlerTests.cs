@@ -36,8 +36,8 @@ public class RecommendRecipesQueryHandlerTests
 
         var handler = new RecommendRecipesQueryHandler(searchService);
         var request = new RecommendRecipesRequestDto(
-            IngredientHints: [..Constants.Recommend.IngredientHintsChicken],
-            Preferences: new PreferencesFilterDto(Constants.Preferences.Vegetarian, [..Constants.Preferences.Nuts]),
+            IngredientHints: [.. Constants.Recommend.IngredientHintsChicken],
+            Preferences: new PreferencesFilterDto(Constants.Preferences.Vegetarian, [.. Constants.Preferences.Nuts]),
             Limit: Constants.Recommend.Limit5);
         var query = new RecommendRecipesQuery(request);
 

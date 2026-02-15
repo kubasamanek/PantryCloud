@@ -23,8 +23,8 @@ public static class SerilogExtensions
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddSerilogLogging(this IServiceCollection services, IConfiguration configuration)
     {
-        var environmentName = configuration["ASPNETCORE_ENVIRONMENT"] 
-                            ?? configuration["Environment"] 
+        var environmentName = configuration["ASPNETCORE_ENVIRONMENT"]
+                            ?? configuration["Environment"]
                             ?? "Production";
 
         var loggerConfiguration = new LoggerConfiguration()

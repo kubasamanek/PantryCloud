@@ -25,7 +25,7 @@ public class HouseholdController(IMediator mediator, IMapper mapper, ILogger<Hou
 
         return FromResult(result, StatusCodes.Status201Created);
     }
-    
+
     [Authorize]
     [HttpGet("me")]
     [ProducesResponseType(typeof(GetCurrentHouseholdResponseDto), StatusCodes.Status200OK)]
@@ -48,10 +48,10 @@ public class HouseholdController(IMediator mediator, IMapper mapper, ILogger<Hou
     {
         var command = Mapper.Map<SendHouseholdInvitationCommand>(request);
         var result = await Mediator.Send(command, cancellationToken);
-        
+
         return FromResult(result, StatusCodes.Status200OK);
     }
-    
+
     [Authorize]
     [HttpPost("join")]
     [ProducesResponseType(typeof(AcceptHouseholdInvitationResponseDto), StatusCodes.Status200OK)]
@@ -62,10 +62,10 @@ public class HouseholdController(IMediator mediator, IMapper mapper, ILogger<Hou
     {
         var command = Mapper.Map<AcceptHouseholdInvitationCommand>(request);
         var result = await Mediator.Send(command, cancellationToken);
-        
+
         return FromResult(result, StatusCodes.Status200OK);
     }
-    
+
     [HttpPost("leave")]
     [ProducesResponseType(typeof(LeaveHouseholdResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -75,7 +75,7 @@ public class HouseholdController(IMediator mediator, IMapper mapper, ILogger<Hou
     {
         var command = Mapper.Map<LeaveHouseholdCommand>(request);
         var result = await Mediator.Send(command, cancellationToken);
-        
+
         return FromResult(result, StatusCodes.Status200OK);
     }
 

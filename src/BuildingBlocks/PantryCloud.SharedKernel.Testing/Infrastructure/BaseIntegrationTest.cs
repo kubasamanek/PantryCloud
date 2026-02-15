@@ -27,9 +27,9 @@ public abstract class BaseIntegrationTest<TProgram, TDbContext>(
         using var scope = factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
         var connection = dbContext.Database.GetDbConnection();
-        
+
         await connection.OpenAsync();
-        
+
         _respawner = await Respawner.CreateAsync(connection, new RespawnerOptions
         {
             DbAdapter = DbAdapter.Postgres,
@@ -51,7 +51,7 @@ public abstract class BaseIntegrationTest<TProgram, TDbContext>(
         using var scope = factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
         var connection = dbContext.Database.GetDbConnection();
-        
+
         await connection.OpenAsync();
         await _respawner.ResetAsync(connection);
     }

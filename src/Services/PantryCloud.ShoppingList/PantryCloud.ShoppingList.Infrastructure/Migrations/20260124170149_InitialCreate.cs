@@ -13,7 +13,7 @@ namespace PantryCloud.ShoppingList.Infrastructure.Migrations
         {
             // Enable pgcrypto extension for gen_random_bytes function
             migrationBuilder.Sql("CREATE EXTENSION IF NOT EXISTS pgcrypto;");
-            
+
             migrationBuilder.CreateTable(
                 name: "shopping_lists",
                 columns: table => new
@@ -97,7 +97,7 @@ namespace PantryCloud.ShoppingList.Infrastructure.Migrations
                 table: "user_household_memberships",
                 columns: new[] { "user_id", "household_id" },
                 unique: true);
-            
+
             // Create trigger to ensure RowVersion is always set, even if EF Core tries to insert NULL
             migrationBuilder.Sql(@"
                 CREATE OR REPLACE FUNCTION set_shopping_list_item_rowversion()
@@ -124,7 +124,7 @@ namespace PantryCloud.ShoppingList.Infrastructure.Migrations
                 DROP TRIGGER IF EXISTS trg_set_shopping_list_item_rowversion ON shopping_list_items;
                 DROP FUNCTION IF EXISTS set_shopping_list_item_rowversion();
             ");
-            
+
             migrationBuilder.DropTable(
                 name: "shopping_list_items");
 

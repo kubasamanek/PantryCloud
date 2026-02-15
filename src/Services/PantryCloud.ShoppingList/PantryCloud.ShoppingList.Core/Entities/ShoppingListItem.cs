@@ -15,7 +15,7 @@ public class ShoppingListItem : AuditableEntity
     public DateTime? CheckedAt { get; set; }
     public ItemSource Source { get; set; } = ItemSource.Manual;
     public byte[] RowVersion { get; set; } = null!;
-    
+
     public ShoppingList ShoppingList { get; set; } = null!;
 }
 

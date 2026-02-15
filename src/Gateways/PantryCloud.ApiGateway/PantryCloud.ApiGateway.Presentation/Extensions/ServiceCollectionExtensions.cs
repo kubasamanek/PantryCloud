@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration)
     {
         var enableSwagger = configuration.GetValue("Gateway:EnableSwagger", false);
-        
+
         if (enableSwagger)
         {
             services.AddSwaggerGenWithAuth();
@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
         }
 
         services.AddControllers();
-        
+
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
 

@@ -23,7 +23,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    
+
     await app.ApplyMigrationsAsync<ShoppingListDbContext>();
 }
 

@@ -10,6 +10,6 @@ public class CorrelationIdProvider(IHttpContextAccessor httpContextAccessor) : I
 {
     public string? GetCorrelationId()
     {
-         return httpContextAccessor.GetCorrelationIdFromContext();
+        return httpContextAccessor.GetCorrelationIdFromContext();
     }
 }

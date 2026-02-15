@@ -12,7 +12,7 @@ public sealed class TokenProvider : ITokenProvider, IDisposable
 {
     private readonly ApiConfiguration _configuration;
     private readonly SigningCredentials _signingCredentials;
-    private readonly RSA  _rsa;
+    private readonly RSA _rsa;
 
     public TokenProvider(ApiConfiguration configuration)
     {
@@ -25,7 +25,7 @@ public sealed class TokenProvider : ITokenProvider, IDisposable
         {
             KeyId = "key-id"
         };
-        
+
         _signingCredentials = new SigningCredentials(rsaSecurityKey, SecurityAlgorithms.RsaSha256);
         _configuration = configuration;
     }
@@ -67,7 +67,7 @@ public sealed class TokenProvider : ITokenProvider, IDisposable
         var randomBytes = RandomNumberGenerator.GetBytes(64);
         return Convert.ToBase64String(randomBytes);
     }
-    
+
     public string CreateVerifyEmailToken()
     {
         var randomBytes = RandomNumberGenerator.GetBytes(64);

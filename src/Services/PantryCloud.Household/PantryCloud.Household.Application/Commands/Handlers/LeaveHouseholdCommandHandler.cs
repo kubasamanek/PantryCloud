@@ -16,7 +16,7 @@ public class LeaveHouseholdCommandHandler(
     public async Task<ErrorOr<LeaveHouseholdResponseDto>> Handle(LeaveHouseholdCommand request, CancellationToken cancellationToken)
     {
         var result = await householdManagementService.LeaveHousehold(request.Request, cancellationToken);
-        
+
         return await result.PublishIfSuccessAsync(
             messageBus,
             (response, correlationId) => new MemberLeftHouseholdEvent

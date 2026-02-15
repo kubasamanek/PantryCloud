@@ -13,11 +13,11 @@ public sealed class RabbitMqPublisher : IAsyncDisposable
     /// <summary>
     /// Creates a publisher that connects to RabbitMQ at the given host and port.
     /// </summary>
-   public RabbitMqPublisher(
-        string host,
-        int port,
-        string user = RabbitMqTestOptions.DefaultUser,
-        string password = RabbitMqTestOptions.DefaultPassword)
+    public RabbitMqPublisher(
+         string host,
+         int port,
+         string user = RabbitMqTestOptions.DefaultUser,
+         string password = RabbitMqTestOptions.DefaultPassword)
     {
         var uri = new Uri($"amqp://{Uri.EscapeDataString(user)}:{Uri.EscapeDataString(password)}@{host}:{port}/");
         _bus = Bus.Factory.CreateUsingRabbitMq(cfg =>

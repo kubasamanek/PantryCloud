@@ -9,7 +9,7 @@ public class ShoppingListDbContext(DbContextOptions<ShoppingListDbContext> optio
     public DbSet<Core.Entities.ShoppingList> ShoppingLists => Set<Core.Entities.ShoppingList>();
     public DbSet<ShoppingListItem> ShoppingListItems => Set<ShoppingListItem>();
     public DbSet<UserHouseholdMembership> UserHouseholdMemberships => Set<UserHouseholdMembership>();
-    
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(typeof(ShoppingListConfiguration).Assembly);

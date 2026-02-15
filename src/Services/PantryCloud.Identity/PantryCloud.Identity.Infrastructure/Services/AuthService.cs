@@ -51,7 +51,7 @@ public class AuthService(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("User registered successfully with ID: {UserId}", user.Id);
-        
+
         // TODO: Send confirmation email
 
         return new RegisterResponseDto(user.Id.ToString(), verifyEmailTokenString);
@@ -107,11 +107,11 @@ public class AuthService(
 
         if (session?.User == null)
 
-        if (session?.User == null)
-        {
-            logger.LogWarning("Refresh token failed: token not found");
-            return AuthErrors.InvalidRefreshToken;
-        }
+            if (session?.User == null)
+            {
+                logger.LogWarning("Refresh token failed: token not found");
+                return AuthErrors.InvalidRefreshToken;
+            }
 
         var user = session.User;
 
@@ -143,10 +143,10 @@ public class AuthService(
     public async Task<ErrorOr<ForgotPasswordResponseDto>> ForgotPasswordAsync(ForgotPasswordRequestDto request, CancellationToken cancellationToken)
     {
         logger.LogInformation("User {Email} forgot password.", request.Email);
-        
+
         var user = await dbContext.Users
             .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
-        
+
         if (user == null)
         {
             logger.LogWarning("User {Email} does not exist", request.Email);
@@ -164,7 +164,7 @@ public class AuthService(
             Token = token,
             CallBackUrl = callbackUrl
         };
-        
+
         await dbContext.ResetPasswordTokens.AddAsync(entity, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
@@ -172,7 +172,7 @@ public class AuthService(
         {
             using var client = new SmtpClient(config.Email.Host, config.Email.Port);
             using var message = new MailMessage();
-            
+
             message.From = new MailAddress(config.Email.From);
             message.Subject = Constants.ResetPasswordEmailSubject;
             message.Body = string.Format(Constants.ResetPasswordEmailBodyTemplate, callbackUrl);
@@ -188,16 +188,16 @@ public class AuthService(
     public async Task<ErrorOr<ResetPasswordResponseDto>> ResetPasswordAsync(ResetPasswordRequestDto request, CancellationToken cancellationToken)
     {
         logger.LogInformation("User {Email} is trying to reset password.", request.Email);
-                
+
         var user = await dbContext.Users
             .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
-        
+
         if (user is null)
         {
             logger.LogWarning("Reset password failed: user not found");
             return AuthErrors.UserDoesNotExist(request.Email);
         }
-        
+
         var token = await dbContext.ResetPasswordTokens
             .FirstOrDefaultAsync(t => t.Email == request.Email && t.Token == request.Token, cancellationToken);
 
@@ -206,13 +206,13 @@ public class AuthService(
             logger.LogWarning("Reset password failed: token not found");
             return AuthErrors.TokenNotValid;
         }
-        
+
         if (token.IsUsed)
         {
             logger.LogWarning("Reset password failed: token has been used");
             return AuthErrors.TokenAlreadyUsed;
         }
-        
+
         if (token.IsExpired)
         {
             logger.LogWarning("Reset password failed: token has expired");
@@ -220,30 +220,30 @@ public class AuthService(
         }
 
         user.PasswordHash = PasswordHasher.Hash(request.NewPassword);
-        token.UsedAt =  DateTime.UtcNow;
-        
+        token.UsedAt = DateTime.UtcNow;
+
         await dbContext.SaveChangesAsync(cancellationToken);
-        
+
         logger.LogInformation("User {Email} successfully reset password", request.Email);
 
         // TODO: Token cleanup (hosted service/cron job)
-        
+
         return new ResetPasswordResponseDto();
     }
 
     public async Task<ErrorOr<VerifyEmailResponseDto>> VerifyEmailAsync(VerifyEmailRequestDto request, CancellationToken cancellationToken)
     {
         logger.LogInformation("User {Email} is trying to verify email.", request.Email);
-                
+
         var user = await dbContext.Users
             .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
-        
+
         if (user is null)
         {
             logger.LogWarning("Verify email failed: user not found");
             return AuthErrors.UserDoesNotExist(request.Email);
         }
-        
+
         var token = await dbContext.VerifyEmailTokens
             .FirstOrDefaultAsync(t => t.Email == request.Email && t.Token == request.Token, cancellationToken);
 
@@ -252,26 +252,26 @@ public class AuthService(
             logger.LogWarning("Verify email failed: token not found");
             return AuthErrors.TokenNotValid;
         }
-        
+
         if (token.IsUsed)
         {
             logger.LogWarning("Verify email failed: token has been used");
             return AuthErrors.TokenAlreadyUsed;
         }
-        
+
         if (token.IsExpired)
         {
             logger.LogWarning("Verify email failed: token has expired");
             return AuthErrors.TokenExpired;
         }
-        
+
         user.EmailVerified = true;
         token.UsedAt = DateTime.UtcNow;
-        
+
         await dbContext.SaveChangesAsync(cancellationToken);
-        
+
         logger.LogInformation("User {Email} successfully verified email.", request.Email);
-        
+
         return new VerifyEmailResponseDto();
     }
 

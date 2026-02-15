@@ -6,7 +6,7 @@ public record RegisterRequestDto(
     [Required(ErrorMessage = "Email is required")]
     [EmailAddress(ErrorMessage = "Invalid email format")]
     string Email,
-    
+
     [Required(ErrorMessage = "Password is required")]
     [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
     string Password
@@ -16,7 +16,7 @@ public record LoginRequestDto(
     [Required(ErrorMessage = "Email is required")]
     [EmailAddress(ErrorMessage = "Invalid email format")]
     string Email,
-    
+
     [Required(ErrorMessage = "Password is required")]
     string Password,
     string? DeviceName = null
@@ -46,10 +46,10 @@ public record ResetPasswordRequestDto(
     [Required(ErrorMessage = "Email is required")]
     [EmailAddress(ErrorMessage = "Invalid email format")]
     string Email,
-    
+
     [Required(ErrorMessage = "Token is required")]
     string Token,
-    
+
     [Required(ErrorMessage = "New password is required")]
     [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
     string NewPassword
@@ -61,7 +61,7 @@ public record VerifyEmailRequestDto(
     [Required(ErrorMessage = "Email is required")]
     [EmailAddress(ErrorMessage = "Invalid email format")]
     string Email,
-    
+
     [Required(ErrorMessage = "Token is required")]
     string Token
 );

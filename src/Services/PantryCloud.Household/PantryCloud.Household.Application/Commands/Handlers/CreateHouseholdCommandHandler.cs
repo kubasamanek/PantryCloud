@@ -10,7 +10,7 @@ namespace PantryCloud.Household.Application.Commands.Handlers;
 public class CreateHouseholdCommandHandler(
     IHouseholdManagementService householdManagementService,
     IMessageBus messageBus,
-    ICorrelationIdProvider correlationIdProvider) 
+    ICorrelationIdProvider correlationIdProvider)
     : IRequestHandler<CreateHouseholdCommand, ErrorOr<CreateHouseholdResponseDto>>
 {
     public async Task<ErrorOr<CreateHouseholdResponseDto>> Handle(CreateHouseholdCommand request, CancellationToken cancellationToken)

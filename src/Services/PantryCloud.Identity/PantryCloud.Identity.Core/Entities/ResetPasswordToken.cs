@@ -10,7 +10,7 @@ public class ResetPasswordToken : BaseEntity
     public DateTime? UsedAt { get; set; }
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
     public string CallBackUrl { get; init; } = string.Empty;
-    
+
     public bool IsUsed => UsedAt.HasValue;
     public bool IsExpired => DateTime.UtcNow > ExpiresAt;
 }

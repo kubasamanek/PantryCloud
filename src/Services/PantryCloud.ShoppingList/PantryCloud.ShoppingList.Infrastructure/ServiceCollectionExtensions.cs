@@ -20,14 +20,14 @@ public static class ServiceCollectionExtensions
         var apiConfiguration = new ApiConfiguration();
         configuration.Bind(apiConfiguration);
         services.AddSingleton(apiConfiguration);
-        
+
         var connectionString = configuration.GetConnectionString("DefaultConnection");
 
         services.AddDbContextWithAuditing<ShoppingListDbContext>(options =>
             options.UseNpgsql(connectionString));
-        
+
         services.AddMessaging(configuration, typeof(ServiceCollectionExtensions).Assembly);
-        
+
         services.AddHealthChecks().AddNpgSql(connectionString!);
 
         services.AddJwtBearerFromConfiguration(configuration, "App:IdentityUrl");
@@ -35,10 +35,10 @@ public static class ServiceCollectionExtensions
         services.AddAuthorization();
 
         services.AddCorrelationId();
-        
+
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<IShoppingListManagementService, ShoppingListManagementService>();
-        
+
         return services;
     }
 }

@@ -128,7 +128,7 @@ public sealed class HouseholdTestFixture : IAsyncLifetime
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return client;
     }
-    
+
     public RabbitMqPublisher CreateRabbitMqPublisher() =>
         RabbitMqPublisher.CreateFromHostPort($"localhost:{_rabbitMq.GetMappedPublicPort(RabbitMqTestOptions.AmqpPort)}");
 

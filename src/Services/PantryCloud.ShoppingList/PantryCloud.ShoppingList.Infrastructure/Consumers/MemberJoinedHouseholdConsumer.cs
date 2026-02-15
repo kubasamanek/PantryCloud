@@ -10,7 +10,7 @@ namespace PantryCloud.ShoppingList.Infrastructure.Consumers;
 
 public class MemberJoinedHouseholdConsumer(
     ShoppingListDbContext dbContext,
-    ILogger<MemberJoinedHouseholdConsumer> logger) 
+    ILogger<MemberJoinedHouseholdConsumer> logger)
     : DbContextConsumerBase<MemberJoinedHouseholdEvent, ShoppingListDbContext>(dbContext, logger)
 {
     protected override async Task HandleAsync(MemberJoinedHouseholdEvent @event, ConsumeContext context)

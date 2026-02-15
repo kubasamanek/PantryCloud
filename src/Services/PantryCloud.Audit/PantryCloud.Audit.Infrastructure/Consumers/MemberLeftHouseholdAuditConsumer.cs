@@ -23,7 +23,7 @@ public class MemberLeftHouseholdAuditConsumer(
             await _dbContext.SaveChangesAsync(context.CancellationToken);
             return;
         }
-        
+
         var membership = await _dbContext.UserHouseholdMemberships
             .FirstOrDefaultAsync(m => m.UserId == @event.MemberId && m.LeftAt == null, context.CancellationToken);
         if (membership != null && membership.HouseholdId == @event.HouseholdId)

@@ -9,7 +9,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationLayerServices(this IServiceCollection services)
     {
-        services.AddAutoMapper(_ => {}, typeof(GetMyNotificationsQuery));
+        services.AddAutoMapper(_ => { }, typeof(GetMyNotificationsQuery));
         services.AddValidatorsFromAssemblyContaining<GetMyNotificationsQuery>();
         services.AddMediatR(cfg =>
         {

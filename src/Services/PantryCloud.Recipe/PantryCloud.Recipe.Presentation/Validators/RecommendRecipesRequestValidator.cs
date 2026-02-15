@@ -6,8 +6,8 @@ namespace PantryCloud.Recipe.Presentation.Validators;
 public class RecommendRecipesRequestValidator : AbstractValidator<RecommendRecipesRequestDto>
 {
     private static readonly HashSet<string> AllowedDietary = new(StringComparer.OrdinalIgnoreCase)
-    { 
-        "None", "Vegetarian", "Vegan" 
+    {
+        "None", "Vegetarian", "Vegan"
     };
 
     public RecommendRecipesRequestValidator()

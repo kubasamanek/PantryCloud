@@ -28,7 +28,7 @@ public class SearchRecipesRequestValidatorTests
     [Fact]
     public void Should_NotHaveError_When_ValidIngredients()
     {
-        var request = new SearchRecipesRequestDto([..Constants.Search.IngredientsChickenRice]);
+        var request = new SearchRecipesRequestDto([.. Constants.Search.IngredientsChickenRice]);
         var result = _validator.Validate(request);
         result.IsValid.ShouldBeTrue();
     }
@@ -36,7 +36,7 @@ public class SearchRecipesRequestValidatorTests
     [Fact]
     public void Should_HaveError_When_IngredientIsEmptyString()
     {
-        var request = new SearchRecipesRequestDto([..Constants.Search.IngredientsChickenEmpty]);
+        var request = new SearchRecipesRequestDto([.. Constants.Search.IngredientsChickenEmpty]);
         var result = _validator.Validate(request);
         result.IsValid.ShouldBeFalse();
     }
@@ -45,7 +45,7 @@ public class SearchRecipesRequestValidatorTests
     public void Should_HaveError_When_DietaryProfileInvalid()
     {
         var request = new SearchRecipesRequestDto(
-            [..Constants.Search.IngredientsGarlic],
+            [.. Constants.Search.IngredientsGarlic],
             new PreferencesFilterDto(Constants.Preferences.Pescatarian, null));
         var result = _validator.Validate(request);
         result.IsValid.ShouldBeFalse();
@@ -55,7 +55,7 @@ public class SearchRecipesRequestValidatorTests
     public void Should_NotHaveError_When_DietaryProfileValid()
     {
         var request = new SearchRecipesRequestDto(
-            [..Constants.Recommend.IngredientHintsChicken],
+            [.. Constants.Recommend.IngredientHintsChicken],
             new PreferencesFilterDto(Constants.Preferences.Vegetarian, null));
         var result = _validator.Validate(request);
         result.IsValid.ShouldBeTrue();
@@ -65,8 +65,8 @@ public class SearchRecipesRequestValidatorTests
     public void Should_NotHaveError_When_ExcludedIngredientsValid()
     {
         var request = new SearchRecipesRequestDto(
-            [..Constants.Recommend.IngredientHintsChicken],
-            new PreferencesFilterDto(null, [..Constants.Preferences.NutsShellfish]));
+            [.. Constants.Recommend.IngredientHintsChicken],
+            new PreferencesFilterDto(null, [.. Constants.Preferences.NutsShellfish]));
         var result = _validator.Validate(request);
         result.IsValid.ShouldBeTrue();
     }

@@ -37,8 +37,8 @@ public class RecommendRecipesRequestValidatorTests
     public void Should_NotHaveError_When_ValidRequest()
     {
         var request = new RecommendRecipesRequestDto(
-            IngredientHints: [..Constants.Recommend.IngredientHintsChicken],
-            Preferences: new PreferencesFilterDto(Constants.Preferences.Vegetarian, [..Constants.Preferences.Nuts]),
+            IngredientHints: [.. Constants.Recommend.IngredientHintsChicken],
+            Preferences: new PreferencesFilterDto(Constants.Preferences.Vegetarian, [.. Constants.Preferences.Nuts]),
             Limit: Constants.Recommend.Limit10);
         var result = _validator.Validate(request);
         result.IsValid.ShouldBeTrue();

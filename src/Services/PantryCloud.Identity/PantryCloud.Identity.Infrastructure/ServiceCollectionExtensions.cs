@@ -16,20 +16,20 @@ public static class ServiceCollectionExtensions
         var apiConfiguration = new ApiConfiguration();
         configuration.Bind(apiConfiguration);
         services.AddSingleton(apiConfiguration);
-        
+
         services.AddSingleton<ITokenProvider, TokenProvider>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddIdentityJwtAuth(apiConfiguration);
-        
+
         var connectionString = configuration.GetConnectionString("DefaultConnection");
-        
+
         services.AddCorrelationId();
-        
+
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));
-        
+
         services.AddHealthChecks().AddNpgSql(connectionString!);
-        
+
         return services;
     }
 }

@@ -15,7 +15,7 @@ public static class MigrationExtensions
     /// </summary>
     /// <typeparam name="TContext">The type of the DbContext.</typeparam>
     /// <param name="host">The application host.</param>
-    public static async Task ApplyMigrationsAsync<TContext>(this IHost host) 
+    public static async Task ApplyMigrationsAsync<TContext>(this IHost host)
         where TContext : DbContext
     {
         using var scope = host.Services.CreateScope();

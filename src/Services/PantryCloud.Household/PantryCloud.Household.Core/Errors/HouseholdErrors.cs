@@ -15,7 +15,7 @@ public static class HouseholdErrors
     );
 
     public static Error OwnerCannotLeave => Error.Forbidden(
-        code:  "Household.Owner.CannotLeave",
+        code: "Household.Owner.CannotLeave",
         description: "Owner is a member of a household and cannot leave."
     );
 

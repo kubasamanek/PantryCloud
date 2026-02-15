@@ -27,7 +27,7 @@ public class SearchRecipesRequestValidator : AbstractValidator<SearchRecipesRequ
         When(x => x.Preferences is not null, () =>
         {
             RuleFor(x => x.Preferences!.DietaryProfile)
-                .Must(v => v == null || AllowedDietary.Contains(v)) 
+                .Must(v => v == null || AllowedDietary.Contains(v))
                 .WithMessage("DietaryProfile must be one of: None, Vegetarian, Vegan.");
         });
 

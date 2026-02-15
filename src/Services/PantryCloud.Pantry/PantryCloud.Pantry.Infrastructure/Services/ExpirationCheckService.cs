@@ -28,7 +28,7 @@ public class ExpirationCheckService(
         var dayAfterTomorrowEnd = dayAfterTomorrow.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc);
 
         logger.LogInformation("Checking expiration check for today {today}", today);
-        
+
         var items = await dbContext.PantryItems
             .AsNoTracking()
             .Where(p => p.ExpirationDate != null

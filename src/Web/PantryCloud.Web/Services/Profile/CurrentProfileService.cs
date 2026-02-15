@@ -14,7 +14,7 @@ public class CurrentProfileService(IProfileApi profileApi) : ICurrentProfileServ
         {
             return;
         }
-        
+
         await LoadAsync(cancellationToken);
         _loaded = true;
     }

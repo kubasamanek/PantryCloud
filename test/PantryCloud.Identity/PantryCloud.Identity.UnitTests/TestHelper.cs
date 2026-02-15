@@ -61,7 +61,7 @@ internal static class TestHelper
             PasswordHash = PasswordHasher.Hash(password)
         };
     }
-    
+
     public static ResetPasswordToken MakeResetToken(string email, bool used = false, bool expired = false)
     {
         return new ResetPasswordToken
@@ -74,7 +74,7 @@ internal static class TestHelper
             UsedAt = used ? DateTime.UtcNow : null
         };
     }
-    
+
     public static VerifyEmailToken MakeVerifyEmailToken(string email, bool used = false, bool expired = false)
     {
         return new VerifyEmailToken

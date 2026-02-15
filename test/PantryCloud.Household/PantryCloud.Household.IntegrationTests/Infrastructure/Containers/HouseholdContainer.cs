@@ -36,7 +36,7 @@ public static class HouseholdContainer
             .WithPortBinding(IntegrationConstants.Household.Port, true)
             .WithCreateParameterModifier(ContainerLoggingConfig.JsonFileLogging)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPath("/health").ForPort(IntegrationConstants.Household.Port)));
-        
+
         foreach (var (k, v) in env)
         {
             builder = builder.WithEnvironment(k, v);

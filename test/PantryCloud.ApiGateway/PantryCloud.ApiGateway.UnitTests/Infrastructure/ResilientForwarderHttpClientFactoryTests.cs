@@ -31,7 +31,7 @@ public class ResilientForwarderHttpClientFactoryTests
 
         var policy = Policy.NoOpAsync<HttpResponseMessage>();
         _policyRegistry.TryGet(Constants.ResilientForwarder.CircuitBreakerPolicyName, out Arg.Any<IAsyncPolicy<HttpResponseMessage>>())
-            .Returns(x => 
+            .Returns(x =>
             {
                 x[1] = policy;
                 return true;
@@ -44,7 +44,7 @@ public class ResilientForwarderHttpClientFactoryTests
 
         resultHandler.ShouldBeOfType<PolicyHttpMessageHandler>();
     }
-    
+
     [Fact]
     public void CreateClient_ShouldApplyRetryPolicy_WhenMetadataPresent()
     {
@@ -60,7 +60,7 @@ public class ResilientForwarderHttpClientFactoryTests
 
         var policy = Policy.NoOpAsync<HttpResponseMessage>();
         _policyRegistry.TryGet<IAsyncPolicy<HttpResponseMessage>>(Constants.ResilientForwarder.RetryPolicyName, out Arg.Any<IAsyncPolicy<HttpResponseMessage>>())
-            .Returns(x => 
+            .Returns(x =>
             {
                 x[1] = policy;
                 return true;
@@ -68,7 +68,7 @@ public class ResilientForwarderHttpClientFactoryTests
 
         var wrapper = new TestableResilientForwarderHttpClientFactory(_policyRegistry, _logger);
         var handler = new HttpClientHandler();
-        
+
         var resultHandler = wrapper.PublicWrapHandler(context, handler);
 
         resultHandler.ShouldBeOfType<PolicyHttpMessageHandler>();
@@ -86,7 +86,7 @@ public class ResilientForwarderHttpClientFactoryTests
 
         var wrapper = new TestableResilientForwarderHttpClientFactory(_policyRegistry, _logger);
         var handler = new HttpClientHandler();
-        
+
         var resultHandler = wrapper.PublicWrapHandler(context, handler);
 
         resultHandler.ShouldNotBeOfType<PolicyHttpMessageHandler>();

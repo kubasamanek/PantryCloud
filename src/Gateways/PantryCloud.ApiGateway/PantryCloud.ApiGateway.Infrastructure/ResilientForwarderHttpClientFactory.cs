@@ -17,7 +17,7 @@ public class ResilientForwarderHttpClientFactory(
 
         // Circuit Breaker wraps inner handler, Retry wraps Circuit Breaker
         // This ensures retries are attempted only when circuit is closed
-        
+
         // Apply Circuit Breaker Policy if metadata exists (inner layer)
         if (context.NewMetadata?.TryGetValue(Constants.CircuitBreakerPolicyName, out var circuitBreakerPolicyName) == true &&
             policyRegistry.TryGet<IAsyncPolicy<HttpResponseMessage>>(circuitBreakerPolicyName, out var circuitBreakerPolicy))

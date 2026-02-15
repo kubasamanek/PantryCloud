@@ -4,7 +4,7 @@ public static class TestConstants
 {
     public const string DockerFilePath =
         "src/Services/PantryCloud.Household/PantryCloud.Household.Presentation/Dockerfile";
-    
+
     public static class Endpoints
     {
         private const string Base = "/api/households";

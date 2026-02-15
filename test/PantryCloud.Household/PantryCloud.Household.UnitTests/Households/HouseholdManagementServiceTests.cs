@@ -13,7 +13,7 @@ public class HouseholdManagementServiceTests
 {
     private readonly ILogger<HouseholdManagementService> _logger = TestHelper.MockLogger<HouseholdManagementService>();
 
-  [Fact]
+    [Fact]
     public async Task GetCurrentHousehold_ShouldReturnHousehold_WhenUserIsMember()
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(GetCurrentHousehold_ShouldReturnHousehold_WhenUserIsMember));

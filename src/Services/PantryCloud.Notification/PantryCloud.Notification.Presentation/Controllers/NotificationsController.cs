@@ -37,7 +37,7 @@ public class NotificationsController(IMediator mediator, IMapper mapper) : ApiCo
         {
             return Unauthorized();
         }
-        
+
         var effectiveLimit = Math.Clamp(limit, 1, 100);
         var query = new GetMyNotificationsQuery(userId.Value, effectiveLimit, since);
         var result = await Mediator.Send(query, cancellationToken);
@@ -49,7 +49,7 @@ public class NotificationsController(IMediator mediator, IMapper mapper) : ApiCo
     {
         var sub = User.FindFirstValue(ClaimTypes.NameIdentifier)
                   ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
-        
+
         return Guid.TryParse(sub, out var id) ? id : null;
     }
 }

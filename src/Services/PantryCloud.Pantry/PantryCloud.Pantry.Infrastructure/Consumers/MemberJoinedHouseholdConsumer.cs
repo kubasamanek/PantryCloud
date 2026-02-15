@@ -10,7 +10,7 @@ namespace PantryCloud.Pantry.Infrastructure.Consumers;
 
 public class MemberJoinedHouseholdConsumer(
     PantryDbContext dbContext,
-    ILogger<MemberJoinedHouseholdConsumer> logger) 
+    ILogger<MemberJoinedHouseholdConsumer> logger)
     : DbContextConsumerBase<MemberJoinedHouseholdEvent, PantryDbContext>(dbContext, logger)
 {
     protected override async Task HandleAsync(MemberJoinedHouseholdEvent @event, ConsumeContext context)
@@ -79,7 +79,7 @@ public class MemberJoinedHouseholdConsumer(
                 HouseholdId = @event.HouseholdId,
                 JoinedAt = @event.JoinedAt
             };
-            
+
             await DbContext.UserHouseholdMemberships.AddAsync(membership, context.CancellationToken);
         }
 

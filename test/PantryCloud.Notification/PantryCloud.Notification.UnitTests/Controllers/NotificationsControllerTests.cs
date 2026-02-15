@@ -22,7 +22,7 @@ public class NotificationsControllerTests
         {
             new(Guid.NewGuid(), "Test Title", "Test Message", NotificationType.Info, DateTime.UtcNow.AddMinutes(-1), userId, null)
         };
-        
+
         var mediator = Substitute.For<IMediator>();
         var mapper = Substitute.For<IMapper>();
 
@@ -46,9 +46,9 @@ public class NotificationsControllerTests
         var list = objectResult.Value.ShouldBeOfType<List<NotificationDto>>();
         list.Count.ShouldBe(1);
         list[0].Title.ShouldBe("Test Title");
-        
+
         await mediator.Received(1).Send(
-            Arg.Is<GetMyNotificationsQuery>(q => q.UserId == userId && q.Limit == 50 && q.Since == null), 
+            Arg.Is<GetMyNotificationsQuery>(q => q.UserId == userId && q.Limit == 50 && q.Since == null),
             Arg.Any<CancellationToken>());
     }
 
@@ -57,7 +57,7 @@ public class NotificationsControllerTests
     {
         var mediator = Substitute.For<IMediator>();
         var mapper = Substitute.For<IMapper>();
-        
+
         var controller = new NotificationsController(mediator, mapper)
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() },
@@ -96,7 +96,7 @@ public class NotificationsControllerTests
         await controller.GetMyNotifications(200);
 
         await mediator.Received(1).Send(
-            Arg.Is<GetMyNotificationsQuery>(q => q.UserId == userId && q.Limit == 100), 
+            Arg.Is<GetMyNotificationsQuery>(q => q.UserId == userId && q.Limit == 100),
             Arg.Any<CancellationToken>());
     }
 
@@ -124,7 +124,7 @@ public class NotificationsControllerTests
         await controller.GetMyNotifications(50, since);
 
         await mediator.Received(1).Send(
-            Arg.Is<GetMyNotificationsQuery>(q => q.UserId == userId && q.Since == since), 
+            Arg.Is<GetMyNotificationsQuery>(q => q.UserId == userId && q.Since == since),
             Arg.Any<CancellationToken>());
     }
 }

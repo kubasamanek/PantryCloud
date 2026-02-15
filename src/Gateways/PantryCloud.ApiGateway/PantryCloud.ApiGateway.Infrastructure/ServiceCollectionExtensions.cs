@@ -39,12 +39,12 @@ public static class ServiceCollectionExtensions
 
         var resilienceSettings = apiConfiguration.Gateway.Resilience;
         var policyRegistry = new PolicyRegistry();
-        
+
         if (resilienceSettings.Retry.Enabled || resilienceSettings.CircuitBreaker.Enabled)
         {
             // Create policies per service to isolate failures
             var serviceNames = new[] { "Identity", "Household", "Pantry", "Recipe", "ShoppingList", "Notification", "Audit" };
-            
+
             foreach (var service in serviceNames)
             {
                 // Create service-specific retry policy
@@ -56,7 +56,7 @@ public static class ServiceCollectionExtensions
                             retryCount: resilienceSettings.Retry.MaxRetryAttempts,
                             sleepDurationProvider: retryAttempt => TimeSpan.FromMilliseconds(
                                 resilienceSettings.Retry.BaseDelayMilliseconds * Math.Pow(2, retryAttempt)));
-                    
+
                     policyRegistry.Add($"{Constants.RetryPolicyName}-{service}", retryPolicy);
                 }
 
@@ -68,15 +68,15 @@ public static class ServiceCollectionExtensions
                         .CircuitBreakerAsync(
                             handledEventsAllowedBeforeBreaking: resilienceSettings.CircuitBreaker.FailureThreshold,
                             durationOfBreak: TimeSpan.FromSeconds(resilienceSettings.CircuitBreaker.DurationOfBreakSeconds));
-                    
+
                     policyRegistry.Add($"{Constants.CircuitBreakerPolicyName}-{service}", circuitBreakerPolicy);
                 }
             }
         }
-        
+
         services.AddSingleton<IReadOnlyPolicyRegistry<string>>(policyRegistry);
 
-        services.AddSingleton<IProxyConfigProvider>(_ => 
+        services.AddSingleton<IProxyConfigProvider>(_ =>
             new InMemoryConfigProvider(
                 GetRoutes(apiConfiguration.Services),
                 GetClusters(apiConfiguration.Services, resilienceSettings)));
@@ -241,7 +241,7 @@ public static class ServiceCollectionExtensions
             {
                 metadata[Constants.CircuitBreakerPolicyName] = $"{Constants.CircuitBreakerPolicyName}-{serviceName}";
             }
-            
+
             var cluster = new ClusterConfig
             {
                 ClusterId = clusterId,

@@ -32,7 +32,7 @@ internal static class TestHelper
         context.RequestServices = services.BuildServiceProvider();
 
         if (!isAuthenticated || userId == null) return context;
-        
+
         var identity = new System.Security.Claims.ClaimsIdentity("test");
         identity.AddClaim(new System.Security.Claims.Claim(
             System.Security.Claims.ClaimTypes.NameIdentifier, userId));
@@ -49,7 +49,7 @@ internal static class TestHelper
             await Task.CompletedTask;
         };
     }
-    
+
     public static ILogger<T> MockLogger<T>() where T : class
         => Substitute.For<ILogger<T>>();
 

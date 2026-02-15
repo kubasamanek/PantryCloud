@@ -22,14 +22,14 @@ public static class ServiceCollectionExtensions
         var apiConfiguration = new ApiConfiguration();
         configuration.Bind(apiConfiguration);
         services.AddSingleton(apiConfiguration);
-        
+
         var connectionString = configuration.GetConnectionString("DefaultConnection");
 
         services.AddDbContextWithAuditing<PantryDbContext>(options =>
             options.UseNpgsql(connectionString));
-        
+
         services.AddMessaging(configuration, typeof(ServiceCollectionExtensions).Assembly);
-        
+
         services.AddHealthChecks().AddNpgSql(connectionString!);
 
         services.AddJwtBearerFromConfiguration(configuration, "App:IdentityUrl");
@@ -43,10 +43,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<IExpirationCheckService, ExpirationCheckService>();
         services.AddHostedService<ExpirationCheckBackgroundService>();
-        
+
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<IPantryManagementService, PantryManagementService>();
-        
+
         return services;
     }
 }

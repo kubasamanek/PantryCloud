@@ -13,7 +13,7 @@ public static class AuthErrors
         code: "Auth.Login.InvalidCredentials",
         description: "Invalid email or password."
     );
-        
+
     public static Error LoginEmailNotVerified = Error.Unauthorized(
         code: "Auth.Login.EmailNotVerified",
         description: "You need to verify your email first."
@@ -23,7 +23,7 @@ public static class AuthErrors
         code: "Auth.RefreshToken.InvalidRefreshToken",
         description: "Invalid refresh token."
     );
-    
+
     public static Error ExpiredRefreshToken = Error.Unauthorized(
         code: "Auth.RefreshToken.ExpiredRefreshToken",
         description: "Expired refresh token."
@@ -38,12 +38,12 @@ public static class AuthErrors
         code: "Auth.TokenInvalid",
         description: $"Token is not valid."
     );
-    
+
     public static Error TokenExpired = Error.Unauthorized(
         code: "Auth.TokenExpired",
         description: $"Token is expired."
     );
-    
+
     public static Error TokenAlreadyUsed = Error.Unauthorized(
         code: "Auth.TokenAlreadyUsed",
         description: $"Token has already been used."

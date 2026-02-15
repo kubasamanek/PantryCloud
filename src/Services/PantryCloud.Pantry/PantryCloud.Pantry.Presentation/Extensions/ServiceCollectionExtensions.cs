@@ -10,14 +10,14 @@ public static class ServiceCollectionExtensions
         services.AddSwaggerGenWithAuth();
 
         services.AddEndpointsApiExplorer();
-        
+
         services.AddControllers();
-        
-        services.AddAutoMapper(_ => {}, typeof(Program));
-        
+
+        services.AddAutoMapper(_ => { }, typeof(Program));
+
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
-        
+
         return services;
     }
 }

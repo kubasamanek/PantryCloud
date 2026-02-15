@@ -6,7 +6,7 @@ namespace PantryCloud.SharedKernel.Persistence;
 /// <summary>
 /// Extension methods for DbContext to provide common operations.
 /// </summary>
-public static class  DbContextExtensions
+public static class DbContextExtensions
 {
     /// <summary>
     /// Finds an entity by ID, or returns null if not found.

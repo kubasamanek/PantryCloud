@@ -4,7 +4,7 @@ using PantryCloud.ShoppingList.Application.Dtos;
 
 namespace PantryCloud.ShoppingList.Application.Commands.Handlers;
 
-public class AddShoppingListItemCommandHandler(IShoppingListManagementService shoppingListManagementService) 
+public class AddShoppingListItemCommandHandler(IShoppingListManagementService shoppingListManagementService)
     : IRequestHandler<AddShoppingListItemCommand, ErrorOr<AddShoppingListItemResponseDto>>
 {
     public async Task<ErrorOr<AddShoppingListItemResponseDto>> Handle(AddShoppingListItemCommand request, CancellationToken cancellationToken)

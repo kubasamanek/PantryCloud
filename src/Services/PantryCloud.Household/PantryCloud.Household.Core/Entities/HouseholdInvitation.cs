@@ -9,7 +9,7 @@ public class HouseholdInvitation : BaseEntity
     public required string Email { get; init; }
     public required DateTime ExpiresAt { get; init; }
     public DateTime? UsedAt { get; set; }
-    
+
     public bool IsExpired => DateTime.UtcNow > ExpiresAt;
 
     public bool IsUsed => UsedAt.HasValue;

@@ -102,7 +102,7 @@ public class ValidationBehaviorTests
     {
         // Arrange
         var request = new TestRequest { Value = "" };
-        
+
         var validator1 = Substitute.For<IValidator<TestRequest>>();
         validator1.ValidateAsync(Arg.Any<ValidationContext<TestRequest>>(), Arg.Any<CancellationToken>())
             .Returns(new ValidationResult(new[]

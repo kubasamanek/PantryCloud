@@ -9,7 +9,7 @@ public interface IUserContext
     /// Gets the current user's unique identifier.
     /// </summary>
     Guid UserId { get; }
-    
+
     /// <summary>
     /// Gets the current user's email address.
     /// </summary>

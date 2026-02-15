@@ -22,7 +22,7 @@ public static class ServiceCollectionExtensions
         where TDbContext : DbContext
     {
         services.AddScoped<AuditableEntityInterceptor>();
-        
+
         services.AddDbContext<TDbContext>((serviceProvider, options) =>
         {
             configureDbContext(options);

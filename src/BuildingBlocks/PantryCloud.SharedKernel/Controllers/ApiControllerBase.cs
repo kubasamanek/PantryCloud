@@ -18,12 +18,12 @@ public abstract class ApiControllerBase(IMediator mediator, IMapper mapper) : Co
     /// Gets the MediatR mediator for sending commands and queries.
     /// </summary>
     protected readonly IMediator Mediator = mediator;
-    
+
     /// <summary>
     /// Gets the AutoMapper mapper for object-to-object mapping.
     /// </summary>
     protected readonly IMapper Mapper = mapper;
-    
+
     /// <summary>
     /// Converts an ErrorOr result to an IActionResult with the specified success status code.
     /// </summary>
@@ -38,7 +38,7 @@ public abstract class ApiControllerBase(IMediator mediator, IMapper mapper) : Co
             Problem
         );
     }
-    
+
     private IActionResult Problem(List<Error> errors)
     {
         if (errors.Count == 0)
@@ -68,8 +68,8 @@ public abstract class ApiControllerBase(IMediator mediator, IMapper mapper) : Co
             _ => StatusCodes.Status400BadRequest,
         };
 
-        return Problem(statusCode: statusCode, 
-            title: firstError.GetType().Name, 
+        return Problem(statusCode: statusCode,
+            title: firstError.GetType().Name,
             detail: firstError.Description);
     }
 

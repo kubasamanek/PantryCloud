@@ -13,11 +13,11 @@ public class CorrelationIdMiddleware(RequestDelegate next)
     public async Task InvokeAsync(HttpContext context)
     {
         var headerValue = context.Request.Headers[CorrelationIdConstants.HeaderName];
-        
+
         var correlationId = headerValue.ToString()
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .FirstOrDefault();
-        
+
         if (string.IsNullOrEmpty(correlationId))
         {
             correlationId = Guid.NewGuid().ToString();
@@ -29,7 +29,7 @@ public class CorrelationIdMiddleware(RequestDelegate next)
         // Set in request headers (for YARP/proxy forwarding) and response headers
         context.Request.Headers[CorrelationIdConstants.HeaderName] = correlationId;
         context.Response.Headers[CorrelationIdConstants.HeaderName] = correlationId;
-        
+
         // Enrich logging with Correlation ID
         using (LogContext.PushProperty("CorrelationId", correlationId))
         {

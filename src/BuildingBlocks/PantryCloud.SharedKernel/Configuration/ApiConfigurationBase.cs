@@ -9,7 +9,7 @@ public abstract class ApiConfigurationBase
     /// Gets or sets the connection strings configuration.
     /// </summary>
     public ConnectionStrings ConnectionStrings { get; set; } = new();
-    
+
     /// <summary>
     /// Gets or sets a value indicating whether the application is running in development mode.
     /// </summary>

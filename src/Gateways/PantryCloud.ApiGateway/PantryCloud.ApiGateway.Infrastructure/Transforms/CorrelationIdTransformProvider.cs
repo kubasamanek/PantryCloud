@@ -27,9 +27,9 @@ public class CorrelationIdTransformProvider : ITransformProvider
             var correlationId = transformContext.HttpContext.Items[CorrelationIdConstants.HttpContextItemKey]?.ToString()
                                ?? transformContext.HttpContext.Request.Headers[CorrelationIdConstants.HeaderName].FirstOrDefault()
                                ?? Guid.NewGuid().ToString();
-            
+
             transformContext.ProxyRequest.Headers.Add(CorrelationIdConstants.HeaderName, correlationId);
-            
+
             return ValueTask.CompletedTask;
         });
     }

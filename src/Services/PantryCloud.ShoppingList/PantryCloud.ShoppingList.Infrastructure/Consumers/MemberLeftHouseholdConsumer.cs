@@ -9,7 +9,7 @@ namespace PantryCloud.ShoppingList.Infrastructure.Consumers;
 
 public class MemberLeftHouseholdConsumer(
     ShoppingListDbContext dbContext,
-    ILogger<MemberLeftHouseholdConsumer> logger) 
+    ILogger<MemberLeftHouseholdConsumer> logger)
     : DbContextConsumerBase<MemberLeftHouseholdEvent, ShoppingListDbContext>(dbContext, logger)
 {
     protected override async Task HandleAsync(MemberLeftHouseholdEvent @event, ConsumeContext context)
@@ -26,7 +26,7 @@ public class MemberLeftHouseholdConsumer(
         if (membership != null)
         {
             membership.LeftAt = @event.LeftAt;
-            
+
             Logger.LogInformation(
                 "Updated household membership - UserId: {UserId} left HouseholdId: {HouseholdId} at {LeftAt}",
                 @event.MemberId,

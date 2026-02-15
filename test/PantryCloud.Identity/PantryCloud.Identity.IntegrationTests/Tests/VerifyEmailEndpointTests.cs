@@ -152,7 +152,7 @@ public class VerifyEmailEndpointTests(IdentityTestFixture fixture) : BaseIntegra
 
         // Act - First verification
         var response1 = await HttpClient.PostAsJsonAsync(TestConstants.Endpoints.VerifyEmail, request);
-        
+
         // Act - Second verification attempt with same token
         var response2 = await HttpClient.PostAsJsonAsync(TestConstants.Endpoints.VerifyEmail, request);
 

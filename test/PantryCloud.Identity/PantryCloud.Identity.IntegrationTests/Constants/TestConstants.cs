@@ -27,7 +27,7 @@ public static class TestConstants
     {
         public const string DefaultEmail = "test@pantrycloud.com";
         public const string DefaultPassword = "Test123!";
-        
+
         public const string AlternativeEmail = "alice@pantrycloud.com";
         public const string AlternativePassword = "Alice123!";
     }

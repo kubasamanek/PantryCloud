@@ -13,8 +13,8 @@ namespace PantryCloud.Household.UnitTests.Invitation;
 
 public class InvitationServiceTests
 {
-   private readonly ILogger<InvitationService> _logger = TestHelper.MockLogger<InvitationService>();
-   
+    private readonly ILogger<InvitationService> _logger = TestHelper.MockLogger<InvitationService>();
+
     [Fact]
     public async Task SendHouseholdInvitation_ShouldCreateInvitation_WhenValidRequest()
     {
@@ -64,13 +64,13 @@ public class InvitationServiceTests
         var service = new InvitationService(_logger, userContext, db);
 
         var request = new SendHouseholdInvitationRequestDto(Constants.Invitation.InviteeEmail, Constants.Household.Id.ToString());
-        
+
         var result = await service.SendHouseholdInvitation(request, CancellationToken.None);
 
         result.IsError.ShouldBeFalse();
         result.Value.Code.ShouldBe(Constants.Invitation.ValidCode);
     }
-    
+
     [Fact]
     public async Task AcceptHouseholdInvitation_ShouldAddMember_WhenValidCode()
     {
@@ -162,7 +162,7 @@ public class InvitationServiceTests
         result.IsError.ShouldBeTrue();
         result.Errors.ShouldContain(InvitationErrors.UsedInvitation);
     }
-    
+
     [Fact]
     public async Task AcceptHouseholdInvitation_ShouldFail_WhenInvitationIsExpired()
     {

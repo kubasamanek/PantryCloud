@@ -28,7 +28,7 @@ public sealed class GlobalExceptionHandler(
 
         var problem = new ProblemDetails
         {
-            Type = exception.GetType().Name, 
+            Type = exception.GetType().Name,
             Title = title,
             Detail = exception.Message,
             Status = statusCode,
@@ -36,7 +36,7 @@ public sealed class GlobalExceptionHandler(
 
         httpContext.Response.StatusCode = statusCode;
         httpContext.Response.ContentType = "application/problem+json";
-        
+
         await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken: cancellationToken);
 
         return true;

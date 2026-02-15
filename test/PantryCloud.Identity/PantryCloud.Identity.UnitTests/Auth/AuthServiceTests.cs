@@ -13,7 +13,7 @@ namespace PantryCloud.Identity.UnitTests.Auth;
 public class AuthServiceTests
 {
     private readonly ILogger<AuthService> _loggerMock = TestHelper.MockLogger();
-    private readonly ITokenProvider  _tokenProviderMock = TestHelper.MockTokenProvider();
+    private readonly ITokenProvider _tokenProviderMock = TestHelper.MockTokenProvider();
     private readonly ApiConfiguration _configurationMock = TestHelper.MockConfiguration();
 
     private readonly IIdentityUserContext _userContextMock = TestHelper.MockIdentityUserContext();
@@ -44,7 +44,7 @@ public class AuthServiceTests
         var existing = Constants.ExampleUser;
         db.Users.Add(existing);
         await db.SaveChangesAsync();
-        
+
         var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var request = new RegisterRequestDto(existing.Email, Constants.Passwords.Example);
@@ -54,7 +54,7 @@ public class AuthServiceTests
         result.IsError.ShouldBeTrue();
         result.Errors.ShouldContain(AuthErrors.RegistrationUserAlreadyExists(existing.Email));
     }
-    
+
     [Fact]
     public async Task LoginAsync_ShouldReturnTokens_AndPersistRefreshToken_OnValidCredentials()
     {
@@ -87,7 +87,7 @@ public class AuthServiceTests
         var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await authService.LoginAsync(
-            new LoginRequestDto(Constants.User.Email, Constants.Passwords.Wrong), 
+            new LoginRequestDto(Constants.User.Email, Constants.Passwords.Wrong),
             CancellationToken.None);
 
         result.IsError.ShouldBeTrue();
@@ -136,7 +136,7 @@ public class AuthServiceTests
         var authService = new AuthService(tokenProvider, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await authService.RefreshTokenAsync(
-            new RefreshTokenRequestDto(Constants.Tokens.OldRefreshToken), 
+            new RefreshTokenRequestDto(Constants.Tokens.OldRefreshToken),
             CancellationToken.None);
 
         result.IsError.ShouldBeFalse();
@@ -155,7 +155,7 @@ public class AuthServiceTests
         var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await authService.RefreshTokenAsync(
-            new RefreshTokenRequestDto(Constants.Tokens.NonExistent), 
+            new RefreshTokenRequestDto(Constants.Tokens.NonExistent),
             CancellationToken.None);
 
         result.IsError.ShouldBeTrue();
@@ -178,17 +178,17 @@ public class AuthServiceTests
             LastUsedAt = DateTime.UtcNow
         });
         await db.SaveChangesAsync();
-        
+
         var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
 
         var result = await authService.RefreshTokenAsync(
-            new RefreshTokenRequestDto(Constants.Tokens.ExpiredRefreshToken), 
+            new RefreshTokenRequestDto(Constants.Tokens.ExpiredRefreshToken),
             CancellationToken.None);
 
         result.IsError.ShouldBeTrue();
         result.Errors.ShouldContain(AuthErrors.ExpiredRefreshToken);
     }
-    
+
     [Fact]
     public async Task ForgotPasswordAsync_ShouldGenerateTokenAndReturnCallback_WhenUserExists()
     {
@@ -208,7 +208,7 @@ public class AuthServiceTests
         var tokenEntity = await db.ResetPasswordTokens.SingleOrDefaultAsync(t => t.Email == user.Email);
         tokenEntity.ShouldNotBeNull();
     }
-    
+
     [Fact]
     public async Task ForgotPasswordAsync_ShouldReturnError_WhenUserDoesNotExist()
     {
@@ -220,7 +220,7 @@ public class AuthServiceTests
         result.IsError.ShouldBeTrue();
         result.Errors.ShouldContain(AuthErrors.UserDoesNotExist(Constants.User.NotFoundEmail));
     }
-    
+
     [Fact]
     public async Task ResetPasswordAsync_ShouldResetPassword_WhenTokenValid()
     {
@@ -229,7 +229,7 @@ public class AuthServiceTests
         var token = TestHelper.MakeResetToken(user.Email, used: false, expired: false);
 
         var originalPassword = user.PasswordHash;
-        
+
         db.Users.Add(user);
         db.ResetPasswordTokens.Add(token);
         await db.SaveChangesAsync();
@@ -243,7 +243,7 @@ public class AuthServiceTests
         var updatedUser = await db.Users.SingleAsync(u => u.Email == user.Email);
         updatedUser.PasswordHash.ShouldNotBe(originalPassword);
     }
-    
+
     [Fact]
     public async Task ResetPasswordAsync_ShouldReturnError_WhenTokenIsUsed()
     {
@@ -261,7 +261,7 @@ public class AuthServiceTests
         result.IsError.ShouldBeTrue();
         result.Errors.ShouldContain(AuthErrors.TokenAlreadyUsed);
     }
-    
+
     [Fact]
     public async Task ResetPasswordAsync_ShouldReturnError_WhenTokenIsExpired()
     {
@@ -280,7 +280,7 @@ public class AuthServiceTests
         result.IsError.ShouldBeTrue();
         result.Errors.ShouldContain(AuthErrors.TokenExpired);
     }
-    
+
     [Fact]
     public async Task ResetPasswordAsync_ShouldReturnError_WhenTokenIsInvalid()
     {
@@ -299,7 +299,7 @@ public class AuthServiceTests
         result.IsError.ShouldBeTrue();
         result.Errors.ShouldContain(AuthErrors.TokenNotValid);
     }
-    
+
     [Fact]
     public async Task VerifyEmailAsync_ShouldVerifyEmail_WhenTokenIsValid()
     {
@@ -323,7 +323,7 @@ public class AuthServiceTests
         var updatedToken = await db.VerifyEmailTokens.SingleAsync(t => t.Email == user.Email);
         updatedToken.UsedAt.ShouldNotBeNull();
     }
-    
+
     [Fact]
     public async Task VerifyEmailAsync_ShouldReturnError_WhenUserNotFound()
     {
@@ -342,7 +342,7 @@ public class AuthServiceTests
         result.IsError.ShouldBeTrue();
         result.Errors.ShouldContain(AuthErrors.UserDoesNotExist(Constants.User.NotFoundEmail));
     }
-    
+
     [Fact]
     public async Task VerifyEmailAsync_ShouldReturnError_WhenTokenNotFound()
     {
@@ -360,7 +360,7 @@ public class AuthServiceTests
         result.IsError.ShouldBeTrue();
         result.Errors.ShouldContain(AuthErrors.TokenNotValid);
     }
-    
+
     [Fact]
     public async Task VerifyEmailAsync_ShouldReturnError_WhenTokenAlreadyUsed()
     {
@@ -381,7 +381,7 @@ public class AuthServiceTests
         result.IsError.ShouldBeTrue();
         result.Errors.ShouldContain(AuthErrors.TokenAlreadyUsed);
     }
-    
+
     [Fact]
     public async Task VerifyEmailAsync_ShouldReturnError_WhenTokenExpired()
     {

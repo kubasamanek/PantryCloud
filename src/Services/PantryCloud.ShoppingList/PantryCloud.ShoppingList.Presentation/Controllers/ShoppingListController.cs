@@ -65,7 +65,7 @@ public class ShoppingListController(IMediator mediator, IMapper mapper) : ApiCon
 
         return FromResult(result, StatusCodes.Status200OK);
     }
-    
+
     [Authorize]
     [HttpPost("{id}/items")]
     [ProducesResponseType(typeof(AddShoppingListItemResponseDto), StatusCodes.Status201Created)]

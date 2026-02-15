@@ -23,7 +23,7 @@ public class AuthController(IMediator mediator, IMapper mapper) : ApiControllerB
 
         return FromResult(result, StatusCodes.Status200OK);
     }
-  
+
     [HttpPost("refresh")]
     [ProducesResponseType(typeof(RefreshTokenResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -36,7 +36,7 @@ public class AuthController(IMediator mediator, IMapper mapper) : ApiControllerB
 
         return FromResult(result, StatusCodes.Status200OK);
     }
-    
+
     [HttpPost("register")]
     [ProducesResponseType(typeof(RegisterResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -47,7 +47,7 @@ public class AuthController(IMediator mediator, IMapper mapper) : ApiControllerB
 
         return FromResult(result, StatusCodes.Status200OK);
     }
-    
+
     [HttpPost("forgot-password")]
     [ProducesResponseType(typeof(ForgotPasswordResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -59,7 +59,7 @@ public class AuthController(IMediator mediator, IMapper mapper) : ApiControllerB
 
         return FromResult(result, StatusCodes.Status200OK);
     }
-    
+
     [HttpPost("reset-password")]
     [ProducesResponseType(typeof(ResetPasswordResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -15,13 +15,13 @@ namespace PantryCloud.Household.Infrastructure.Services;
 public class HouseholdManagementService(
     HouseholdDbContext dbContext,
     IUserContext userContext,
-    ILogger<HouseholdManagementService> logger) 
+    ILogger<HouseholdManagementService> logger)
     : BaseDbContextService<HouseholdManagementService, HouseholdDbContext>(dbContext, userContext, logger), IHouseholdManagementService
 {
     public async Task<ErrorOr<GetCurrentHouseholdResponseDto>> GetCurrentHousehold(CancellationToken cancellationToken)
     {
         Logger.LogInformation("Getting current household for {UserId}", UserId);
-        
+
         var household = await DbContext.Households
             .Where(h => h.Members.Any(m => m.UserId == UserId))
             .FirstOrDefaultAsync(cancellationToken);
@@ -31,7 +31,7 @@ public class HouseholdManagementService(
             Logger.LogInformation("Household for {UserId} not found", UserId);
             return Error.NotFound("Household.NotFound", "Household not found");
         }
-        
+
         Logger.LogInformation("Got current household for {UserId}", UserId);
 
         return new GetCurrentHouseholdResponseDto(household.Id, household.Name);
@@ -40,7 +40,7 @@ public class HouseholdManagementService(
     public async Task<ErrorOr<GetHouseholdByUserIdResponseDto>> GetHouseholdByUserId(GetHouseholdByUserIdRequestDto request, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Getting household for user {UserId}", request.UserId);
-        
+
         var household = await DbContext.Households
             .Where(h => h.Members.Any(m => m.UserId == request.UserId))
             .FirstOrDefaultAsync(cancellationToken);
@@ -50,7 +50,7 @@ public class HouseholdManagementService(
             Logger.LogInformation("Household for user {UserId} not found", request.UserId);
             return Error.NotFound("Household.NotFound", "Household not found");
         }
-        
+
         Logger.LogInformation("Got household for user {UserId}", request.UserId);
 
         return new GetHouseholdByUserIdResponseDto(household.Id, household.Name);
@@ -59,7 +59,7 @@ public class HouseholdManagementService(
     public async Task<ErrorOr<CreateHouseholdResponseDto>> CreateHousehold(CreateHouseholdRequestDto request, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Creating household for {UserId}", UserId);
-        
+
         var alreadyMember = await DbContext.Members
             .AnyAsync(m => m.UserId == UserId, cancellationToken);
 
@@ -86,17 +86,17 @@ public class HouseholdManagementService(
         DbContext.Members.Add(member);
 
         await DbContext.SaveChangesAsync(cancellationToken);
-        
+
         Logger.LogInformation("Created household for {UserId}", UserId);
 
         return new CreateHouseholdResponseDto(
-            household.Id, 
-            household.Name, 
-            member.UserId, 
-            UserEmail, 
+            household.Id,
+            household.Name,
+            member.UserId,
+            UserEmail,
             member.JoinedAt);
     }
-    
+
     public async Task<ErrorOr<LeaveHouseholdResponseDto>> LeaveHousehold(LeaveHouseholdRequestDto request, CancellationToken cancellationToken)
     {
         Logger.LogInformation("User {UserId} requested to leave household", UserId);

@@ -266,7 +266,7 @@ public class PantryManagementService(
             Logger.LogDebug("Household ID resolved for user {UserId}: {HouseholdId}", UserId, membership.HouseholdId);
             return membership.HouseholdId;
         }
-        
+
         Logger.LogWarning("User {UserId} has no active household membership (cache miss - no fallback)", UserId);
         return PantryErrors.HouseholdNotFound;
     }

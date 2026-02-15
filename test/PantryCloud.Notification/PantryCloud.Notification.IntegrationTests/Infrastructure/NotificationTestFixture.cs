@@ -112,7 +112,7 @@ public sealed class NotificationTestFixture : IAsyncLifetime
             Constants.RabbitMq.Password);
         await publisher.PublishAsync(message, cancellationToken);
     }
-    
+
     public async Task<IReadOnlyList<NotificationDto>> GetMyNotificationsAsync(string accessToken, int limit = 50, DateTime? since = null, CancellationToken cancellationToken = default)
     {
         var query = $"/me?limit={limit}";
@@ -120,13 +120,13 @@ public sealed class NotificationTestFixture : IAsyncLifetime
         {
             query += "&since=" + Uri.EscapeDataString(since.Value.ToString("O"));
         }
-        
+
         using var client = new HttpClient();
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-        
+
         var response = await client.GetAsync(NotificationBaseUrl + query, cancellationToken);
         response.EnsureSuccessStatusCode();
-        
+
         var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         var list = await response.Content.ReadFromJsonAsync<List<NotificationDto>>(options, cancellationToken);
         return list ?? [];

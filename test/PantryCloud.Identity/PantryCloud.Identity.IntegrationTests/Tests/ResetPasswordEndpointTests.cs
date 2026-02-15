@@ -70,7 +70,7 @@ public class ResetPasswordEndpointTests(IdentityTestFixture fixture) : BaseInteg
         // Verify password was not changed
         var user = await GetUserByEmailAsync(TestConstants.Users.DefaultEmail);
         user.ShouldNotBeNull();
-        
+
         // Old password should still work
         var loginRequest = new LoginRequestDto(TestConstants.Users.DefaultEmail, TestConstants.Users.DefaultPassword);
         var loginResponse = await HttpClient.PostAsJsonAsync(TestConstants.Endpoints.Login, loginRequest);
@@ -244,7 +244,7 @@ public class ResetPasswordEndpointTests(IdentityTestFixture fixture) : BaseInteg
 
         // Act - First reset
         var response1 = await HttpClient.PostAsJsonAsync(TestConstants.Endpoints.ResetPassword, request1);
-        
+
         // Act - Second reset attempt with same token
         var response2 = await HttpClient.PostAsJsonAsync(TestConstants.Endpoints.ResetPassword, request2);
 

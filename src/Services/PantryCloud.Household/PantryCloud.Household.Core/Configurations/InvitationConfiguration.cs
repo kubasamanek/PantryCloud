@@ -12,11 +12,11 @@ public class HouseholdInvitationConfiguration : IEntityTypeConfiguration<Househo
 
         builder.Property(i => i.Code)
             .IsRequired();
-        
+
         builder.Property(i => i.ExpiresAt)
             .IsRequired();
 
         builder.HasIndex(i => i.Code)
-            .IsUnique(); 
+            .IsUnique();
     }
 }

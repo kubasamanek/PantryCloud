@@ -25,7 +25,7 @@ public class JwksController(IMediator mediator, IMapper mapper, ApiConfiguration
         var rsaParameters = rsa.ExportParameters(false);
         var key = new RsaSecurityKey(rsaParameters)
         {
-            KeyId = "key-id" 
+            KeyId = "key-id"
         };
 
         var jwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(key);
@@ -35,7 +35,7 @@ public class JwksController(IMediator mediator, IMapper mapper, ApiConfiguration
         var jwks = new { keys = new[] { jwk } };
         return Ok(jwks);
     }
-    
+
     [HttpGet("/.well-known/openid-configuration")]
     public IActionResult GetOpenIdConfiguration()
     {
@@ -46,13 +46,13 @@ public class JwksController(IMediator mediator, IMapper mapper, ApiConfiguration
 
         if (string.IsNullOrEmpty(apiConfiguration.App.AuthorityBaseUrl))
         {
-            issuer = apiConfiguration.Jwt.Issuer; 
+            issuer = apiConfiguration.Jwt.Issuer;
         }
-        
+
         // jwks_uri: use the same host that was used to fetch this document
         var jwksUri = $"{Request.Scheme}://{Request.Host}/.well-known/openid-configuration/jwks";
-        var endpointsBase = !string.IsNullOrEmpty(apiConfiguration.App.AuthorityBaseUrl) 
-            ? apiConfiguration.App.AuthorityBaseUrl.TrimEnd('/') 
+        var endpointsBase = !string.IsNullOrEmpty(apiConfiguration.App.AuthorityBaseUrl)
+            ? apiConfiguration.App.AuthorityBaseUrl.TrimEnd('/')
             : $"{Request.Scheme}://{Request.Host}";
 
         var discoveryDocument = new

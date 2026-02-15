@@ -33,7 +33,7 @@ internal static class Constants
         public static readonly IReadOnlyList<string> Nuts = ["nuts"];
         public static readonly IReadOnlyList<string> NutsShellfish = ["nuts", "shellfish"];
     }
-    
+
     public static class Errors
     {
         public const string RecipeNotFound = "Recipe.NotFound";

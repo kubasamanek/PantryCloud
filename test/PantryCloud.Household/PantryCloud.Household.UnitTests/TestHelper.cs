@@ -18,16 +18,16 @@ internal static class TestHelper
             .Options;
         return new HouseholdDbContext(options);
     }
-    
+
     public static ApiConfiguration MockConfiguration()
     {
         var tp = new ApiConfiguration();
         return tp;
     }
-    
+
     public static ILogger<T> MockLogger<T>() where T : class
         => Substitute.For<ILogger<T>>();
-    
+
     public static IUserContext CreateMockUserContext(Guid userId, string email)
     {
         var claims = new List<Claim>

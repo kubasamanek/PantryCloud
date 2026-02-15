@@ -8,7 +8,7 @@ public class PantryDbContext(DbContextOptions<PantryDbContext> options) : DbCont
 {
     public DbSet<PantryItem> PantryItems => Set<PantryItem>();
     public DbSet<UserHouseholdMembership> UserHouseholdMemberships => Set<UserHouseholdMembership>();
-    
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(typeof(PantryItemConfiguration).Assembly);

@@ -14,7 +14,7 @@ public static class SolutionPathHelper
         var solutionDir = GetSolutionDirectory();
         return Path.Combine(solutionDir, Path.Combine(pathSegments));
     }
-    
+
     /// <summary>
     /// Finds the solution directory by walking up from the current directory until a .sln file is found.
     /// </summary>

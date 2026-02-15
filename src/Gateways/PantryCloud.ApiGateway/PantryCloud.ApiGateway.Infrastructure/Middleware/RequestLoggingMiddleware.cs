@@ -21,7 +21,7 @@ public class RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggi
         var queryString = context.Request.QueryString;
         var userAgent = context.Request.Headers[Constants.UserAgentHeader].FirstOrDefault() ?? Constants.UnknownPlaceholder;
         var remoteIp = context.Connection.RemoteIpAddress?.ToString() ?? Constants.UnknownPlaceholder;
-        var user = context.User.Identity?.IsAuthenticated == true 
+        var user = context.User.Identity?.IsAuthenticated == true
             ? context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "anonymous"
             : "anonymous";
 
