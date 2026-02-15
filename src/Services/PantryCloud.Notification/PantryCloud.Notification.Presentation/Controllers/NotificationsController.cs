@@ -2,7 +2,10 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PantryCloud.Notification.Application;
+using MediatR;
+using AutoMapper;
+using PantryCloud.SharedKernel.Controllers;
+using PantryCloud.Notification.Application.Queries;
 using PantryCloud.Notification.Core.Dtos;
 
 namespace PantryCloud.Notification.Presentation.Controllers;
@@ -13,7 +16,7 @@ namespace PantryCloud.Notification.Presentation.Controllers;
 [ApiController]
 [Route("")]
 [Authorize]
-public class NotificationsController(IUserNotificationRepository repository) : ControllerBase
+public class NotificationsController(IMediator mediator, IMapper mapper) : ApiControllerBase(mediator, mapper)
 {
     /// <summary>
     /// Gets recent notifications for the current user (for "what I missed" when offline).
@@ -36,8 +39,10 @@ public class NotificationsController(IUserNotificationRepository repository) : C
         }
         
         var effectiveLimit = Math.Clamp(limit, 1, 100);
-        var list = await repository.GetByUserIdAsync(userId.Value, effectiveLimit, since, cancellationToken);
-        return Ok(list);
+        var query = new GetMyNotificationsQuery(userId.Value, effectiveLimit, since);
+        var result = await Mediator.Send(query, cancellationToken);
+
+        return FromResult(result, StatusCodes.Status200OK);
     }
 
     private Guid? GetCurrentUserId()
