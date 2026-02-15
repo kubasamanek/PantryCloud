@@ -11,6 +11,8 @@
         <MudSpacer />
         <AuthorizeView>
             <Authorized>
+                <NotificationConnection />
+                <NotificationBell />
                 <TokenExpiryDisplay />
                 <MudText Typo="Typo.body2" Class="mr-2" Style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@_displayName</MudText>
                 <MudButton Variant="Variant.Text" Color="Color.Inherit" OnClick="BeginLogout">

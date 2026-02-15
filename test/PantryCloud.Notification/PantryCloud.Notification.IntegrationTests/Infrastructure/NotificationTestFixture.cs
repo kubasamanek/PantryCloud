@@ -1,9 +1,11 @@
+using System.Net.Http.Json;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
 using DotNet.Testcontainers.Networks;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
+using PantryCloud.Notification.Core.Dtos;
 using PantryCloud.Notification.Core.Entities;
 using PantryCloud.Notification.Infrastructure.Persistence;
 using PantryCloud.Notification.IntegrationTests.Infrastructure.Containers;
@@ -53,8 +55,8 @@ public sealed class NotificationTestFixture : IAsyncLifetime
         await _network.CreateAsync();
         await _postgres.StartAsync();
 
-        await PostgresDatabaseSetup.CreateDatabaseAsync(_postgres, Constants.Postgres.NotificationDatabase, Constants.Postgres.User, Constants.Postgres.DefaultDatabase);
-        await PostgresDatabaseSetup.ApplyMigrationsAsync<NotificationDbContext>(_postgres, Constants.Postgres.NotificationDatabase, Constants.Postgres.User, Constants.Postgres.Password, Constants.Postgres.Port);
+        await PostgresDatabaseSetup.CreateDatabaseAsync(_postgres, Constants.Postgres.NotificationDatabase);
+        await PostgresDatabaseSetup.ApplyMigrationsAsync<NotificationDbContext>(_postgres, Constants.Postgres.NotificationDatabase);
         await _rabbitMq.StartAsync();
 
         await _notificationImage.CreateAsync();
@@ -106,5 +108,24 @@ public sealed class NotificationTestFixture : IAsyncLifetime
     {
         await using var publisher = new EventPublisher(RabbitMqHostPort);
         await publisher.PublishAsync(message, cancellationToken);
+    }
+    
+    public async Task<IReadOnlyList<NotificationDto>> GetMyNotificationsAsync(string accessToken, int limit = 50, DateTime? since = null, CancellationToken cancellationToken = default)
+    {
+        var query = $"/me?limit={limit}";
+        if (since.HasValue)
+        {
+            query += "&since=" + Uri.EscapeDataString(since.Value.ToString("O"));
+        }
+        
+        using var client = new HttpClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+        
+        var response = await client.GetAsync(NotificationBaseUrl + query, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        
+        var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var list = await response.Content.ReadFromJsonAsync<List<NotificationDto>>(options, cancellationToken);
+        return list ?? [];
     }
 }

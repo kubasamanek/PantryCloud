@@ -9,6 +9,7 @@ using PantryCloud.Web.Services.Auth;
 using PantryCloud.Web.Services.Household;
 using PantryCloud.Web.Services.Pantry;
 using PantryCloud.Web.Services.Profile;
+using PantryCloud.Web.Services.Notification;
 using PantryCloud.Web.Services.Recipe;
 using PantryCloud.Web.Services.ShoppingList;
 using PantryCloud.Web.Services.Sessions;
@@ -46,6 +47,9 @@ builder.Services.AddScoped<IHouseholdApi, HouseholdApiService>();
 builder.Services.AddScoped<IPantryApi, PantryApiService>();
 builder.Services.AddScoped<IShoppingListApi, ShoppingListApiService>();
 builder.Services.AddScoped<IRecipeApi, RecipeApiService>();
+builder.Services.AddScoped<INotificationHubClient, NotificationHubClient>();
+builder.Services.AddScoped<INotificationStateService, NotificationStateService>();
+builder.Services.AddScoped<INotificationApi, NotificationApiService>();
 
 // Gateway client with Bearer + 401 refresh
 builder.Services.AddScoped<GatewayAuthorizationMessageHandler>();

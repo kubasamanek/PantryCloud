@@ -24,4 +24,9 @@ public static class ApiPaths
     /// Base path for recipe endpoints (recipe service).
     /// </summary>
     public const string Recipe = "api/recipe";
+
+    /// <summary>
+    /// Base path for notification endpoints (notification service).
+    /// </summary>
+    public const string Notification = "api/notification";
 }
