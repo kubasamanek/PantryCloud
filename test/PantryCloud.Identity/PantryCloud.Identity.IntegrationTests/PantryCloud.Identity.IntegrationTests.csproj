@@ -35,4 +35,9 @@
     <ProjectReference Include="..\..\..\src\BuildingBlocks\PantryCloud.SharedKernel.Testing\PantryCloud.SharedKernel.Testing.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Infrastructure\Images\" />
+    <Folder Include="Tests\" />
+  </ItemGroup>
+
 </Project>

@@ -23,7 +23,8 @@ on:
 
 env:
   SERVICE_PROJECT: src/Services/PantryCloud.ShoppingList/PantryCloud.ShoppingList.Presentation/PantryCloud.ShoppingList.Presentation.csproj
-  TEST_PROJECT: test/PantryCloud.ShoppingList/PantryCloud.ShoppingList.UnitTests/PantryCloud.ShoppingList.UnitTests.csproj
+  UNIT_TEST_PROJECT: test/PantryCloud.ShoppingList/PantryCloud.ShoppingList.UnitTests/PantryCloud.ShoppingList.UnitTests.csproj
+  INTEGRATION_TEST_PROJECT: test/PantryCloud.ShoppingList/PantryCloud.ShoppingList.IntegrationTests/PantryCloud.ShoppingList.IntegrationTests.csproj
   DOCKERFILE_PATH: src/Services/PantryCloud.ShoppingList/PantryCloud.ShoppingList.Presentation/Dockerfile
   IMAGE_NAME: samanekj/shoppinglistservice
 
@@ -67,20 +68,51 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore ${{ env.TEST_PROJECT }}
+        run: |
+          dotnet restore ${{ env.UNIT_TEST_PROJECT }}
+          dotnet restore ${{ env.INTEGRATION_TEST_PROJECT }}
 
       - name: Build tests
-        run: dotnet build ${{ env.TEST_PROJECT }} --no-restore --configuration Release
+        run: |
+          dotnet build ${{ env.UNIT_TEST_PROJECT }} --no-restore --configuration Release
+          dotnet build ${{ env.INTEGRATION_TEST_PROJECT }} --no-restore --configuration Release
 
       - name: Run Unit Tests with Coverage
         run: |
-          dotnet test ${{ env.TEST_PROJECT }} \
+          dotnet test ${{ env.UNIT_TEST_PROJECT }} \
             --no-build \
             --configuration Release \
             --collect:"XPlat Code Coverage" \
             --results-directory ./coverage \
             --logger "trx;LogFileName=test_results.trx" \
             --verbosity normal
+          
+      - name: Setup Docker for Integration Tests
+        run: docker --version
+
+      - name: Pre-pull Docker base images for Integration Tests
+        run: |
+          docker pull mcr.microsoft.com/dotnet/aspnet:9.0
+          docker pull mcr.microsoft.com/dotnet/sdk:9.0
+
+      - name: Run Integration Tests with Coverage
+        run: |
+          dotnet test ${{ env.INTEGRATION_TEST_PROJECT }} \
+            --no-build \
+            --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/integration \
+            --logger "trx;LogFileName=integration_test_results.trx" \
+            --verbosity normal
+        env:
+          DOCKER_HOST: unix:///var/run/docker.sock
+          DOCKER_BUILDKIT: 0
+          TESTCONTAINERS_RYUK_DISABLED: false
+
+      - name: Cleanup Docker containers
+        if: always()
+        run: |
+          docker ps -aq --filter "label=org.testcontainers=true" | xargs -r docker rm -f || true
 
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool

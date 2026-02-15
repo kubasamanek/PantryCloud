@@ -399,11 +399,17 @@ public class ShoppingListManagementService(
         var householdId = householdIdResult.Value;
 
         var shoppingList = await DbContext.ShoppingLists
-            .FirstOrDefaultAsync(sl => sl.Id == listId && sl.HouseholdId == householdId, cancellationToken);
+            .FirstOrDefaultAsync(sl => sl.Id == listId, cancellationToken);
 
         if (shoppingList == null)
         {
-            Logger.LogWarning("Shopping list {ListId} not found or user {UserId} does not have access", listId, UserId);
+            Logger.LogWarning("Shopping list {ListId} not found", listId);
+            return ShoppingListErrors.ShoppingListNotFound;
+        }
+
+        if (shoppingList.HouseholdId != householdId)
+        {
+            Logger.LogWarning("User {UserId} does not have access to shopping list {ListId}", UserId, listId);
             return ShoppingListErrors.UnauthorizedAccess;
         }
 

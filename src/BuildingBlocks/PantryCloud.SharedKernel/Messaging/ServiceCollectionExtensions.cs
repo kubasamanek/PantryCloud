@@ -30,7 +30,7 @@ public static class ServiceCollectionExtensions
         services.AddMassTransit(busConfig =>
         {
             busConfig.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter(true));
-            
+
             if (consumerAssemblies.Length > 0)
             {
                 foreach (var assembly in consumerAssemblies)
