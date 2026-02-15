@@ -7,9 +7,6 @@ namespace PantryCloud.Recipe.IntegrationTests.Infrastructure.Containers;
 
 public static class MongoContainer
 {
-    /// <summary>
-    /// Creates a MongoDB container with no auth so the Recipe API can connect with mongodb://mongo:27017/
-    /// </summary>
     public static MongoDbContainer Create(INetwork network)
     {
         return new MongoDbBuilder()

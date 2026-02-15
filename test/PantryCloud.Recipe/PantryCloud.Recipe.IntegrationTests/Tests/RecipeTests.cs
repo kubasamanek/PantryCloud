@@ -26,7 +26,6 @@ public class RecipeTests(RecipeTestFixture fixture) : BaseIntegrationTest(fixtur
     public async Task Search_Returns200_WhenAuthenticated_WithValidRequest()
     {
         var client = CreateClientWithToken(Guid.NewGuid());
-        // Validator requires at least one ingredient
         var body = JsonSerializer.Serialize(new SearchRecipesRequestDto(new List<string> { "nonexistent-ingredient-xyz" }));
         var content = new StringContent(body, Encoding.UTF8, "application/json");
 
