@@ -16,110 +16,17 @@ on:
       - 'test/PantryCloud.SharedKernel/**'
   workflow_dispatch:
 
-env:
-  PROJECT_PATH: src/BuildingBlocks/PantryCloud.SharedKernel/PantryCloud.SharedKernel.csproj
-  TEST_PROJECT_PATH: test/PantryCloud.SharedKernel/PantryCloud.SharedKernel.UnitTests/PantryCloud.SharedKernel.UnitTests.csproj
-
-permissions:
-  checks: write
-  pull-requests: write
-  contents: read
-
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '9.0.x'
-
-      - name: Restore dependencies
-        run: dotnet restore ${{ env.PROJECT_PATH }}
-
-      - name: Build
-        run: dotnet build ${{ env.PROJECT_PATH }} --no-restore --configuration Release
-
-  test:
-    name: Test & Coverage
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '9.0.x'
-
-      - name: Restore dependencies
-        run: dotnet restore ${{ env.TEST_PROJECT_PATH }}
-
-      - name: Build tests
-        run: dotnet build ${{ env.TEST_PROJECT_PATH }} --no-restore --configuration Release
-
-      - name: Run Unit Tests with Coverage
-        run: |
-          dotnet test ${{ env.TEST_PROJECT_PATH }} \
-            --no-build \
-            --configuration Release \
-            --collect:"XPlat Code Coverage" \
-            --results-directory ./coverage \
-            --logger "trx;LogFileName=test_results.trx" \
-            --verbosity normal
-
-      - name: Install ReportGenerator
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool
-
-      - name: Generate Coverage Report
-        run: |
-          reportgenerator \
-            "-reports:./coverage/**/coverage.cobertura.xml" \
-            "-targetdir:./coverage/report" \
-            "-reporttypes:Html;Cobertura;TextSummary"
-
-      - name: Display Coverage Summary
-        run: cat ./coverage/report/Summary.txt
-
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v5
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/**/coverage.cobertura.xml
-          flags: shared-kernel
-          name: shared-kernel-coverage
-          fail_ci_if_error: false
-
-      - name: Upload Test Results to Codecov
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/**/*.trx
-          report_type: test_results
-          flags: shared-kernel
-
-      - name: Upload Coverage Report as Artifact
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: coverage-report
-          path: ./coverage/report/
-          retention-days: 30
-
-      - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always() && !cancelled()
-        with:
-          files: './coverage/**/*.trx'
-          check_name: "SharedKernel - Test Results"
-          check_run: false
-          comment_mode: off
+  pipeline:
+    uses: ./.github/workflows/dotnet-service-pipeline.yml
+    with:
+      service_project_path: src/BuildingBlocks/PantryCloud.SharedKernel/PantryCloud.SharedKernel.csproj
+      unit_test_project_path: test/PantryCloud.SharedKernel/PantryCloud.SharedKernel.UnitTests/PantryCloud.SharedKernel.UnitTests.csproj
+      # No integration tests for SharedKernel
+      # No Dockerfile (Library)
+      coverage_flag: shared-kernel
+      test_results_name: "SharedKernel - Test Results"
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
