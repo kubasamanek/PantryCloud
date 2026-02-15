@@ -19,7 +19,7 @@ public static class InvitationErrors
         description: "User is not in this household."
     );
     
-    public static Error InvalidInvitation => Error.Unauthorized(
+    public static Error InvalidInvitation => Error.Validation(
         code: "Household.Invitations.InvalidInvitation",
         description: "Invalid invitation."
     );

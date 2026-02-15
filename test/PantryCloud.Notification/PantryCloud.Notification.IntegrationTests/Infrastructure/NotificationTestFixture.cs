@@ -9,9 +9,9 @@ using PantryCloud.Notification.Core.Dtos;
 using PantryCloud.Notification.Core.Entities;
 using PantryCloud.Notification.Infrastructure.Persistence;
 using PantryCloud.Notification.IntegrationTests.Infrastructure.Containers;
-using PantryCloud.Notification.IntegrationTests.Infrastructure.Environment;
 using PantryCloud.Notification.IntegrationTests.Infrastructure.Images;
 using PantryCloud.SharedKernel.Testing.Infrastructure.Environment;
+using PantryCloud.SharedKernel.Testing.Infrastructure.RabbitMq;
 using Testcontainers.PostgreSql;
 using Testcontainers.RabbitMq;
 
@@ -47,7 +47,7 @@ public sealed class NotificationTestFixture : IAsyncLifetime
             Constants.RabbitMq.Host,
             TestJwtSecret
         ).Build();
-        _jwtProvider = new TestJwtProvider(TestJwtSecret);
+        _jwtProvider = new TestJwtProvider(TestJwtSecret, Constants.Jwt.Issuer, Constants.Jwt.Audience);
     }
 
     public async Task InitializeAsync()
@@ -106,7 +106,10 @@ public sealed class NotificationTestFixture : IAsyncLifetime
 
     public async Task PublishEventAsync<T>(T message, CancellationToken cancellationToken = default) where T : class
     {
-        await using var publisher = new EventPublisher(RabbitMqHostPort);
+        await using var publisher = RabbitMqPublisher.CreateFromHostPort(
+            RabbitMqHostPort,
+            Constants.RabbitMq.User,
+            Constants.RabbitMq.Password);
         await publisher.PublishAsync(message, cancellationToken);
     }
     
