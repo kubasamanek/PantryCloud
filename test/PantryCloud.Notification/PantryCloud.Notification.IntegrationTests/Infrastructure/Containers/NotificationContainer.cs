@@ -6,13 +6,14 @@ namespace PantryCloud.Notification.IntegrationTests.Infrastructure.Containers;
 
 public static class NotificationContainer
 {
-    public static ContainerBuilder Create(string imageName, INetwork network, string connectionString, string rabbitHost, string issuerSigningKeyBase64)
+    public static ContainerBuilder Create(string imageName, INetwork network, string connectionString, string rabbitHost, string redisConnectionString, string issuerSigningKeyBase64)
     {
         var env = new Dictionary<string, string>
         {
             ["ASPNETCORE_ENVIRONMENT"] = Constants.Environment.Testing,
             ["ASPNETCORE_HTTP_PORTS"] = Constants.Notification.HttpPorts,
             ["ConnectionStrings__DefaultConnection"] = connectionString,
+            ["ConnectionStrings__Redis"] = redisConnectionString,
             ["Messaging__RabbitMQ__Host"] = rabbitHost,
             ["Messaging__RabbitMQ__Username"] = Constants.RabbitMq.User,
             ["Messaging__RabbitMQ__Password"] = Constants.RabbitMq.Password,

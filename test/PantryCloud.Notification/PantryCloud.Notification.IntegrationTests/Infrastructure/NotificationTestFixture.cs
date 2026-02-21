@@ -13,6 +13,7 @@ using PantryCloud.SharedKernel.Testing.Infrastructure.Environment;
 using PantryCloud.SharedKernel.Testing.Infrastructure.RabbitMq;
 using Testcontainers.PostgreSql;
 using Testcontainers.RabbitMq;
+using Testcontainers.Redis;
 
 namespace PantryCloud.Notification.IntegrationTests.Infrastructure;
 
@@ -23,6 +24,7 @@ public sealed class NotificationTestFixture : IAsyncLifetime
     private readonly INetwork _network;
     private readonly PostgreSqlContainer _postgres;
     private readonly RabbitMqContainer _rabbitMq;
+    private readonly RedisContainer _redis;
     private readonly IContainer _notificationApi;
     private readonly TestJwtProvider _jwtProvider;
 
@@ -37,11 +39,13 @@ public sealed class NotificationTestFixture : IAsyncLifetime
 
         _postgres = PostgresContainer.Create(_network).Build();
         _rabbitMq = RabbitMqContainerConfig.Create(_network).Build();
+        _redis = RedisContainerConfig.Create(_network).Build();
         _notificationApi = NotificationContainer.Create(
             NotificationImageBuilder.ImageName,
             _network,
             $"Host={Constants.Postgres.Host};Port={Constants.Postgres.Port};Database={Constants.Postgres.NotificationDatabase};Username={Constants.Postgres.User};Password={Constants.Postgres.Password}",
             Constants.RabbitMq.Host,
+            $"{Constants.Redis.Host}:{Constants.Redis.Port}",
             TestJwtSecret
         ).Build();
         _jwtProvider = new TestJwtProvider(TestJwtSecret, Constants.Jwt.Issuer, Constants.Jwt.Audience);
@@ -55,6 +59,7 @@ public sealed class NotificationTestFixture : IAsyncLifetime
         await PostgresDatabaseSetup.CreateDatabaseAsync(_postgres, Constants.Postgres.NotificationDatabase);
         await PostgresDatabaseSetup.ApplyMigrationsAsync<NotificationDbContext>(_postgres, Constants.Postgres.NotificationDatabase);
         await _rabbitMq.StartAsync();
+        await _redis.StartAsync();
 
         await NotificationImageBuilder.BuildAsync();
         await _notificationApi.StartAsync();
@@ -63,6 +68,7 @@ public sealed class NotificationTestFixture : IAsyncLifetime
     public async Task DisposeAsync()
     {
         await _notificationApi.DisposeAsync();
+        await _redis.DisposeAsync();
         await _rabbitMq.DisposeAsync();
         await _postgres.DisposeAsync();
         await _network.DisposeAsync();
