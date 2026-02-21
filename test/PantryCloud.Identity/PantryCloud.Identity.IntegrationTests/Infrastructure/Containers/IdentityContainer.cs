@@ -1,5 +1,4 @@
 using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Images;
 using DotNet.Testcontainers.Networks;
 using PantryCloud.SharedKernel.Testing.Infrastructure.TestContainers;
 
@@ -7,7 +6,7 @@ namespace PantryCloud.Identity.IntegrationTests.Infrastructure.Containers;
 
 public static class IdentityContainer
 {
-    public static ContainerBuilder Create(IFutureDockerImage image, INetwork network, string connectionString, string secretsHostPath)
+    public static ContainerBuilder Create(string imageName, INetwork network, string connectionString, string secretsHostPath)
     {
         var env = new Dictionary<string, string>
         {
@@ -20,7 +19,7 @@ public static class IdentityContainer
         };
 
         var builder = new ContainerBuilder()
-            .WithImage(image)
+            .WithImage(imageName)
             .WithNetwork(network)
             .WithNetworkAliases(IntegrationConstants.Identity.NetworkAlias)
             .WithPortBinding(IntegrationConstants.Identity.Port, true)

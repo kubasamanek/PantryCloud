@@ -1,7 +1,6 @@
 using System.Net.Http.Json;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using DotNet.Testcontainers.Images;
 using DotNet.Testcontainers.Networks;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +23,6 @@ public sealed class NotificationTestFixture : IAsyncLifetime
     private readonly INetwork _network;
     private readonly PostgreSqlContainer _postgres;
     private readonly RabbitMqContainer _rabbitMq;
-    private readonly IFutureDockerImage _notificationImage;
     private readonly IContainer _notificationApi;
     private readonly TestJwtProvider _jwtProvider;
 
@@ -39,9 +37,8 @@ public sealed class NotificationTestFixture : IAsyncLifetime
 
         _postgres = PostgresContainer.Create(_network).Build();
         _rabbitMq = RabbitMqContainerConfig.Create(_network).Build();
-        _notificationImage = NotificationImageBuilder.Build();
         _notificationApi = NotificationContainer.Create(
-            _notificationImage,
+            NotificationImageBuilder.ImageName,
             _network,
             $"Host={Constants.Postgres.Host};Port={Constants.Postgres.Port};Database={Constants.Postgres.NotificationDatabase};Username={Constants.Postgres.User};Password={Constants.Postgres.Password}",
             Constants.RabbitMq.Host,
@@ -59,7 +56,7 @@ public sealed class NotificationTestFixture : IAsyncLifetime
         await PostgresDatabaseSetup.ApplyMigrationsAsync<NotificationDbContext>(_postgres, Constants.Postgres.NotificationDatabase);
         await _rabbitMq.StartAsync();
 
-        await _notificationImage.CreateAsync();
+        await NotificationImageBuilder.BuildAsync();
         await _notificationApi.StartAsync();
     }
 

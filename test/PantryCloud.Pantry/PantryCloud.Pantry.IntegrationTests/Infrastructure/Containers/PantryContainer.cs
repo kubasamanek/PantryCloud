@@ -1,5 +1,4 @@
 using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Images;
 using DotNet.Testcontainers.Networks;
 using PantryCloud.Pantry.IntegrationTests.Constants;
 using PantryCloud.SharedKernel.Testing.Infrastructure.RabbitMq;
@@ -10,7 +9,7 @@ namespace PantryCloud.Pantry.IntegrationTests.Infrastructure.Containers;
 public static class PantryContainer
 {
     public static ContainerBuilder Create(
-        IFutureDockerImage image,
+        string imageName,
         INetwork network,
         string connectionString,
         string rabbitMqHost,
@@ -30,7 +29,7 @@ public static class PantryContainer
         };
 
         var builder = new ContainerBuilder()
-            .WithImage(image)
+            .WithImage(imageName)
             .WithNetwork(network)
             .WithNetworkAliases(IntegrationConstants.Pantry.NetworkAlias)
             .WithPortBinding(IntegrationConstants.Pantry.Port, true)

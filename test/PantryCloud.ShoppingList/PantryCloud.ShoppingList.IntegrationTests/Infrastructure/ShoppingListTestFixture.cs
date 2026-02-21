@@ -2,7 +2,6 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using DotNet.Testcontainers.Images;
 using DotNet.Testcontainers.Networks;
 using Microsoft.EntityFrameworkCore;
 using PantryCloud.ShoppingList.Core.Entities;
@@ -26,7 +25,6 @@ public sealed class ShoppingListTestFixture : IAsyncLifetime
     private readonly INetwork _network;
     private readonly PostgreSqlContainer _postgres;
     private readonly RabbitMqContainer _rabbitMq;
-    private readonly IFutureDockerImage _shoppingListImage;
     private readonly IContainer _shoppingListApi;
     private readonly TestJwtProvider _jwtProvider;
     private Respawner _respawner = null!;
@@ -41,9 +39,8 @@ public sealed class ShoppingListTestFixture : IAsyncLifetime
 
         _postgres = PostgresContainer.Create(_network).Build();
         _rabbitMq = RabbitMqContainerBuilder.Create(_network).Build();
-        _shoppingListImage = ShoppingListImageBuilder.Build();
         _shoppingListApi = ShoppingListContainer.Create(
-            _shoppingListImage,
+            ShoppingListImageBuilder.ImageName,
             _network,
             $"Host={IntegrationConstants.Postgres.Host};Port={IntegrationConstants.Postgres.Port};Database={IntegrationConstants.Postgres.ShoppingListDatabase};Username={IntegrationConstants.Postgres.User};Password={IntegrationConstants.Postgres.Password}",
             "rabbitmq",
@@ -64,7 +61,7 @@ public sealed class ShoppingListTestFixture : IAsyncLifetime
         await PostgresDatabaseSetup.ApplyMigrationsAsync<ShoppingListDbContext>(_postgres, IntegrationConstants.Postgres.ShoppingListDatabase, IntegrationConstants.Postgres.User, IntegrationConstants.Postgres.Password, IntegrationConstants.Postgres.Port);
 
         await _rabbitMq.StartAsync();
-        await _shoppingListImage.CreateAsync();
+        await ShoppingListImageBuilder.BuildAsync();
         await _shoppingListApi.StartAsync();
 
         BaseAddress = $"http://127.0.0.1:{_shoppingListApi.GetMappedPublicPort(IntegrationConstants.ShoppingList.Port)}/";

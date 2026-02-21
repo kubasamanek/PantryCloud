@@ -1,7 +1,6 @@
 using System.Data.Common;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using DotNet.Testcontainers.Images;
 using DotNet.Testcontainers.Networks;
 using Microsoft.EntityFrameworkCore;
 using PantryCloud.Identity.Core.Entities;
@@ -19,7 +18,6 @@ public sealed class IdentityTestFixture : IAsyncLifetime
 {
     private readonly INetwork _network;
     private readonly PostgreSqlContainer _postgres;
-    private readonly IFutureDockerImage _identityImage;
     private readonly IContainer _identityApi;
     private Respawner _respawner = null!;
 
@@ -35,10 +33,9 @@ public sealed class IdentityTestFixture : IAsyncLifetime
             .Build();
 
         _postgres = PostgresContainer.Create(_network).Build();
-        _identityImage = IdentityImageBuilder.Build();
         var secretsPath = SolutionPathHelper.GetPathFromSolutionRoot("src", "Services", "PantryCloud.Identity", "PantryCloud.Identity.Presentation", "Secrets");
         _identityApi = IdentityContainer.Create(
-            _identityImage,
+            IdentityImageBuilder.ImageName,
             _network,
             $"Host={IntegrationConstants.Postgres.Host};Port={IntegrationConstants.Postgres.Port};Database={IntegrationConstants.Postgres.IdentityDatabase};Username={IntegrationConstants.Postgres.User};Password={IntegrationConstants.Postgres.Password}",
             secretsPath
@@ -53,7 +50,7 @@ public sealed class IdentityTestFixture : IAsyncLifetime
         await PostgresDatabaseSetup.CreateDatabaseAsync(_postgres, IntegrationConstants.Postgres.IdentityDatabase, IntegrationConstants.Postgres.User, IntegrationConstants.Postgres.DefaultDatabase);
         await PostgresDatabaseSetup.ApplyMigrationsAsync<ApplicationDbContext>(_postgres, IntegrationConstants.Postgres.IdentityDatabase, IntegrationConstants.Postgres.User, IntegrationConstants.Postgres.Password, IntegrationConstants.Postgres.Port);
 
-        await _identityImage.CreateAsync();
+        await IdentityImageBuilder.BuildAsync();
         await _identityApi.StartAsync();
 
         BaseAddress = $"http://127.0.0.1:{_identityApi.GetMappedPublicPort(IntegrationConstants.Identity.Port)}";

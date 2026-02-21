@@ -32,6 +32,7 @@ jobs:
       integration_test_project_path: test/PantryCloud.Audit/PantryCloud.Audit.IntegrationTests/PantryCloud.Audit.IntegrationTests.csproj
       dockerfile_path: src/Services/PantryCloud.Audit/PantryCloud.Audit.Presentation/Dockerfile
       image_name: samanekj/auditservice
+      test_image_name: pantrycloud-audit-test:latest
       coverage_flag: audit-service
       test_results_name: "AuditService - Test Results"
     secrets:

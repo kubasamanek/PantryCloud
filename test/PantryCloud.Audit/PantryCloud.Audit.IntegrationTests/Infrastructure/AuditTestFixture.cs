@@ -2,7 +2,6 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using DotNet.Testcontainers.Images;
 using DotNet.Testcontainers.Networks;
 using Microsoft.EntityFrameworkCore;
 using PantryCloud.Audit.Core.Entities;
@@ -26,7 +25,6 @@ public sealed class AuditTestFixture : IAsyncLifetime
     private readonly INetwork _network;
     private readonly PostgreSqlContainer _postgres;
     private readonly RabbitMqContainer _rabbitMq;
-    private readonly IFutureDockerImage _auditImage;
     private readonly IContainer _auditApi;
     private readonly TestJwtProvider _jwtProvider;
     private Respawner _respawner = null!;
@@ -41,9 +39,8 @@ public sealed class AuditTestFixture : IAsyncLifetime
 
         _postgres = PostgresContainer.Create(_network).Build();
         _rabbitMq = RabbitMqContainerBuilder.Create(_network).Build();
-        _auditImage = AuditImageBuilder.Build();
         _auditApi = AuditContainer.Create(
-            _auditImage,
+            AuditImageBuilder.ImageName,
             _network,
             $"Host={IntegrationConstants.Postgres.Host};Port={IntegrationConstants.Postgres.Port};Database={IntegrationConstants.Postgres.AuditDatabase};Username={IntegrationConstants.Postgres.User};Password={IntegrationConstants.Postgres.Password}",
             "rabbitmq",
@@ -64,7 +61,7 @@ public sealed class AuditTestFixture : IAsyncLifetime
         await PostgresDatabaseSetup.ApplyMigrationsAsync<AuditDbContext>(_postgres, IntegrationConstants.Postgres.AuditDatabase, IntegrationConstants.Postgres.User, IntegrationConstants.Postgres.Password, IntegrationConstants.Postgres.Port);
 
         await _rabbitMq.StartAsync();
-        await _auditImage.CreateAsync();
+        await AuditImageBuilder.BuildAsync();
         await _auditApi.StartAsync();
 
         BaseAddress = $"http://127.0.0.1:{_auditApi.GetMappedPublicPort(IntegrationConstants.Audit.Port)}/";

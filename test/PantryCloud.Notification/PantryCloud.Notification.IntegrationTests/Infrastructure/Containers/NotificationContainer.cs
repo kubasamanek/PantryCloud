@@ -1,13 +1,12 @@
 using DotNet.Testcontainers.Builders;
 using PantryCloud.SharedKernel.Testing.Infrastructure.TestContainers;
 using DotNet.Testcontainers.Networks;
-using DotNet.Testcontainers.Images;
 
 namespace PantryCloud.Notification.IntegrationTests.Infrastructure.Containers;
 
 public static class NotificationContainer
 {
-    public static ContainerBuilder Create(IFutureDockerImage image, INetwork network, string connectionString, string rabbitHost, string issuerSigningKeyBase64)
+    public static ContainerBuilder Create(string imageName, INetwork network, string connectionString, string rabbitHost, string issuerSigningKeyBase64)
     {
         var env = new Dictionary<string, string>
         {
@@ -22,7 +21,7 @@ public static class NotificationContainer
             ["Jwt__Audience"] = Constants.Jwt.Audience
         };
         var builder = new ContainerBuilder()
-            .WithImage(image)
+            .WithImage(imageName)
             .WithNetwork(network)
             .WithNetworkAliases(Constants.Notification.NetworkAlias)
             .WithPortBinding(Constants.Notification.Port, true)

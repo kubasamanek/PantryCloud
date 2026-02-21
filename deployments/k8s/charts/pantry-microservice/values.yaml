@@ -70,8 +70,6 @@ nodeSelector: {}
 tolerations: []
 affinity: {}
 
-# ServiceAccount: when create is true, a SA is created and pods use it; when false, pods use the default SA.
-# Set name to use an existing ServiceAccount (create is ignored in that case).
 serviceAccount:
   create: true
   name: ""

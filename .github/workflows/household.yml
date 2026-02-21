@@ -29,6 +29,7 @@ jobs:
       integration_test_project_path: test/PantryCloud.Household/PantryCloud.Household.IntegrationTests/PantryCloud.Household.IntegrationTests.csproj
       dockerfile_path: src/Services/PantryCloud.Household/PantryCloud.Household.Presentation/Dockerfile
       image_name: samanekj/householdservice
+      test_image_name: pantrycloud-household-test:latest
       coverage_flag: household-service
       test_results_name: "HouseholdService - Test Results"
     secrets:

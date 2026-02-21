@@ -31,6 +31,7 @@ jobs:
       integration_test_project_path: test/PantryCloud.ShoppingList/PantryCloud.ShoppingList.IntegrationTests/PantryCloud.ShoppingList.IntegrationTests.csproj
       dockerfile_path: src/Services/PantryCloud.ShoppingList/PantryCloud.ShoppingList.Presentation/Dockerfile
       image_name: samanekj/shoppinglistservice
+      test_image_name: pantrycloud-shoppinglist-test:latest
       coverage_flag: shoppinglist-service
       test_results_name: "ShoppingListService - Test Results"
     secrets:

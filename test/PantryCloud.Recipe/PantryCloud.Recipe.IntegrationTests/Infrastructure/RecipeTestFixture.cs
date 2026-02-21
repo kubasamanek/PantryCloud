@@ -3,7 +3,6 @@ using System.Text.Json;
 using DotNet.Testcontainers.Builders;
 using PantryCloud.Recipe.Application.Dtos;
 using DotNet.Testcontainers.Containers;
-using DotNet.Testcontainers.Images;
 using DotNet.Testcontainers.Networks;
 using PantryCloud.Recipe.IntegrationTests.Constants;
 using PantryCloud.Recipe.IntegrationTests.Infrastructure.Containers;
@@ -19,7 +18,6 @@ public sealed class RecipeTestFixture : IAsyncLifetime
 
     private readonly INetwork _network;
     private readonly MongoDbContainer _mongo;
-    private readonly IFutureDockerImage _recipeImage;
     private readonly IContainer _recipeApi;
     private readonly TestJwtProvider _jwtProvider;
 
@@ -30,10 +28,9 @@ public sealed class RecipeTestFixture : IAsyncLifetime
             .Build();
 
         _mongo = MongoContainer.Create(_network);
-        _recipeImage = RecipeImageBuilder.Build();
         var mongoConnectionString = $"mongodb://{IntegrationConstants.Mongo.Host}:{IntegrationConstants.Mongo.Port}/";
         _recipeApi = RecipeContainer.Create(
-            _recipeImage,
+            RecipeImageBuilder.ImageName,
             _network,
             mongoConnectionString,
             TestJwtSecret
@@ -48,7 +45,7 @@ public sealed class RecipeTestFixture : IAsyncLifetime
     {
         await _network.CreateAsync();
         await _mongo.StartAsync();
-        await _recipeImage.CreateAsync();
+        await RecipeImageBuilder.BuildAsync();
         await _recipeApi.StartAsync();
 
         BaseAddress = $"http://127.0.0.1:{_recipeApi.GetMappedPublicPort(IntegrationConstants.Recipe.Port)}/";

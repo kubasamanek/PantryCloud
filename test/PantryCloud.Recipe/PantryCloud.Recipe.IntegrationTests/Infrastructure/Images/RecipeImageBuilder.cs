@@ -1,18 +1,16 @@
 using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Images;
 using PantryCloud.Recipe.IntegrationTests.Constants;
+using PantryCloud.SharedKernel.Testing.Infrastructure.TestContainers;
 
 namespace PantryCloud.Recipe.IntegrationTests.Infrastructure.Images;
 
 public static class RecipeImageBuilder
 {
-    public static IFutureDockerImage Build()
+    public const string ImageName = "pantrycloud-recipe-test:latest";
+
+    public static async Task BuildAsync(CancellationToken ct = default)
     {
-        return new ImageFromDockerfileBuilder()
-            .WithName("pantrycloud-recipe-test")
-            .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), string.Empty)
-            .WithDockerfile(TestConstants.DockerFilePath)
-            .WithDeleteIfExists(false)
-            .Build();
+        var solutionDir = CommonDirectoryPath.GetSolutionDirectory().DirectoryPath;
+        await DockerImageHelper.BuildImageAsync(ImageName, TestConstants.DockerFilePath, solutionDir, ct);
     }
 }
