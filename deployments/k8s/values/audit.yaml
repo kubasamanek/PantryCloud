@@ -1,0 +1,27 @@
+replicaCount: 1
+
+image:
+  repository: samanekj/auditservice
+  tag: latest
+
+fullnameOverride: audit-api
+
+env:
+  ASPNETCORE_ENVIRONMENT: Production
+  ASPNETCORE_HTTP_PORTS: "8080"
+  Jwt__Issuer: pantry-identity
+  Jwt__Audience: pantry-cloud
+  App__IdentityUrl: http://identity-api:8080
+  Messaging__RabbitMQ__Host: pantry-rabbitmq
+  Audit__RetentionDays: "30"
+
+existingSecrets:
+  - audit-api-secrets
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

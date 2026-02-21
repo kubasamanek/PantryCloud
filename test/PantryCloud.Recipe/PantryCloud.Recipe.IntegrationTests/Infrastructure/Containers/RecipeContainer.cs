@@ -1,5 +1,4 @@
 using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Images;
 using DotNet.Testcontainers.Networks;
 using PantryCloud.Recipe.IntegrationTests.Constants;
 using PantryCloud.SharedKernel.Testing.Infrastructure.TestContainers;
@@ -9,7 +8,7 @@ namespace PantryCloud.Recipe.IntegrationTests.Infrastructure.Containers;
 public static class RecipeContainer
 {
     public static ContainerBuilder Create(
-        IFutureDockerImage image,
+        string imageName,
         INetwork network,
         string mongoConnectionString,
         string jwtIssuerSigningKeyBase64)
@@ -27,7 +26,7 @@ public static class RecipeContainer
         };
 
         var builder = new ContainerBuilder()
-            .WithImage(image)
+            .WithImage(imageName)
             .WithNetwork(network)
             .WithNetworkAliases(IntegrationConstants.Recipe.NetworkAlias)
             .WithPortBinding(IntegrationConstants.Recipe.Port, true)

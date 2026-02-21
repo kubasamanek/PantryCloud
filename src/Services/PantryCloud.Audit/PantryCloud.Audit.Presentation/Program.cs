@@ -23,9 +23,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    await app.ApplyMigrationsAsync<AuditDbContext>();
 }
+
+await app.ApplyMigrationsAsync<AuditDbContext>();
 
 if (app.Environment.IsProduction())
 {

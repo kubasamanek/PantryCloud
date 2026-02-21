@@ -30,6 +30,7 @@ jobs:
       integration_test_project_path: test/PantryCloud.Identity/PantryCloud.Identity.IntegrationTests/PantryCloud.Identity.IntegrationTests.csproj
       dockerfile_path: src/Services/PantryCloud.Identity/PantryCloud.Identity.Presentation/Dockerfile
       image_name: samanekj/identityservice
+      test_image_name: pantrycloud-identity-test:latest
       coverage_flag: identity-service
       test_results_name: "IdentityService - Test Results"
     secrets:

@@ -23,9 +23,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    await app.ApplyMigrationsAsync<ShoppingListDbContext>();
 }
+
+await app.ApplyMigrationsAsync<ShoppingListDbContext>();
 
 if (app.Environment.IsProduction())
 {

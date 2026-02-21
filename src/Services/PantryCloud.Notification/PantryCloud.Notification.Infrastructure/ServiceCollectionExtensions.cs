@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,7 @@ using PantryCloud.Notification.Infrastructure.Services;
 using PantryCloud.SharedKernel.Correlation;
 using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.SharedKernel.Messaging;
+using StackExchange.Redis;
 
 namespace PantryCloud.Notification.Infrastructure;
 
@@ -22,10 +24,17 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(apiConfiguration);
 
         var connectionString = configuration.GetConnectionString("DefaultConnection");
-        if (!string.IsNullOrEmpty(connectionString))
+        var isTesting = configuration["ASPNETCORE_ENVIRONMENT"] == "Testing";
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            if (!isTesting)
+                throw new InvalidOperationException("ConnectionStrings:DefaultConnection is required for the Notification service.");
+        }
+        else
         {
             services.AddDbContext<NotificationDbContext>(options =>
                 options.UseNpgsql(connectionString));
+            services.AddHealthChecks().AddNpgSql(connectionString);
         }
 
         services.AddJwtBearerFromConfiguration(configuration, "App:IdentityUrl", options =>
@@ -46,7 +55,23 @@ public static class ServiceCollectionExtensions
         services.AddAuthorization();
 
         services.AddCorrelationId();
-        services.AddSignalR();
+
+        var redisConnectionString = configuration.GetConnectionString("Redis") ?? "localhost:6379";
+        var redisConfig = ConfigurationOptions.Parse(redisConnectionString);
+        redisConfig.AbortOnConnectFail = false;
+        var redis = ConnectionMultiplexer.Connect(redisConfig);
+        services.AddSingleton<IConnectionMultiplexer>(redis);
+
+        services.AddSignalR().AddStackExchangeRedis(options =>
+        {
+            options.Configuration.ChannelPrefix = RedisChannel.Literal("PantryCloud:SignalR:");
+            options.ConnectionFactory = _ => Task.FromResult<IConnectionMultiplexer>(redis);
+        });
+
+        services.AddDataProtection()
+            .SetApplicationName("PantryCloud")
+            .PersistKeysToStackExchangeRedis(redis, "PantryCloud:DataProtection:Keys");
+
         services.AddMessaging(configuration, typeof(MemberLeftHouseholdConsumer).Assembly);
 
         services.AddScoped<IHouseholdMembershipRepository, HouseholdMembershipRepository>();

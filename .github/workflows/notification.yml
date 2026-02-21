@@ -30,6 +30,7 @@ jobs:
       integration_test_project_path: test/PantryCloud.Notification/PantryCloud.Notification.IntegrationTests/PantryCloud.Notification.IntegrationTests.csproj
       dockerfile_path: src/Services/PantryCloud.Notification/PantryCloud.Notification.Presentation/Dockerfile
       image_name: samanekj/notificationservice
+      test_image_name: pantrycloud-notification-test:latest
       coverage_flag: notification-service
       test_results_name: "NotificationService - Test Results"
     secrets:

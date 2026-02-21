@@ -2,7 +2,6 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using DotNet.Testcontainers.Images;
 using DotNet.Testcontainers.Networks;
 using Microsoft.EntityFrameworkCore;
 using PantryCloud.Household.Infrastructure.Persistence;
@@ -29,7 +28,6 @@ public sealed class HouseholdTestFixture : IAsyncLifetime
     private readonly INetwork _network;
     private readonly PostgreSqlContainer _postgres;
     private readonly RabbitMqContainer _rabbitMq;
-    private readonly IFutureDockerImage _householdImage;
     private readonly IContainer _householdApi;
     private readonly TestJwtProvider _jwtProvider;
     private Respawner _respawner = null!;
@@ -44,9 +42,8 @@ public sealed class HouseholdTestFixture : IAsyncLifetime
 
         _postgres = PostgresContainerBuilder.Create(_network).Build();
         _rabbitMq = RabbitMqContainerBuilder.Create(_network).Build();
-        _householdImage = HouseholdImageBuilder.Build();
         _householdApi = HouseholdContainer.Create(
-            _householdImage,
+            HouseholdImageBuilder.ImageName,
             _network,
             $"Host={IntegrationConstants.Postgres.Host};Port={IntegrationConstants.Postgres.Port};Database={IntegrationConstants.Postgres.HouseholdDatabase};Username={IntegrationConstants.Postgres.User};Password={IntegrationConstants.Postgres.Password}",
             "rabbitmq",
@@ -67,7 +64,7 @@ public sealed class HouseholdTestFixture : IAsyncLifetime
         await PostgresDatabaseSetup.ApplyMigrationsAsync<HouseholdDbContext>(_postgres, IntegrationConstants.Postgres.HouseholdDatabase, IntegrationConstants.Postgres.User, IntegrationConstants.Postgres.Password, IntegrationConstants.Postgres.Port);
 
         await _rabbitMq.StartAsync();
-        await _householdImage.CreateAsync();
+        await HouseholdImageBuilder.BuildAsync();
         await _householdApi.StartAsync();
 
         BaseAddress = $"http://127.0.0.1:{_householdApi.GetMappedPublicPort(IntegrationConstants.Household.Port)}/";

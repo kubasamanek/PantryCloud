@@ -191,6 +191,68 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E830A321
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PantryCloud.Audit.IntegrationTests", "test\PantryCloud.Audit\PantryCloud.Audit.IntegrationTests\PantryCloud.Audit.IntegrationTests.csproj", "{747A5636-299D-4879-8E82-E886049CAC62}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "K8s", "K8s", "{E888CAC6-87B7-4CF3-884E-1FA2880D5C60}"
+	ProjectSection(SolutionItems) = preProject
+		deployments\k8s\kind-cluster.yaml = deployments\k8s\kind-cluster.yaml
+		deployments\k8s\Makefile = deployments\k8s\Makefile
+		deployments\k8s\README.md = deployments\k8s\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Secrets", "Secrets", "{F646B78E-6EC9-436E-90B7-B35FDD94A52E}"
+	ProjectSection(SolutionItems) = preProject
+		deployments\k8s\secrets\create-secrets.sh = deployments\k8s\secrets\create-secrets.sh
+		deployments\k8s\secrets\README.md = deployments\k8s\secrets\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Values", "Values", "{DD41DD47-62A1-49DD-8DB1-3A6911DC1599}"
+	ProjectSection(SolutionItems) = preProject
+		deployments\k8s\values\api-gateway.yaml = deployments\k8s\values\api-gateway.yaml
+		deployments\k8s\values\audit.yaml = deployments\k8s\values\audit.yaml
+		deployments\k8s\values\household.yaml = deployments\k8s\values\household.yaml
+		deployments\k8s\values\identity.yaml = deployments\k8s\values\identity.yaml
+		deployments\k8s\values\notification.yaml = deployments\k8s\values\notification.yaml
+		deployments\k8s\values\pantry.yaml = deployments\k8s\values\pantry.yaml
+		deployments\k8s\values\recipe.yaml = deployments\k8s\values\recipe.yaml
+		deployments\k8s\values\shoppinglist.yaml = deployments\k8s\values\shoppinglist.yaml
+		deployments\k8s\values\web.yaml = deployments\k8s\values\web.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Charts", "Charts", "{3E303348-2A99-4133-AB3C-8E97F011EA74}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Base", "Base", "{F91DB0DE-87BC-42D0-83C5-6EC5BD798499}"
+	ProjectSection(SolutionItems) = preProject
+		deployments\k8s\charts\pantry-microservice\Chart.yaml = deployments\k8s\charts\pantry-microservice\Chart.yaml
+		deployments\k8s\charts\pantry-microservice\values.yaml = deployments\k8s\charts\pantry-microservice\values.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{E117BCA5-F0E0-4240-90CB-ABFA7D5DB366}"
+	ProjectSection(SolutionItems) = preProject
+		deployments\k8s\charts\infrastructure\Chart.yaml = deployments\k8s\charts\infrastructure\Chart.yaml
+		deployments\k8s\charts\infrastructure\values.yaml = deployments\k8s\charts\infrastructure\values.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{28292B19-5A7B-4A90-B827-606254F6FA19}"
+	ProjectSection(SolutionItems) = preProject
+		deployments\k8s\charts\pantry-microservice\templates\_helpers.tpl = deployments\k8s\charts\pantry-microservice\templates\_helpers.tpl
+		deployments\k8s\charts\pantry-microservice\templates\configmap.yaml = deployments\k8s\charts\pantry-microservice\templates\configmap.yaml
+		deployments\k8s\charts\pantry-microservice\templates\deployment.yaml = deployments\k8s\charts\pantry-microservice\templates\deployment.yaml
+		deployments\k8s\charts\pantry-microservice\templates\hpa.yaml = deployments\k8s\charts\pantry-microservice\templates\hpa.yaml
+		deployments\k8s\charts\pantry-microservice\templates\ingress.yaml = deployments\k8s\charts\pantry-microservice\templates\ingress.yaml
+		deployments\k8s\charts\pantry-microservice\templates\pdb.yaml = deployments\k8s\charts\pantry-microservice\templates\pdb.yaml
+		deployments\k8s\charts\pantry-microservice\templates\secret.yaml = deployments\k8s\charts\pantry-microservice\templates\secret.yaml
+		deployments\k8s\charts\pantry-microservice\templates\service.yaml = deployments\k8s\charts\pantry-microservice\templates\service.yaml
+		deployments\k8s\charts\pantry-microservice\templates\serviceaccount.yaml = deployments\k8s\charts\pantry-microservice\templates\serviceaccount.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{99A942F4-5896-4E05-BF15-DC718BFC197B}"
+	ProjectSection(SolutionItems) = preProject
+		deployments\k8s\charts\infrastructure\templates\_helpers.tpl = deployments\k8s\charts\infrastructure\templates\_helpers.tpl
+		deployments\k8s\charts\infrastructure\templates\mongodb.yaml = deployments\k8s\charts\infrastructure\templates\mongodb.yaml
+		deployments\k8s\charts\infrastructure\templates\postgresql.yaml = deployments\k8s\charts\infrastructure\templates\postgresql.yaml
+		deployments\k8s\charts\infrastructure\templates\rabbitmq.yaml = deployments\k8s\charts\infrastructure\templates\rabbitmq.yaml
+		deployments\k8s\charts\infrastructure\templates\redis.yaml = deployments\k8s\charts\infrastructure\templates\redis.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -896,5 +958,13 @@ Global
 		{63B86A89-93FA-4CEF-98DC-21ADA4E7BA93} = {CF7EBD83-5185-4DF8-8264-2936DFED7941}
 		{E830A321-1912-4FA8-A413-F453814D68B2} = {CF7EBD83-5185-4DF8-8264-2936DFED7941}
 		{747A5636-299D-4879-8E82-E886049CAC62} = {E830A321-1912-4FA8-A413-F453814D68B2}
+		{E888CAC6-87B7-4CF3-884E-1FA2880D5C60} = {5E6219B9-5B71-4C81-A5EE-CC779BBDB4C2}
+		{F646B78E-6EC9-436E-90B7-B35FDD94A52E} = {E888CAC6-87B7-4CF3-884E-1FA2880D5C60}
+		{DD41DD47-62A1-49DD-8DB1-3A6911DC1599} = {E888CAC6-87B7-4CF3-884E-1FA2880D5C60}
+		{3E303348-2A99-4133-AB3C-8E97F011EA74} = {E888CAC6-87B7-4CF3-884E-1FA2880D5C60}
+		{F91DB0DE-87BC-42D0-83C5-6EC5BD798499} = {3E303348-2A99-4133-AB3C-8E97F011EA74}
+		{E117BCA5-F0E0-4240-90CB-ABFA7D5DB366} = {3E303348-2A99-4133-AB3C-8E97F011EA74}
+		{28292B19-5A7B-4A90-B827-606254F6FA19} = {F91DB0DE-87BC-42D0-83C5-6EC5BD798499}
+		{99A942F4-5896-4E05-BF15-DC718BFC197B} = {E117BCA5-F0E0-4240-90CB-ABFA7D5DB366}
 	EndGlobalSection
 EndGlobal

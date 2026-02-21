@@ -24,11 +24,13 @@ public static class ServiceCollectionExtensions
 
         services.AddJwtBearerFromConfiguration(configuration, "App:IdentityUrl");
 
+        var allowedOrigins = GetCorsAllowedOrigins(configuration);
+
         services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
             {
-                policy.WithOrigins("http://localhost:3000")
+                policy.WithOrigins(allowedOrigins)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();
@@ -271,5 +273,16 @@ public static class ServiceCollectionExtensions
 
             return cluster;
         }
+    }
+    
+    private static string[] GetCorsAllowedOrigins(IConfiguration configuration)
+    {
+        var section = configuration.GetSection("Cors:AllowedOrigins");
+        var array = section.Get<string[]>();
+        if (array is { Length: > 0 }){
+            return array;
+        }
+        var single = configuration["Cors:AllowedOrigins"] ?? "http://localhost:3000";
+        return single.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 }

@@ -1,0 +1,55 @@
+replicaCount: 1
+
+image:
+  repository: samanekj/pantrycloud-web
+  tag: latest
+
+fullnameOverride: web
+
+service:
+  type: ClusterIP
+  port: 80
+
+env:
+  GATEWAY_BASE_URL: http://pantry.test
+
+probes:
+  enabled: true
+  path: /
+  liveness:
+    initialDelaySeconds: 5
+    periodSeconds: 30
+    failureThreshold: 3
+    timeoutSeconds: 5
+  readiness:
+    initialDelaySeconds: 3
+    periodSeconds: 10
+    failureThreshold: 3
+    timeoutSeconds: 5
+  startup:
+    initialDelaySeconds: 3
+    periodSeconds: 3
+    failureThreshold: 10
+    timeoutSeconds: 5
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: pantry.test
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: localhost
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 32Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi

@@ -1,0 +1,42 @@
+replicaCount: 1
+
+image:
+  repository: samanekj/identityservice
+  tag: latest
+
+fullnameOverride: identity-api
+
+env:
+  ASPNETCORE_ENVIRONMENT: Production
+  ASPNETCORE_HTTP_PORTS: "8080"
+  Jwt__Issuer: pantry-identity
+  Jwt__Audience: pantry-cloud
+  Jwt__ExpirationInMinutes: "5"
+  Jwt__PrivateKeyPath: /secrets/jwt/private.pem
+  Jwt__PublicKeyPath: /secrets/jwt/public.pem
+  App__FrontendUrl: http://pantry.test
+  App__AuthorityBaseUrl: http://pantry.test/api/identity
+  App__ResetPasswordTokenExpirationInMinutes: "60"
+  App__VerifyEmailTokenExpirationInMinutes: "60"
+
+existingSecrets:
+  - identity-api-secrets
+
+volumes:
+  - name: jwt-keys
+    secret:
+      secretName: jwt-signing-keys
+      defaultMode: 0444
+
+volumeMounts:
+  - name: jwt-keys
+    mountPath: /secrets/jwt
+    readOnly: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

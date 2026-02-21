@@ -18,6 +18,7 @@
         <PackageReference Include="Testcontainers" Version="4.3.0" />
         <PackageReference Include="Testcontainers.PostgreSql" Version="4.3.0" />
         <PackageReference Include="Testcontainers.RabbitMq" Version="4.3.0" />
+        <PackageReference Include="Testcontainers.Redis" Version="4.3.0" />
         <PackageReference Include="Docker.DotNet" Version="3.125.15" />
         <PackageReference Include="MassTransit" Version="8.3.2" />
         <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.2" />

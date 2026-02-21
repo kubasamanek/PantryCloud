@@ -19,8 +19,11 @@ WORKDIR /usr/share/nginx/html
 
 RUN rm -f /etc/nginx/conf.d/default.conf
 COPY src/Web/PantryCloud.Web/nginx.conf /etc/nginx/conf.d/default.conf
+COPY src/Web/PantryCloud.Web/docker-entrypoint.sh /docker-entrypoint.d/40-blazor-config.sh
+RUN chmod +x /docker-entrypoint.d/40-blazor-config.sh
 
 COPY --from=build /app/webroot/. .
 
 EXPOSE 80
+ENTRYPOINT ["/docker-entrypoint.d/40-blazor-config.sh"]
 CMD ["nginx", "-g", "daemon off;"]

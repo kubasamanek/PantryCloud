@@ -1,16 +1,16 @@
 using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Images;
+using PantryCloud.SharedKernel.Testing.Infrastructure.TestContainers;
 using PantryCloud.ShoppingList.IntegrationTests.Constants;
 
 namespace PantryCloud.ShoppingList.IntegrationTests.Infrastructure.Images;
 
 public static class ShoppingListImageBuilder
 {
-    public static IFutureDockerImage Build()
+    public const string ImageName = "pantrycloud-shoppinglist-test:latest";
+
+    public static async Task BuildAsync(CancellationToken ct = default)
     {
-        return new ImageFromDockerfileBuilder()
-            .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), string.Empty)
-            .WithDockerfile(TestConstants.DockerFilePath)
-            .Build();
+        var solutionDir = CommonDirectoryPath.GetSolutionDirectory().DirectoryPath;
+        await DockerImageHelper.BuildImageAsync(ImageName, TestConstants.DockerFilePath, solutionDir, ct);
     }
 }

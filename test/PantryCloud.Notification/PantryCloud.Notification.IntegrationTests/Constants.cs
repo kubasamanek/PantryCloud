@@ -20,6 +20,12 @@ public static class Constants
         public const int AmqpPort = 5672;
     }
 
+    public static class Redis
+    {
+        public const string Host = "redis";
+        public const int Port = 6379;
+    }
+
     public static class Notification
     {
         public const ushort Port = 8080;

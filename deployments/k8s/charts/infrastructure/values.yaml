@@ -1,0 +1,61 @@
+credentialsSecret: pantry-infra-credentials
+
+postgresql:
+  image: postgres:17-alpine
+  serviceName: pantry-postgresql
+  port: 5432
+  databases:
+    - identity_db
+    - household_db
+    - pantry_db
+    - shoppinglist_db
+    - notification_db
+    - audit_db
+  storage: 2Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+rabbitmq:
+  image: rabbitmq:4-management-alpine
+  serviceName: pantry-rabbitmq
+  port: 5672
+  managementPort: 15672
+  storage: 1Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+mongodb:
+  image: mongo:8.0
+  serviceName: pantry-mongodb
+  port: 27017
+  storage: 1Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+redis:
+  image: redis:7-alpine
+  serviceName: pantry-redis-master
+  port: 6379
+  storage: 500Mi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
