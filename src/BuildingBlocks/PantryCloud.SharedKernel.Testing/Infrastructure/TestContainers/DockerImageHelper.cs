@@ -14,10 +14,6 @@ public static class DockerImageHelper
     /// Builds a Docker image from a Dockerfile using the Docker CLI.
     /// Skips the build if the image already exists locally.
     /// </summary>
-    /// <param name="imageName">Tag for the built image (e.g. "pantrycloud-household-test:latest")</param>
-    /// <param name="dockerfilePath">Relative path to the Dockerfile from the build context</param>
-    /// <param name="buildContext">Absolute path to the build context directory</param>
-    /// <param name="cancellationToken">Cancellation token</param>
     public static async Task BuildImageAsync(
         string imageName,
         string dockerfilePath,
