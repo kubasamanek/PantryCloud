@@ -273,7 +273,8 @@ public static class ServiceCollectionExtensions
 
             return cluster;
         }
-
+    }
+    
     private static string[] GetCorsAllowedOrigins(IConfiguration configuration)
     {
         var section = configuration.GetSection("Cors:AllowedOrigins");
@@ -283,6 +284,5 @@ public static class ServiceCollectionExtensions
         }
         var single = configuration["Cors:AllowedOrigins"] ?? "http://localhost:3000";
         return single.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-    }
     }
 }
