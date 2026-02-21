@@ -239,14 +239,6 @@ undeploy-services: ## Undeploy all application services
 	done
 
 # ──────────────────────────────────────────────
-# Database Migrations
-# ──────────────────────────────────────────────
-
-.PHONY: migrate
-migrate: ## Migrations run at application startup (no separate step needed)
-	@echo "Migrations run at application startup; no separate step needed."
-
-# ──────────────────────────────────────────────
 # Full Lifecycle
 # ──────────────────────────────────────────────
 
@@ -276,6 +268,9 @@ status: ## Show cluster status
 	@echo "==> Ingress:"
 	@kubectl get ingress -n $(NAMESPACE)
 
+define deployment_name
+$(if $(filter api-gateway web,$(1)),$(1),$(1)-api)
+endef
 .PHONY: logs-%
-logs-%: ## Tail logs for a service (e.g., make logs-identity)
-	kubectl logs -f deployment/$*-api -n $(NAMESPACE)
+logs-%: ## Tail logs for a service (e.g., make logs-identity, make logs-api-gateway, make logs-web)
+	kubectl logs -f deployment/$(call deployment_name,$*) -n $(NAMESPACE)

@@ -24,13 +24,18 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(apiConfiguration);
 
         var connectionString = configuration.GetConnectionString("DefaultConnection");
-        if (!string.IsNullOrEmpty(connectionString))
+        var isTesting = configuration["ASPNETCORE_ENVIRONMENT"] == "Testing";
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            if (!isTesting)
+                throw new InvalidOperationException("ConnectionStrings:DefaultConnection is required for the Notification service.");
+        }
+        else
         {
             services.AddDbContext<NotificationDbContext>(options =>
                 options.UseNpgsql(connectionString));
+            services.AddHealthChecks().AddNpgSql(connectionString);
         }
-
-        services.AddHealthChecks().AddNpgSql(connectionString!);
 
         services.AddJwtBearerFromConfiguration(configuration, "App:IdentityUrl", options =>
         {
@@ -52,12 +57,15 @@ public static class ServiceCollectionExtensions
         services.AddCorrelationId();
 
         var redisConnectionString = configuration.GetConnectionString("Redis") ?? "localhost:6379";
-        var redis = ConnectionMultiplexer.Connect(redisConnectionString);
+        var redisConfig = ConfigurationOptions.Parse(redisConnectionString);
+        redisConfig.AbortOnConnectFail = false;
+        var redis = ConnectionMultiplexer.Connect(redisConfig);
         services.AddSingleton<IConnectionMultiplexer>(redis);
 
-        services.AddSignalR().AddStackExchangeRedis(redisConnectionString, options =>
+        services.AddSignalR().AddStackExchangeRedis(options =>
         {
             options.Configuration.ChannelPrefix = RedisChannel.Literal("PantryCloud:SignalR:");
+            options.ConnectionFactory = _ => Task.FromResult<IConnectionMultiplexer>(redis);
         });
 
         services.AddDataProtection()

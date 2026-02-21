@@ -77,28 +77,24 @@ make ingress-install
 # 3. Pull or build images and load them into the cluster
 make images
 
-# 4. Deploy stateful infrastructure (PostgreSQL, RabbitMQ, MongoDB, Redis)
-make infra-install
-
-# 5. Generate and inject JWT signing keys
+# 4. Generate and inject secrets (JWT keys, infra credentials, per-service secrets)
 make secrets
 
-# 6. Deploy backend services and Web SPA
-make deploy-services
+# 5. Deploy stateful infrastructure (PostgreSQL, RabbitMQ, MongoDB, Redis)
+make infra-install
 
-# 7. Apply EF Core database migrations
-make migrate
+# 6. Deploy backend services and Web SPA (EF Core migrations run at service startup)
+make deploy-services
 ```
 
 ## Available Commands
 
 | Command | Description |
 |---------|-------------|
-| `make up` | Full automated deployment (cluster + infra + apps + migrations). |
+| `make up` | Full automated deployment (cluster, secrets, infra, apps; migrations run at app startup). |
 | `make down` | Tear down the Kind cluster. |
 | `make images` | Load images into Kind (use `IMAGE_SOURCE=local` to build locally). |
 | `make redeploy` | Re-load images and restart application deployments. |
 | `make status` | Display the status of pods, services, and ingress. |
-| `make migrate` | Execute EF Core migrations against the PostgreSQL databases. |
 | `make deploy-<svc>` | Deploy a specific service (e.g., `make deploy-identity`). |
 | `make logs-<svc>` | Tail logs for a specific service deployment. |

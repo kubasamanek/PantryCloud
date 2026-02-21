@@ -26,7 +26,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-if (!app.Environment.IsEnvironment("Testing"))
+if (!app.Environment.IsEnvironment("Testing") && !string.IsNullOrEmpty(app.Configuration.GetConnectionString("DefaultConnection")))
 {
     await app.ApplyMigrationsAsync<NotificationDbContext>();
 }

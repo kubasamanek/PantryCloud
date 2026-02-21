@@ -9,8 +9,13 @@ data:
   init-db.sql: |
     {{- range .Values.postgresql.databases }}
     CREATE DATABASE {{ . }};
-    GRANT ALL PRIVILEGES ON DATABASE {{ . }} TO {{ $.Values.postgresql.user }};
     {{- end }}
+  init-grant.sh: |
+    #!/bin/bash
+    set -e
+    for db in {{ join .Values.postgresql.databases " " }}; do
+      psql -v ON_ERROR_STOP=1 -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE \"$db\" TO \"$POSTGRES_USER\";"
+    done
 ---
 apiVersion: v1
 kind: Service
@@ -80,9 +85,9 @@ spec:
           livenessProbe:
             exec:
               command:
-                - pg_isready
-                - -U
-                - {{ .Values.postgresql.user | quote }}
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER"
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -90,9 +95,9 @@ spec:
           readinessProbe:
             exec:
               command:
-                - pg_isready
-                - -U
-                - {{ .Values.postgresql.user | quote }}
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER"
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 5

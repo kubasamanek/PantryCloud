@@ -31,12 +31,14 @@ Application services reference these via `existingSecrets` in their Helm values;
 
 ## Overriding Defaults
 
-Set environment variables before running the script to use non-default credentials or hosts (e.g. for a different PostgreSQL password or host):
+Set environment variables before running the script to use non-default credentials or hosts:
 
 - **PostgreSQL:** `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT`
 - **RabbitMQ:** `RABBITMQ_USER`, `RABBITMQ_PASSWORD`
 - **MongoDB:** `MONGODB_ROOT_USER`, `MONGODB_ROOT_PASSWORD`, `MONGODB_HOST`, `MONGODB_PORT`
 - **Redis:** `REDIS_HOST`, `REDIS_PORT`
+
+The script writes these into `pantry-infra-credentials` (and into per-service connection strings). The infrastructure Helm chart reads the secret for PostgreSQL (user, password), RabbitMQ, and MongoDB—init scripts and probes use the secret, so you do not need to change any Helm values when overriding.
 
 Example:
 

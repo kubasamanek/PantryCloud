@@ -4,7 +4,6 @@ postgresql:
   image: postgres:17-alpine
   serviceName: pantry-postgresql
   port: 5432
-  user: admin
   databases:
     - identity_db
     - household_db
