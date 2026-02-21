@@ -24,11 +24,14 @@ public static class ServiceCollectionExtensions
 
         services.AddJwtBearerFromConfiguration(configuration, "App:IdentityUrl");
 
+        var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+            ?? [configuration["Cors:AllowedOrigins"] ?? "http://localhost:3000"];
+
         services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
             {
-                policy.WithOrigins("http://localhost:3000")
+                policy.WithOrigins(allowedOrigins)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();

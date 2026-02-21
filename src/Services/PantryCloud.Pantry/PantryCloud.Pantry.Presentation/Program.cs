@@ -23,9 +23,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    await app.ApplyMigrationsAsync<PantryDbContext>();
 }
+
+await app.ApplyMigrationsAsync<PantryDbContext>();
 
 if (app.Environment.IsProduction())
 {

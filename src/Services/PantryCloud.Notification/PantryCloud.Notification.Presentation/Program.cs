@@ -26,7 +26,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-if (app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
+if (!app.Environment.IsEnvironment("Testing"))
 {
     await app.ApplyMigrationsAsync<NotificationDbContext>();
 }

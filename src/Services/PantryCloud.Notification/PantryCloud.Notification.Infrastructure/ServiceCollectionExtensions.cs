@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,7 @@ using PantryCloud.Notification.Infrastructure.Services;
 using PantryCloud.SharedKernel.Correlation;
 using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.SharedKernel.Messaging;
+using StackExchange.Redis;
 
 namespace PantryCloud.Notification.Infrastructure;
 
@@ -27,6 +29,8 @@ public static class ServiceCollectionExtensions
             services.AddDbContext<NotificationDbContext>(options =>
                 options.UseNpgsql(connectionString));
         }
+
+        services.AddHealthChecks().AddNpgSql(connectionString!);
 
         services.AddJwtBearerFromConfiguration(configuration, "App:IdentityUrl", options =>
         {
@@ -46,7 +50,20 @@ public static class ServiceCollectionExtensions
         services.AddAuthorization();
 
         services.AddCorrelationId();
-        services.AddSignalR();
+
+        var redisConnectionString = configuration.GetConnectionString("Redis") ?? "localhost:6379";
+        var redis = ConnectionMultiplexer.Connect(redisConnectionString);
+        services.AddSingleton<IConnectionMultiplexer>(redis);
+
+        services.AddSignalR().AddStackExchangeRedis(redisConnectionString, options =>
+        {
+            options.Configuration.ChannelPrefix = RedisChannel.Literal("PantryCloud:SignalR:");
+        });
+
+        services.AddDataProtection()
+            .SetApplicationName("PantryCloud")
+            .PersistKeysToStackExchangeRedis(redis, "PantryCloud:DataProtection:Keys");
+
         services.AddMessaging(configuration, typeof(MemberLeftHouseholdConsumer).Assembly);
 
         services.AddScoped<IHouseholdMembershipRepository, HouseholdMembershipRepository>();

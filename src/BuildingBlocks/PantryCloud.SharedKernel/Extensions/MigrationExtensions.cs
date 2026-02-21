@@ -1,25 +1,22 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace PantryCloud.SharedKernel.Extensions;
 
-/// <summary>
-/// Extension methods for applying Entity Framework Core migrations.
-/// </summary>
 public static class MigrationExtensions
 {
     /// <summary>
-    /// Applies pending migrations for the specified DbContext.
-    /// Typically called during application startup in development environments.
+    /// Applies pending EF Core migrations at startup.
     /// </summary>
-    /// <typeparam name="TContext">The type of the DbContext.</typeparam>
-    /// <param name="host">The application host.</param>
     public static async Task ApplyMigrationsAsync<TContext>(this IHost host)
         where TContext : DbContext
     {
         using var scope = host.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<TContext>();
+        var logger = scope.ServiceProvider.GetService<ILoggerFactory>()?.CreateLogger("PantryCloud.Migrations");
         await db.Database.MigrateAsync();
+        logger?.LogInformation("EF Core migrations applied for {Context}", typeof(TContext).Name);
     }
 }

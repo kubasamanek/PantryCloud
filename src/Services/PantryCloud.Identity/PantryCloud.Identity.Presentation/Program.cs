@@ -22,9 +22,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    await app.ApplyMigrationsAsync<ApplicationDbContext>();
 }
+
+await app.ApplyMigrationsAsync<ApplicationDbContext>();
 
 if (app.Environment.IsProduction())
 {

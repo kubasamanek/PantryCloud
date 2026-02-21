@@ -22,9 +22,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    await app.ApplyMigrationsAsync<HouseholdDbContext>();
 }
+
+await app.ApplyMigrationsAsync<HouseholdDbContext>();
 
 if (app.Environment.IsProduction())
 {
