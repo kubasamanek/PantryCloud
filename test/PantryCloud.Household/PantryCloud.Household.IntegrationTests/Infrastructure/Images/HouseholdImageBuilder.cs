@@ -9,8 +9,10 @@ public static class HouseholdImageBuilder
     public static IFutureDockerImage Build()
     {
         return new ImageFromDockerfileBuilder()
+            .WithName("pantrycloud-household-test")
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), string.Empty)
             .WithDockerfile(TestConstants.DockerFilePath)
+            .WithDeleteIfExists(false)
             .Build();
     }
 }

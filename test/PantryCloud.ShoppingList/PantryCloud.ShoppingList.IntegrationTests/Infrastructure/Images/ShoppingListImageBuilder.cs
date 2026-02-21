@@ -9,8 +9,10 @@ public static class ShoppingListImageBuilder
     public static IFutureDockerImage Build()
     {
         return new ImageFromDockerfileBuilder()
+            .WithName("pantrycloud-shoppinglist-test")
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), string.Empty)
             .WithDockerfile(TestConstants.DockerFilePath)
+            .WithDeleteIfExists(false)
             .Build();
     }
 }

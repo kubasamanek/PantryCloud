@@ -9,8 +9,10 @@ public static class AuditImageBuilder
     public static IFutureDockerImage Build()
     {
         return new ImageFromDockerfileBuilder()
+            .WithName("pantrycloud-audit-test")
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), string.Empty)
             .WithDockerfile(TestConstants.DockerFilePath)
+            .WithDeleteIfExists(false)
             .Build();
     }
 }

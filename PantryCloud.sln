@@ -104,7 +104,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		GitVersion.yml = GitVersion.yml
 		.dockerignore = .dockerignore
 		.gitignore = .gitignore
-		k8s-deployment-explanation.md = k8s-deployment-explanation.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipelines", "Pipelines", "{E059CF8E-6433-4D8A-AEE5-7121754386F9}"

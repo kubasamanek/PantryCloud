@@ -9,8 +9,10 @@ public static class PantryImageBuilder
     public static IFutureDockerImage Build()
     {
         return new ImageFromDockerfileBuilder()
+            .WithName("pantrycloud-pantry-test")
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), string.Empty)
             .WithDockerfile(TestConstants.DockerFilePath)
+            .WithDeleteIfExists(false)
             .Build();
     }
 }
