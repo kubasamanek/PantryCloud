@@ -147,6 +147,12 @@ spec:
               readOnly: true
           resources:
             {{- toYaml .Values.alloy.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /-/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 15
           readinessProbe:
             httpGet:
               path: /-/ready
