@@ -41,6 +41,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IShoppingListManagementService, ShoppingListManagementService>();
 
         services.AddPrometheusMetrics();
+        services.AddOpenTelemetryTracing(configuration);
         
         return services;
     }

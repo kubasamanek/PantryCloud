@@ -57,6 +57,9 @@ spec:
             - secretRef:
                 name: {{ . }}
             {{- end }}
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.observability.otlpEndpoint | quote }}
           {{- if .Values.probes.enabled }}
           startupProbe:
             httpGet:

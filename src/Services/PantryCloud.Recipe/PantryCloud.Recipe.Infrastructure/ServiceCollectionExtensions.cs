@@ -59,6 +59,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRecipeSearchService, LocalMongoRecipeSearchService>();
         
         services.AddPrometheusMetrics();
+        services.AddOpenTelemetryTracing(configuration);
         
         return services;
     }

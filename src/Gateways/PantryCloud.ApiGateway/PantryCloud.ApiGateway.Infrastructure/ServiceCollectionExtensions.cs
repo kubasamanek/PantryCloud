@@ -90,6 +90,7 @@ public static class ServiceCollectionExtensions
             .AddTransforms<CorrelationIdTransformProvider>();
 
         services.AddPrometheusMetrics();
+        services.AddOpenTelemetryTracing(configuration);
 
         return services;
     }

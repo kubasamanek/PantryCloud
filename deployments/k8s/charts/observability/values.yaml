@@ -53,3 +53,18 @@ alloy:
     limits:
       cpu: 200m
       memory: 128Mi
+
+tempo:
+  image: grafana/tempo:2.10.1
+  serviceName: pantry-tempo
+  port: 3200
+  otlpGrpcPort: 4317
+  storage: 5Gi
+  retentionPeriod: 72h
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

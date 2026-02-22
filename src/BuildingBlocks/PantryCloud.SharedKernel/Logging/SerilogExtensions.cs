@@ -35,7 +35,8 @@ public static class SerilogExtensions
             .Enrich.FromLogContext()
             .Enrich.WithMachineName()
             .Enrich.WithEnvironmentName()
-            .Enrich.WithProperty("Application", configuration["ApplicationName"] ?? "PantryCloud");
+            .Enrich.WithProperty("Application", configuration["ApplicationName"] ?? "PantryCloud")
+            .Enrich.With(new ActivityEnricher());
 
         // Production: Compact JSON format (structured for log aggregation)
         if (string.Equals(environmentName, "Production", StringComparison.OrdinalIgnoreCase))
