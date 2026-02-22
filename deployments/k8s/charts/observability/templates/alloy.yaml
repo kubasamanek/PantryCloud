@@ -120,6 +120,10 @@ spec:
         app.kubernetes.io/instance: {{ .Values.alloy.serviceName }}
     spec:
       serviceAccountName: {{ .Values.alloy.serviceName }}
+      securityContext:
+        fsGroup: 473
+        runAsUser: 473
+        runAsNonRoot: true
       containers:
         - name: alloy
           image: {{ .Values.alloy.image }}
