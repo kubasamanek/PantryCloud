@@ -96,6 +96,26 @@ data:
         url = "http://{{ .Values.loki.serviceName }}:{{ .Values.loki.port }}/loki/api/v1/push"
       }
     }
+
+    // ── OTLP receiver for traces ─────────────────────
+    otelcol.receiver.otlp "default" {
+      grpc {
+        endpoint = "0.0.0.0:4317"
+      }
+      output {
+        traces = [otelcol.exporter.otlp.tempo.input]
+      }
+    }
+
+    // ── Export traces to Tempo ────────────────────────
+    otelcol.exporter.otlp "tempo" {
+      client {
+        endpoint = "{{ .Values.tempo.serviceName }}:{{ .Values.tempo.otlpGrpcPort }}"
+        tls {
+          insecure = true
+        }
+      }
+    }
 ---
 # -------------------------------------------------------------------
 # DaemonSet: one Alloy pod per node
@@ -131,14 +151,20 @@ spec:
             - "run"
             - "/etc/alloy/config.alloy"
             - "--server.http.listen-addr=0.0.0.0:12345"
+            - "--storage.path=/var/lib/alloy/data"
             - "--stability.level=public-preview"
           ports:
             - containerPort: 12345
               name: http
               protocol: TCP
+            - containerPort: 4317
+              name: otlp-grpc
+              protocol: TCP
           volumeMounts:
             - name: config
               mountPath: /etc/alloy
+            - name: data
+              mountPath: /var/lib/alloy
             - name: pod-logs
               mountPath: /var/log/pods
               readOnly: true
@@ -163,9 +189,37 @@ spec:
         - name: config
           configMap:
             name: {{ .Values.alloy.serviceName }}-config
+        - name: data
+          emptyDir: {}
         - name: pod-logs
           hostPath:
             path: /var/log/pods
         - name: docker-logs
           hostPath:
             path: /var/lib/docker/containers
+---
+# -------------------------------------------------------------------
+# Service: DNS-addressable endpoint for OTLP receivers
+# -------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.alloy.serviceName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: alloy
+    app.kubernetes.io/instance: {{ .Values.alloy.serviceName }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4317
+      targetPort: otlp-grpc
+      protocol: TCP
+      name: otlp-grpc
+    - port: 12345
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: alloy
+    app.kubernetes.io/instance: {{ .Values.alloy.serviceName }}

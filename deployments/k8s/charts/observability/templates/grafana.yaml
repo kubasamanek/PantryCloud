@@ -25,15 +25,48 @@ data:
     datasources:
       - name: Prometheus
         type: prometheus
+        uid: prometheus
         access: proxy
         url: "http://{{ .Values.prometheus.serviceName }}:{{ .Values.prometheus.port }}"
         isDefault: true
         editable: false
+        jsonData:
+          exemplarTraceIdDestinations:
+            - name: traceID
+              datasourceUid: tempo
       - name: Loki
         type: loki
+        uid: loki
         access: proxy
         url: "http://{{ .Values.loki.serviceName }}:{{ .Values.loki.port }}"
         editable: false
+        jsonData:
+          derivedFields:
+            - name: TraceId
+              matcherRegex: '"TraceId":"(\w+)"'
+              url: "$${__value.raw}"
+              datasourceUid: tempo
+              matcherType: label
+      - name: Tempo
+        type: tempo
+        uid: tempo
+        access: proxy
+        url: "http://{{ .Values.tempo.serviceName }}:{{ .Values.tempo.port }}"
+        editable: false
+        jsonData:
+          tracesToLogsV2:
+            datasourceUid: loki
+            filterByTraceID: true
+            filterBySpanID: false
+          tracesToMetrics:
+            datasourceUid: prometheus
+            tags:
+              - key: service.name
+                value: service
+          nodeGraph:
+            enabled: true
+          serviceMap:
+            datasourceUid: prometheus
 ---
 # -------------------------------------------------------------------
 # ConfigMap: Dashboard provider

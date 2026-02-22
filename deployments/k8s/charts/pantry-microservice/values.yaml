@@ -73,3 +73,6 @@ affinity: {}
 serviceAccount:
   create: true
   name: ""
+
+observability:
+  otlpEndpoint: "http://pantry-alloy:4317"
