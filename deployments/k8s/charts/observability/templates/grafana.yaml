@@ -29,6 +29,11 @@ data:
         url: "http://{{ .Values.prometheus.serviceName }}:{{ .Values.prometheus.port }}"
         isDefault: true
         editable: false
+      - name: Loki
+        type: loki
+        access: proxy
+        url: "http://{{ .Values.loki.serviceName }}:{{ .Values.loki.port }}"
+        editable: false
 ---
 # -------------------------------------------------------------------
 # ConfigMap: Dashboard provider
