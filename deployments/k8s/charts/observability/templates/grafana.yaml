@@ -46,7 +46,7 @@ data:
               matcherRegex: '"TraceId":"(\w+)"'
               url: "$${__value.raw}"
               datasourceUid: tempo
-              matcherType: label
+              matcherType: regex
       - name: Tempo
         type: tempo
         uid: tempo
