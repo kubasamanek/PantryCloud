@@ -161,6 +161,9 @@ namespace: require-cluster ## Create the pantry namespace
 # Infrastructure images (official Docker Hub images)
 INFRA_IMAGES := postgres:17-alpine rabbitmq:4-management-alpine mongo:8.0 redis:7-alpine
 
+# Observability images
+OBSERVABILITY_IMAGES := prom/prometheus:v3.9.1 grafana/grafana:12.3.3
+
 .PHONY: infra-images
 infra-images: ## Pre-pull infrastructure images and load into Kind
 	@echo "==> Pulling infrastructure images on host..."
@@ -184,6 +187,22 @@ infra-install: namespace ## Deploy infrastructure (PostgreSQL, RabbitMQ, MongoDB
 .PHONY: infra-delete
 infra-delete: ## Delete infrastructure release
 	helm uninstall pantry-infra --namespace $(NAMESPACE) || true
+
+# ──────────────────────────────────────────────
+# Observability (Prometheus, Grafana)
+# ──────────────────────────────────────────────
+
+OBSERVABILITY_CHART := ./charts/observability
+
+.PHONY: observability-install
+observability-install: namespace ## Deploy observability stack (Prometheus, Grafana)
+	helm upgrade --install pantry-observability $(OBSERVABILITY_CHART) \
+		--namespace $(NAMESPACE) \
+		--wait --timeout 120s
+
+.PHONY: observability-delete
+observability-delete: ## Delete observability stack
+	helm uninstall pantry-observability --namespace $(NAMESPACE) || true
 
 # ──────────────────────────────────────────────
 # Secrets
@@ -243,7 +262,7 @@ undeploy-services: ## Undeploy all application services
 # ──────────────────────────────────────────────
 
 .PHONY: up
-up: cluster-create ingress-install images secrets infra-install deploy-services ## Full deploy: cluster + images + secrets + infra + apps (migrations run at startup)
+up: cluster-create ingress-install images secrets infra-install observability-install deploy-services ## Full deploy: cluster + images + secrets + infra + observability + apps
 	@echo ""
 	@echo "============================================="
 	@echo " PantryCloud is running!"

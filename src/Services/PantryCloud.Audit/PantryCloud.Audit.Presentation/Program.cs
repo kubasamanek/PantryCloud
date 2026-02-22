@@ -5,6 +5,7 @@ using PantryCloud.Audit.Infrastructure.Persistence;
 using PantryCloud.SharedKernel.Correlation;
 using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.SharedKernel.Logging;
+using PantryCloud.SharedKernel.Observability;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,6 +40,7 @@ app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapPrometheusMetrics();
 app.MapHealthChecks("/health");
 app.MapControllers();
 

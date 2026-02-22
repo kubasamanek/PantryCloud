@@ -3,6 +3,7 @@ using PantryCloud.ApiGateway.Infrastructure;
 using PantryCloud.ApiGateway.Infrastructure.Middleware;
 using PantryCloud.ApiGateway.Presentation.Extensions;
 using PantryCloud.SharedKernel.Correlation;
+using PantryCloud.SharedKernel.Observability;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,7 @@ if (apiConfiguration.Gateway.RateLimit.Enabled)
     app.UseRateLimiter();
 }
 
+app.MapPrometheusMetrics();
 app.MapReverseProxy();
 
 app.MapControllers();

@@ -11,6 +11,7 @@ using PantryCloud.SharedKernel.Correlation;
 using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.SharedKernel.Identity;
 using PantryCloud.SharedKernel.Messaging;
+using PantryCloud.SharedKernel.Observability;
 using PantryCloud.SharedKernel.Persistence;
 
 namespace PantryCloud.Audit.Infrastructure;
@@ -40,6 +41,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserContext, UserContext>();
         services.AddHostedService<AuditRetentionBackgroundService>();
 
+        services.AddPrometheusMetrics();
+        
         return services;
     }
 }

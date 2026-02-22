@@ -1,0 +1,40 @@
+name: Helm Charts
+
+on:
+  push:
+    branches: [develop, main]
+    paths:
+      - 'deployments/k8s/charts/**'
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - 'deployments/k8s/charts/**'
+
+jobs:
+  lint:
+    name: Lint Helm Charts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Lint pantry-microservice chart
+        run: helm lint deployments/k8s/charts/pantry-microservice
+
+      - name: Lint infrastructure chart
+        run: helm lint deployments/k8s/charts/infrastructure
+
+      - name: Lint observability chart
+        run: helm lint deployments/k8s/charts/observability
+
+      - name: Template pantry-microservice chart
+        run: helm template test deployments/k8s/charts/pantry-microservice
+
+      - name: Template infrastructure chart
+        run: helm template test deployments/k8s/charts/infrastructure
+
+      - name: Template observability chart
+        run: helm template test deployments/k8s/charts/observability

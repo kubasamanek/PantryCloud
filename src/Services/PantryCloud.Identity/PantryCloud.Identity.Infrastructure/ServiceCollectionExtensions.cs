@@ -6,6 +6,7 @@ using PantryCloud.Identity.Core;
 using PantryCloud.Identity.Infrastructure.Persistence;
 using PantryCloud.Identity.Infrastructure.Services;
 using PantryCloud.SharedKernel.Correlation;
+using PantryCloud.SharedKernel.Observability;
 
 namespace PantryCloud.Identity.Infrastructure;
 
@@ -29,7 +30,8 @@ public static class ServiceCollectionExtensions
             options.UseNpgsql(connectionString));
 
         services.AddHealthChecks().AddNpgSql(connectionString!);
-
+        services.AddPrometheusMetrics();
+        
         return services;
     }
 }

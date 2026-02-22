@@ -8,6 +8,7 @@ using PantryCloud.Recipe.Infrastructure.Services;
 using PantryCloud.SharedKernel.Correlation;
 using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.SharedKernel.Identity;
+using PantryCloud.SharedKernel.Observability;
 
 namespace PantryCloud.Recipe.Infrastructure;
 
@@ -56,7 +57,9 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IRecipeRepository, MongoRecipeRepository>();
         services.AddScoped<IRecipeSearchService, LocalMongoRecipeSearchService>();
-
+        
+        services.AddPrometheusMetrics();
+        
         return services;
     }
 }

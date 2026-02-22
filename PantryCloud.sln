@@ -119,6 +119,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipelines", "Pipelines", "{
 		.github\workflows\audit.yml = .github\workflows\audit.yml
 		.github\workflows\frontend.yml = .github\workflows\frontend.yml
 		.github\workflows\base.yml = .github\workflows\base.yml
+		.github\workflows\helm.yml = .github\workflows\helm.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployments", "Deployments", "{5E6219B9-5B71-4C81-A5EE-CC779BBDB4C2}"
@@ -251,6 +252,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{
 		deployments\k8s\charts\infrastructure\templates\postgresql.yaml = deployments\k8s\charts\infrastructure\templates\postgresql.yaml
 		deployments\k8s\charts\infrastructure\templates\rabbitmq.yaml = deployments\k8s\charts\infrastructure\templates\rabbitmq.yaml
 		deployments\k8s\charts\infrastructure\templates\redis.yaml = deployments\k8s\charts\infrastructure\templates\redis.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Observability", "Observability", "{3B1F1363-69F4-4754-8798-178F33CD7D88}"
+	ProjectSection(SolutionItems) = preProject
+		deployments\k8s\charts\observability\Chart.yaml = deployments\k8s\charts\observability\Chart.yaml
+		deployments\k8s\charts\observability\values.yaml = deployments\k8s\charts\observability\values.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{41CFEC88-924F-452A-9D88-2DB997BAB6C5}"
+	ProjectSection(SolutionItems) = preProject
+		deployments\k8s\charts\observability\templates\grafana.yaml = deployments\k8s\charts\observability\templates\grafana.yaml
+		deployments\k8s\charts\observability\templates\prometheus.yaml = deployments\k8s\charts\observability\templates\prometheus.yaml
 	EndProjectSection
 EndProject
 Global
@@ -966,5 +979,7 @@ Global
 		{E117BCA5-F0E0-4240-90CB-ABFA7D5DB366} = {3E303348-2A99-4133-AB3C-8E97F011EA74}
 		{28292B19-5A7B-4A90-B827-606254F6FA19} = {F91DB0DE-87BC-42D0-83C5-6EC5BD798499}
 		{99A942F4-5896-4E05-BF15-DC718BFC197B} = {E117BCA5-F0E0-4240-90CB-ABFA7D5DB366}
+		{3B1F1363-69F4-4754-8798-178F33CD7D88} = {3E303348-2A99-4133-AB3C-8E97F011EA74}
+		{41CFEC88-924F-452A-9D88-2DB997BAB6C5} = {3B1F1363-69F4-4754-8798-178F33CD7D88}
 	EndGlobalSection
 EndGlobal

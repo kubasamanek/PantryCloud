@@ -5,6 +5,7 @@ using PantryCloud.SharedKernel.Correlation;
 using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.SharedKernel.Identity;
 using PantryCloud.SharedKernel.Messaging;
+using PantryCloud.SharedKernel.Observability;
 using PantryCloud.SharedKernel.Persistence;
 using PantryCloud.ShoppingList.Application;
 using PantryCloud.ShoppingList.Core;
@@ -39,6 +40,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<IShoppingListManagementService, ShoppingListManagementService>();
 
+        services.AddPrometheusMetrics();
+        
         return services;
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using PantryCloud.ApiGateway.Core;
 using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.ApiGateway.Infrastructure.Transforms;
+using PantryCloud.SharedKernel.Observability;
 using Polly;
 using Polly.Extensions.Http;
 using Polly.Registry;
@@ -87,6 +88,8 @@ public static class ServiceCollectionExtensions
 
         services.AddReverseProxy()
             .AddTransforms<CorrelationIdTransformProvider>();
+
+        services.AddPrometheusMetrics();
 
         return services;
     }

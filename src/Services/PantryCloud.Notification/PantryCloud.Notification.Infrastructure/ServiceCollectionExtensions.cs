@@ -11,6 +11,7 @@ using PantryCloud.Notification.Infrastructure.Services;
 using PantryCloud.SharedKernel.Correlation;
 using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.SharedKernel.Messaging;
+using PantryCloud.SharedKernel.Observability;
 using StackExchange.Redis;
 
 namespace PantryCloud.Notification.Infrastructure;
@@ -77,6 +78,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IHouseholdMembershipRepository, HouseholdMembershipRepository>();
         services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
+
+        services.AddPrometheusMetrics();
 
         return services;
     }

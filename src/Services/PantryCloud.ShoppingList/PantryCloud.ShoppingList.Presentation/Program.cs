@@ -1,6 +1,7 @@
 using PantryCloud.SharedKernel.Correlation;
 using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.SharedKernel.Logging;
+using PantryCloud.SharedKernel.Observability;
 using PantryCloud.ShoppingList.Application;
 using PantryCloud.ShoppingList.Infrastructure;
 using PantryCloud.ShoppingList.Infrastructure.Persistence;
@@ -39,6 +40,7 @@ app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapPrometheusMetrics();
 app.MapHealthChecks("/health");
 app.MapControllers();
 

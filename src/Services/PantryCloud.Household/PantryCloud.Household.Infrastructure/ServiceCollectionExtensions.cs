@@ -10,6 +10,7 @@ using PantryCloud.SharedKernel.Correlation;
 using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.SharedKernel.Identity;
 using PantryCloud.SharedKernel.Messaging;
+using PantryCloud.SharedKernel.Observability;
 using PantryCloud.SharedKernel.Persistence;
 
 namespace PantryCloud.Household.Infrastructure;
@@ -42,6 +43,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IInvitationService, InvitationService>();
         services.AddScoped<IPreferencesService, PreferencesService>();
         services.AddScoped<IProfileService, ProfileService>();
+
+        services.AddPrometheusMetrics();
 
         return services;
     }

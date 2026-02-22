@@ -17,6 +17,9 @@ spec:
         {{- include "pantry-microservice.selectorLabels" . | nindent 8 }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.service.port }}"
+        prometheus.io/path: "/metrics"
     spec:
       {{- if or .Values.serviceAccount.create .Values.serviceAccount.name }}
       serviceAccountName: {{ .Values.serviceAccount.name | default (include "pantry-microservice.fullname" .) }}
