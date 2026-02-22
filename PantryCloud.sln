@@ -264,6 +264,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{
 	ProjectSection(SolutionItems) = preProject
 		deployments\k8s\charts\observability\templates\grafana.yaml = deployments\k8s\charts\observability\templates\grafana.yaml
 		deployments\k8s\charts\observability\templates\prometheus.yaml = deployments\k8s\charts\observability\templates\prometheus.yaml
+		deployments\k8s\charts\observability\templates\alloy.yaml = deployments\k8s\charts\observability\templates\alloy.yaml
+		deployments\k8s\charts\observability\templates\loki.yaml = deployments\k8s\charts\observability\templates\loki.yaml
 	EndProjectSection
 EndProject
 Global

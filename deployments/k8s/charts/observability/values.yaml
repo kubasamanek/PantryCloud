@@ -28,3 +28,28 @@ grafana:
     limits:
       cpu: 500m
       memory: 256Mi
+
+loki:
+  image: grafana/loki:3.6.6
+  serviceName: pantry-loki
+  port: 3100
+  storage: 5Gi
+  retentionPeriod: 168h
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+alloy:
+  image: grafana/alloy:v1.13.1
+  serviceName: pantry-alloy
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
