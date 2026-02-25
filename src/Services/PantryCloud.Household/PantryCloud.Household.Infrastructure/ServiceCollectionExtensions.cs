@@ -45,6 +45,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProfileService, ProfileService>();
 
         services.AddOpenTelemetryTracing(configuration);
+        services.AddApiVersioningDefaults();
 
         return services;
     }

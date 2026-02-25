@@ -42,6 +42,7 @@ public static class ServiceCollectionExtensions
         services.AddHostedService<AuditRetentionBackgroundService>();
 
         services.AddOpenTelemetryTracing(configuration);
+        services.AddApiVersioningDefaults();
         
         return services;
     }

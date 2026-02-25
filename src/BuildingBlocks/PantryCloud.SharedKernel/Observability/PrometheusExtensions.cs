@@ -6,7 +6,6 @@ namespace PantryCloud.SharedKernel.Observability;
 
 public static class PrometheusExtensions
 {
-
     public static WebApplication MapPrometheusMetrics(this WebApplication app)
     {
         app.UseHttpMetrics();

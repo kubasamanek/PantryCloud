@@ -10,14 +10,14 @@ public static class TestConstants
     /// </summary>
     public static class Endpoints
     {
-        public const string Register = "/api/auth/register";
-        public const string Login = "/api/auth/login";
-        public const string Refresh = "/api/auth/refresh";
-        public const string ForgotPassword = "/api/auth/forgot-password";
-        public const string ResetPassword = "/api/auth/reset-password";
-        public const string VerifyEmail = "/api/auth/verify-email";
-        public const string Sessions = "/api/auth/sessions";
-        public const string Logout = "/api/auth/logout";
+        public const string Register = "/api/v1/auth/register";
+        public const string Login = "/api/v1/auth/login";
+        public const string Refresh = "/api/v1/auth/refresh";
+        public const string ForgotPassword = "/api/v1/auth/forgot-password";
+        public const string ResetPassword = "/api/v1/auth/reset-password";
+        public const string VerifyEmail = "/api/v1/auth/verify-email";
+        public const string Sessions = "/api/v1/auth/sessions";
+        public const string Logout = "/api/v1/auth/logout";
     }
 
     /// <summary>

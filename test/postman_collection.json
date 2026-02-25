@@ -69,14 +69,14 @@
                   "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"Test123!\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/identity/api/auth/register",
+                  "raw": "{{base_url}}/api/v1/identity/auth/register",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "identity",
-                    "api",
                     "auth",
                     "register"
                   ]
@@ -119,14 +119,14 @@
                   "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"Test123!\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/identity/api/auth/login",
+                  "raw": "{{base_url}}/api/v1/identity/auth/login",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "identity",
-                    "api",
                     "auth",
                     "login"
                   ]
@@ -169,14 +169,14 @@
                   "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/identity/api/auth/refresh",
+                  "raw": "{{base_url}}/api/v1/identity/auth/refresh",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "identity",
-                    "api",
                     "auth",
                     "refresh"
                   ]
@@ -196,9 +196,17 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/identity/api/auth/sessions",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "identity", "api", "auth", "sessions"]
+                  "raw": "{{base_url}}/api/v1/identity/auth/sessions",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "auth",
+                    "sessions"
+                  ]
                 },
                 "description": "List all active sessions for the current user. Requires authentication."
               },
@@ -215,9 +223,18 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/identity/api/auth/sessions/{{session_id}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "identity", "api", "auth", "sessions", "{{session_id}}"]
+                  "raw": "{{base_url}}/api/v1/identity/auth/sessions/{{session_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "auth",
+                    "sessions",
+                    "{{session_id}}"
+                  ]
                 },
                 "description": "Revoke a specific session by ID. Requires authentication."
               },
@@ -234,9 +251,18 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/identity/api/auth/sessions/others",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "identity", "api", "auth", "sessions", "others"]
+                  "raw": "{{base_url}}/api/v1/identity/auth/sessions/others",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "auth",
+                    "sessions",
+                    "others"
+                  ]
                 },
                 "description": "Revoke all sessions except the one used for this request."
               },
@@ -257,9 +283,17 @@
                   "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/identity/api/auth/logout",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "identity", "api", "auth", "logout"]
+                  "raw": "{{base_url}}/api/v1/identity/auth/logout",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "auth",
+                    "logout"
+                  ]
                 },
                 "description": "Revoke the current session (logout)."
               },
@@ -280,14 +314,14 @@
                   "raw": "{\n    \"email\": \"test@example.com\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/identity/api/auth/forgot-password",
+                  "raw": "{{base_url}}/api/v1/identity/auth/forgot-password",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "identity",
-                    "api",
                     "auth",
                     "forgot-password"
                   ]
@@ -311,14 +345,14 @@
                   "raw": "{\n    \"email\": \"test@example.com\",\n    \"token\": \"reset-token-here\",\n    \"newPassword\": \"NewPassword123!\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/identity/api/auth/reset-password",
+                  "raw": "{{base_url}}/api/v1/identity/auth/reset-password",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "identity",
-                    "api",
                     "auth",
                     "reset-password"
                   ]
@@ -342,14 +376,14 @@
                   "raw": "{\n    \"email\": \"test@example.com\",\n    \"token\": \"verification-token-here\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/identity/api/auth/verify-email",
+                  "raw": "{{base_url}}/api/v1/identity/auth/verify-email",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "identity",
-                    "api",
                     "auth",
                     "verify-email"
                   ]
@@ -369,14 +403,14 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{base_url}}/api/identity/api/test/public",
+                  "raw": "{{base_url}}/api/v1/identity/test/public",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "identity",
-                    "api",
                     "test",
                     "public"
                   ]
@@ -397,14 +431,14 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/identity/api/test/secure",
+                  "raw": "{{base_url}}/api/v1/identity/test/secure",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "identity",
-                    "api",
                     "test",
                     "secure"
                   ]
@@ -424,13 +458,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{base_url}}/api/identity/.well-known/openid-configuration",
+                  "raw": "{{base_url}}/.well-known/openid-configuration",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
-                    "api",
-                    "identity",
                     ".well-known",
                     "openid-configuration"
                   ]
@@ -445,13 +477,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{base_url}}/api/identity/.well-known/openid-configuration/jwks",
+                  "raw": "{{base_url}}/.well-known/openid-configuration/jwks",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
-                    "api",
-                    "identity",
                     ".well-known",
                     "openid-configuration",
                     "jwks"
@@ -497,14 +527,14 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/household/api/households/me",
+              "raw": "{{base_url}}/api/v1/household/households/me",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
+                "v1",
                 "household",
-                "api",
                 "households",
                 "me"
               ]
@@ -550,14 +580,14 @@
               "raw": "{\n    \"name\": \"My Household\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/household/api/households",
+              "raw": "{{base_url}}/api/v1/household/households",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
+                "v1",
                 "household",
-                "api",
                 "households"
               ]
             },
@@ -585,14 +615,14 @@
               "raw": "{\n    \"toEmail\": \"invite@example.com\",\n    \"householdId\": \"{{household_id}}\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/household/api/households/invite",
+              "raw": "{{base_url}}/api/v1/household/households/invite",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
+                "v1",
                 "household",
-                "api",
                 "households",
                 "invite"
               ]
@@ -621,14 +651,14 @@
               "raw": "{\n    \"code\": \"invitation-code-here\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/household/api/households/join",
+              "raw": "{{base_url}}/api/v1/household/households/join",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
+                "v1",
                 "household",
-                "api",
                 "households",
                 "join"
               ]
@@ -657,14 +687,14 @@
               "raw": "{}"
             },
             "url": {
-              "raw": "{{base_url}}/api/household/api/households/leave",
+              "raw": "{{base_url}}/api/v1/household/households/leave",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
+                "v1",
                 "household",
-                "api",
                 "households",
                 "leave"
               ]
@@ -678,12 +708,25 @@
           "request": {
             "method": "DELETE",
             "header": [
-              {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"}
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/household/api/households/members/{{member_user_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "household", "api", "households", "members", "{{member_user_id}}"]
+              "raw": "{{base_url}}/api/v1/household/households/members/{{member_user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "members",
+                "{{member_user_id}}"
+              ]
             },
             "description": "Remove a member from the household. Owner only. Cannot kick yourself or another owner. Get member IDs from Get Household Members Preferences."
           },
@@ -694,17 +737,32 @@
           "request": {
             "method": "POST",
             "header": [
-              {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"},
-              {"key": "Content-Type", "value": "application/json"}
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n    \"newOwnerUserId\": \"{{member_user_id}}\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/household/api/households/transfer-ownership",
-              "host": ["{{base_url}}"],
-              "path": ["api", "household", "api", "households", "transfer-ownership"]
+              "raw": "{{base_url}}/api/v1/household/households/transfer-ownership",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "transfer-ownership"
+              ]
             },
             "description": "Transfer household ownership to another member. Owner only. New owner must be existing member. Notifies all household members."
           },
@@ -715,12 +773,25 @@
           "request": {
             "method": "GET",
             "header": [
-              {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"}
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/household/api/households/me/profile",
-              "host": ["{{base_url}}"],
-              "path": ["api", "household", "api", "households", "me", "profile"]
+              "raw": "{{base_url}}/api/v1/household/households/me/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "me",
+                "profile"
+              ]
             },
             "description": "Get current user's profile (display name, avatar URL). 404 if no profile set."
           },
@@ -731,17 +802,33 @@
           "request": {
             "method": "PUT",
             "header": [
-              {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"},
-              {"key": "Content-Type", "value": "application/json"}
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n    \"displayName\": \"My Display Name\",\n    \"avatarUrl\": \"https://example.com/avatar.png\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/household/api/households/me/profile",
-              "host": ["{{base_url}}"],
-              "path": ["api", "household", "api", "households", "me", "profile"]
+              "raw": "{{base_url}}/api/v1/household/households/me/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "me",
+                "profile"
+              ]
             },
             "description": "Create or update profile. displayName required (1-100 chars), avatarUrl optional (max 500 chars)."
           },
@@ -759,9 +846,18 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/household/api/households/me/preferences",
-              "host": ["{{base_url}}"],
-              "path": ["api", "household", "api", "households", "me", "preferences"]
+              "raw": "{{base_url}}/api/v1/household/households/me/preferences",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "me",
+                "preferences"
+              ]
             },
             "description": "Get current user's recipe preferences (dietary profile, excluded ingredients). 404 if none set. Fetch and send in Recipe search/recommend."
           },
@@ -772,17 +868,33 @@
           "request": {
             "method": "PUT",
             "header": [
-              {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"},
-              {"key": "Content-Type", "value": "application/json"}
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n    \"dietaryProfile\": 1,\n    \"excludedIngredients\": [\"nuts\", \"shellfish\"]\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/household/api/households/me/preferences",
-              "host": ["{{base_url}}"],
-              "path": ["api", "household", "api", "households", "me", "preferences"]
+              "raw": "{{base_url}}/api/v1/household/households/me/preferences",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "me",
+                "preferences"
+              ]
             },
             "description": "Create or update preferences. dietaryProfile: 0=None, 1=Vegetarian, 2=Vegan. User must be in a household."
           },
@@ -793,12 +905,26 @@
           "request": {
             "method": "GET",
             "header": [
-              {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"}
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/household/api/households/me/members/preferences",
-              "host": ["{{base_url}}"],
-              "path": ["api", "household", "api", "households", "me", "members", "preferences"]
+              "raw": "{{base_url}}/api/v1/household/households/me/members/preferences",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "me",
+                "members",
+                "preferences"
+              ]
             },
             "description": "Get all household members' preferences, profile data (DisplayName, AvatarUrl), and Role (Owner/Member). Use userId as member_user_id for Kick/Transfer. For 'recommend for household': aggregate (union excluded, strictest dietary) and send in POST /recipes/recommend."
           },
@@ -849,12 +975,13 @@
                   "raw": "{\n    \"name\": \"Milk\",\n    \"quantity\": 2.5,\n    \"unit\": 3,\n    \"expirationDate\": \"2024-12-31T00:00:00Z\",\n    \"category\": \"Dairy\",\n    \"notes\": \"Whole milk\",\n    \"imageUrl\": null\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/pantry/items",
+                  "raw": "{{base_url}}/api/v1/pantry/pantry/items",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "pantry",
                     "items"
                   ]
@@ -875,12 +1002,13 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/pantry/items/{{pantry_item_id}}",
+                  "raw": "{{base_url}}/api/v1/pantry/pantry/items/{{pantry_item_id}}",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "pantry",
                     "items",
                     "{{pantry_item_id}}"
@@ -910,12 +1038,13 @@
                   "raw": "{\n    \"name\": \"Milk (Updated)\",\n    \"quantity\": 3.0,\n    \"unit\": 3,\n    \"expirationDate\": \"2025-01-15T00:00:00Z\",\n    \"category\": \"Dairy\",\n    \"notes\": \"Updated notes\",\n    \"imageUrl\": null,\n    \"rowVersion\": \"AAAAAAAAAAA=\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/pantry/items/{{pantry_item_id}}",
+                  "raw": "{{base_url}}/api/v1/pantry/pantry/items/{{pantry_item_id}}",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "pantry",
                     "items",
                     "{{pantry_item_id}}"
@@ -937,12 +1066,13 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/pantry/items/{{pantry_item_id}}",
+                  "raw": "{{base_url}}/api/v1/pantry/pantry/items/{{pantry_item_id}}",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "pantry",
                     "items",
                     "{{pantry_item_id}}"
@@ -964,12 +1094,13 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/pantry/items?category=&searchTerm=&page=1&pageSize=50",
+                  "raw": "{{base_url}}/api/v1/pantry/pantry/items?category=&searchTerm=&page=1&pageSize=50",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "pantry",
                     "items"
                   ],
@@ -1012,12 +1143,13 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/pantry/items?category=Dairy&page=1&pageSize=50",
+                  "raw": "{{base_url}}/api/v1/pantry/pantry/items?category=Dairy&page=1&pageSize=50",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "pantry",
                     "items"
                   ],
@@ -1053,12 +1185,13 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/pantry/items?searchTerm=milk&page=1&pageSize=50",
+                  "raw": "{{base_url}}/api/v1/pantry/pantry/items?searchTerm=milk&page=1&pageSize=50",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "pantry",
                     "items"
                   ],
@@ -1129,12 +1262,13 @@
                   "raw": "{\n    \"name\": \"Weekly Shopping\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/shoppinglist",
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "shoppinglist"
                   ]
                 },
@@ -1154,12 +1288,13 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/shoppinglist?page=1&pageSize=50",
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists?page=1&pageSize=50",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "shoppinglist"
                   ],
                   "query": [
@@ -1191,12 +1326,13 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/shoppinglist/{{shopping_list_id}}",
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists/{{shopping_list_id}}",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "shoppinglist",
                     "{{shopping_list_id}}"
                   ]
@@ -1217,12 +1353,13 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/shoppinglist/{{shopping_list_id}}",
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists/{{shopping_list_id}}",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "shoppinglist",
                     "{{shopping_list_id}}"
                   ]
@@ -1273,12 +1410,13 @@
                   "raw": "{\n    \"name\": \"Milk\",\n    \"quantity\": 2,\n    \"unit\": 0,\n    \"source\": 0\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/shoppinglist/{{shopping_list_id}}/items",
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists/{{shopping_list_id}}/items",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "shoppinglist",
                     "{{shopping_list_id}}",
                     "items"
@@ -1308,12 +1446,13 @@
                   "raw": "{\n    \"items\": [\n        {\n            \"name\": \"Tomatoes\",\n            \"quantity\": 3,\n            \"unit\": 0,\n            \"source\": 2\n        },\n        {\n            \"name\": \"Onions\",\n            \"quantity\": 2,\n            \"unit\": 0,\n            \"source\": 2\n        },\n        {\n            \"name\": \"Garlic\",\n            \"quantity\": 5,\n            \"unit\": 0,\n            \"source\": 2\n        }\n    ]\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/shoppinglist/{{shopping_list_id}}/items/batch",
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists/{{shopping_list_id}}/items/batch",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "shoppinglist",
                     "{{shopping_list_id}}",
                     "items",
@@ -1344,12 +1483,13 @@
                   "raw": "{\n    \"name\": \"Milk (Updated)\",\n    \"quantity\": 3,\n    \"unit\": 0,\n    \"rowVersion\": \"AAAAAAAAAAA=\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/shoppinglist/{{shopping_list_id}}/items/{{shopping_item_id}}",
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists/{{shopping_list_id}}/items/{{shopping_item_id}}",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "shoppinglist",
                     "{{shopping_list_id}}",
                     "items",
@@ -1372,12 +1512,13 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/shoppinglist/{{shopping_list_id}}/items/{{shopping_item_id}}/check",
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists/{{shopping_list_id}}/items/{{shopping_item_id}}/check",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "shoppinglist",
                     "{{shopping_list_id}}",
                     "items",
@@ -1401,12 +1542,13 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/shoppinglist/{{shopping_list_id}}/items/{{shopping_item_id}}",
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists/{{shopping_list_id}}/items/{{shopping_item_id}}",
                   "host": [
                     "{{base_url}}"
                   ],
                   "path": [
                     "api",
+                    "v1",
                     "shoppinglist",
                     "{{shopping_list_id}}",
                     "items",
@@ -1444,12 +1586,13 @@
               "raw": "{\n    \"ingredients\": [\"chicken\", \"rice\"]\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/recipe/search",
+              "raw": "{{base_url}}/api/v1/recipe/recipes/search",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
+                "v1",
                 "recipe",
                 "search"
               ]
@@ -1463,17 +1606,31 @@
           "request": {
             "method": "POST",
             "header": [
-              {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"},
-              {"key": "Content-Type", "value": "application/json"}
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n    \"ingredients\": [\"chicken\", \"rice\"],\n    \"preferences\": {\n        \"dietaryProfile\": \"Vegetarian\",\n        \"excludedIngredients\": [\"nuts\", \"shellfish\"]\n    }\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/recipe/search",
-              "host": ["{{base_url}}"],
-              "path": ["api", "recipe", "search"]
+              "raw": "{{base_url}}/api/v1/recipe/recipes/search",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recipe",
+                "search"
+              ]
             },
             "description": "Search with preference filter. Fetch preferences from GET /households/me/preferences, then send here. dietaryProfile: None|Vegetarian|Vegan."
           },
@@ -1484,19 +1641,33 @@
           "request": {
             "method": "POST",
             "header": [
-              {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"},
-              {"key": "Content-Type", "value": "application/json"}
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n    \"ingredientHints\": [\"chicken\"],\n    \"preferences\": {\n        \"dietaryProfile\": \"Vegetarian\",\n        \"excludedIngredients\": [\"nuts\"]\n    },\n    \"limit\": 10\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/recipe/recommend",
-              "host": ["{{base_url}}"],
-              "path": ["api", "recipe", "recommend"]
+              "raw": "{{base_url}}/api/v1/recipe/recipes/recommend",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recipe",
+                "recommend"
+              ]
             },
-            "description": "Recommend recipes. Fetch GET /households/me/members/preferences, aggregate (union excluded, strictest dietary), then send here. ingredientHints optional; limit 1–100."
+            "description": "Recommend recipes. Fetch GET /households/me/members/preferences, aggregate (union excluded, strictest dietary), then send here. ingredientHints optional; limit 1\u2013100."
           },
           "response": []
         },
@@ -1529,12 +1700,13 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/recipe/{{recipe_id}}",
+              "raw": "{{base_url}}/api/v1/recipe/recipes/{{recipe_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
+                "v1",
                 "recipe",
                 "{{recipe_id}}"
               ]
@@ -1563,12 +1735,13 @@
               "raw": "{\n    \"count\": 10\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/recipe/seed",
+              "raw": "{{base_url}}/api/v1/recipe/recipes/seed",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
+                "v1",
                 "recipe",
                 "seed"
               ]
@@ -1588,9 +1761,16 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/notification/health",
-              "host": ["{{base_url}}"],
-              "path": ["api", "notification", "health"]
+              "raw": "{{base_url}}/api/v1/notification/notifications/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notification",
+                "health"
+              ]
             },
             "description": "Check if the Notification service is healthy."
           },
@@ -1601,15 +1781,35 @@
           "request": {
             "method": "GET",
             "header": [
-              {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"}
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/notification/me?limit=50",
-              "host": ["{{base_url}}"],
-              "path": ["api", "notification", "me"],
+              "raw": "{{base_url}}/api/v1/notification/notifications/me?limit=50",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notification",
+                "me"
+              ],
               "query": [
-                {"key": "limit", "value": "50", "description": "Max notifications to return (1-100)"},
-                {"key": "since", "value": "", "description": "Optional UTC datetime (ISO 8601) to return only notifications after this time", "disabled": true}
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Max notifications to return (1-100)"
+                },
+                {
+                  "key": "since",
+                  "value": "",
+                  "description": "Optional UTC datetime (ISO 8601) to return only notifications after this time",
+                  "disabled": true
+                }
               ]
             },
             "description": "Get recent notifications for the current user (for \"what I missed\" when offline). Requires authentication. Optional query: limit (default 50), since (UTC datetime)."
@@ -1622,11 +1822,18 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/notification/health",
-              "host": ["{{base_url}}"],
-              "path": ["api", "notification", "health"]
+              "raw": "{{base_url}}/api/v1/notification/notifications/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notification",
+                "health"
+              ]
             },
-            "description": "**SignalR Real-Time Notifications**\n\n**Option A – HTML test page (recommended)**\nOpen `test/signalr-test.html` in a browser. Paste your access_token and click Connect. Uses skipNegotiation for direct WebSocket (avoids CORS when opening from file://).\n\n**Option B – Node.js script (good for CLI)**\n```\ncd test && npm install && node signalr-connect.mjs YOUR_ACCESS_TOKEN\n```\nHandles the 0x1E handshake automatically.\n\n**Option C – Postman WebSocket**\n1. File > New > WebSocket Request\n2. URL: `ws://localhost:5050/api/notification/hubs/notifications?access_token=YOUR_TOKEN`\n3. Connect, then send: `{\"protocol\":\"json\",\"version\":1}` + 0x1E character. Without 0x1E you get \"Handshake was canceled.\" To insert 0x1E: VS Code extension \"insert-unicode\" (U+001E), or Mac: Ctrl+Shift+U, type 1e, Enter.\n\nKeep connected to receive `ReceiveNotification` events (member joined/left, pantry depleted, etc.)."
+            "description": "**SignalR Real-Time Notifications**\n\n**Option A \u2013 HTML test page (recommended)**\nOpen `test/signalr-test.html` in a browser. Paste your access_token and click Connect. Uses skipNegotiation for direct WebSocket (avoids CORS when opening from file://).\n\n**Option B \u2013 Node.js script (good for CLI)**\n```\ncd test && npm install && node signalr-connect.mjs YOUR_ACCESS_TOKEN\n```\nHandles the 0x1E handshake automatically.\n\n**Option C \u2013 Postman WebSocket**\n1. File > New > WebSocket Request\n2. URL: `ws://localhost:5050/hubs/notifications?access_token=YOUR_TOKEN`\n3. Connect, then send: `{\"protocol\":\"json\",\"version\":1}` + 0x1E character. Without 0x1E you get \"Handshake was canceled.\" To insert 0x1E: VS Code extension \"insert-unicode\" (U+001E), or Mac: Ctrl+Shift+U, type 1e, Enter.\n\nKeep connected to receive `ReceiveNotification` events (member joined/left, pantry depleted, etc.)."
           },
           "response": []
         }
@@ -1647,16 +1854,47 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/audit/households/{{household_id}}/entries?page=1&pageSize=50",
-              "host": ["{{base_url}}"],
-              "path": ["api", "audit", "households", "{{household_id}}", "entries"],
+              "raw": "{{base_url}}/api/v1/audit/audit/households/{{household_id}}/entries?page=1&pageSize=50",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "audit",
+                "households",
+                "{{household_id}}",
+                "entries"
+              ],
               "query": [
-                {"key": "from", "value": "", "disabled": true},
-                {"key": "to", "value": "", "disabled": true},
-                {"key": "actionType", "value": "", "disabled": true},
-                {"key": "entityType", "value": "", "disabled": true},
-                {"key": "page", "value": "1"},
-                {"key": "pageSize", "value": "50"}
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "actionType",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "entityType",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "50"
+                }
               ]
             },
             "description": "List audit entries for a household. Requires authentication and household membership. Optional filters: from, to (date range), actionType, entityType."
@@ -1724,7 +1962,7 @@
     },
     {
       "key": "signalr_ws_url",
-      "value": "ws://localhost:5050/api/notification/hubs/notifications",
+      "value": "ws://localhost:5050/hubs/notifications",
       "type": "string"
     }
   ]

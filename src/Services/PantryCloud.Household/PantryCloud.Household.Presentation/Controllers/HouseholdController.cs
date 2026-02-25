@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +11,8 @@ using PantryCloud.SharedKernel.Controllers;
 namespace PantryCloud.Household.Presentation.Controllers;
 
 [ApiController]
-[Route("api/households")]
+[ApiVersion(1)]
+[Route("api/v{version:apiVersion}/households")]
 [Authorize]
 public class HouseholdController(IMediator mediator, IMapper mapper, ILogger<HouseholdController> logger) : ApiControllerBase(mediator, mapper)
 {
