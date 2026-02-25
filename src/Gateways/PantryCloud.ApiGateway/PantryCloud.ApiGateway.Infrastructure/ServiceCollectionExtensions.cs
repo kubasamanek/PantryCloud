@@ -114,7 +114,7 @@ public static class ServiceCollectionExtensions
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/api/v1/jwks/.well-known/{**catch-all}"
+                        ["PathPattern"] = "/.well-known/{**catch-all}"
                     }
                 ]
             },
