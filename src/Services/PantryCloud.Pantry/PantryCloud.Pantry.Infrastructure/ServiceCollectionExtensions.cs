@@ -49,6 +49,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPantryManagementService, PantryManagementService>();
 
         services.AddOpenTelemetryTracing(configuration);
+        services.AddApiVersioningDefaults();
 
         return services;
     }

@@ -80,6 +80,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INotificationService, NotificationService>();
 
         services.AddOpenTelemetryTracing(configuration);
+        services.AddApiVersioningDefaults();
 
         return services;
     }

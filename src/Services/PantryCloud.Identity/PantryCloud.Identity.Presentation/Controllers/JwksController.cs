@@ -59,8 +59,8 @@ public class JwksController(IMediator mediator, IMapper mapper, ApiConfiguration
         {
             issuer,
             jwks_uri = jwksUri,
-            token_endpoint = $"{endpointsBase}/api/auth/login",
-            authorization_endpoint = $"{endpointsBase}/api/auth/login",
+            token_endpoint = $"{endpointsBase}/api/v1/auth/login",
+            authorization_endpoint = $"{endpointsBase}/api/v1/auth/login",
             response_types_supported = new[] { "token" },
             subject_types_supported = new[] { "public" },
             id_token_signing_alg_values_supported = new[] { "RS256" }

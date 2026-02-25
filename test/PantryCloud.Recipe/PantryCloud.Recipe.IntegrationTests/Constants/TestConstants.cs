@@ -7,7 +7,7 @@ public static class TestConstants
 
     public static class Endpoints
     {
-        private const string Base = "/api/recipes";
+        private const string Base = "/api/v1/recipes";
         public const string Search = Base + "/search";
         public const string Recommend = Base + "/recommend";
         public const string Seed = Base + "/seed";

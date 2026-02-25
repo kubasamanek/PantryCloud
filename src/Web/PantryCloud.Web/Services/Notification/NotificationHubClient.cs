@@ -30,7 +30,7 @@ public class NotificationHubClient(
         }
 
         var baseUrl = (gatewayOptions.Value?.BaseUrl ?? "http://localhost:5050").TrimEnd('/');
-        var hubUrl = $"{baseUrl}/api/notification/hubs/notifications";
+        var hubUrl = $"{baseUrl}/hubs/notifications";
 
         var connection = new HubConnectionBuilder()
             .WithUrl(hubUrl, options =>

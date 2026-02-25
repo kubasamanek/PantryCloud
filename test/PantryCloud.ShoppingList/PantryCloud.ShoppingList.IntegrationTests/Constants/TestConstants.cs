@@ -7,7 +7,7 @@ public static class TestConstants
 
     public static class Endpoints
     {
-        private const string Base = "/api/shopping-lists";
+        private const string Base = "/api/v1/shopping-lists";
         public const string CreateList = Base + "";
         public const string ListLists = Base + "";
         public static string GetList(Guid id) => Base + $"/{id}";

@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -11,7 +12,8 @@ using PantryCloud.SharedKernel.Controllers;
 namespace PantryCloud.Recipe.Presentation.Controllers;
 
 [ApiController]
-[Route("api/recipes")]
+[ApiVersion(1)]
+[Route("api/v{version:apiVersion}/recipes")]
 public class RecipeController(IMediator mediator, IMapper mapper, IWebHostEnvironment environment)
     : ApiControllerBase(mediator, mapper)
 {

@@ -90,6 +90,7 @@ public static class ServiceCollectionExtensions
             .AddTransforms<CorrelationIdTransformProvider>();
 
         services.AddOpenTelemetryTracing(configuration);
+        services.AddApiVersioningDefaults();
 
         return services;
     }
@@ -98,20 +99,40 @@ public static class ServiceCollectionExtensions
     {
         return
         [
+            // OIDC discovery must remain unversioned - standard endpoints
             new RouteConfig
             {
-                RouteId = RouteConfiguration.IdentityRouteId,
+                RouteId = "identity-oidc",
                 ClusterId = RouteConfiguration.IdentityClusterId,
                 AuthorizationPolicy = "Anonymous",
+                Order = 1,
                 Match = new RouteMatch
                 {
-                    Path = "/api/identity/{**catch-all}"
+                    Path = "/.well-known/{**catch-all}"
                 },
                 Transforms =
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/{**catch-all}"
+                        ["PathPattern"] = "/.well-known/{**catch-all}"
+                    }
+                ]
+            },
+            new RouteConfig
+            {
+                RouteId = RouteConfiguration.IdentityRouteId,
+                ClusterId = RouteConfiguration.IdentityClusterId,
+                // Login, register, and token refresh must be accessible without a JWT
+                AuthorizationPolicy = "Anonymous",
+                Match = new RouteMatch
+                {
+                    Path = "/api/{version}/identity/{**catch-all}"
+                },
+                Transforms =
+                [
+                    new Dictionary<string, string>
+                    {
+                        ["PathPattern"] = "/api/{version}/{**catch-all}"
                     }
                 ]
             },
@@ -119,16 +140,15 @@ public static class ServiceCollectionExtensions
             {
                 RouteId = RouteConfiguration.HouseholdRouteId,
                 ClusterId = RouteConfiguration.HouseholdClusterId,
-                AuthorizationPolicy = "Anonymous",
                 Match = new RouteMatch
                 {
-                    Path = "/api/household/{**catch-all}"
+                    Path = "/api/{version}/household/{**catch-all}"
                 },
                 Transforms =
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/{**catch-all}"
+                        ["PathPattern"] = "/api/{version}/{**catch-all}"
                     }
                 ]
             },
@@ -138,13 +158,13 @@ public static class ServiceCollectionExtensions
                 ClusterId = RouteConfiguration.PantryClusterId,
                 Match = new RouteMatch
                 {
-                    Path = "/api/pantry/{**catch-all}"
+                    Path = "/api/{version}/pantry/{**catch-all}"
                 },
                 Transforms =
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/api/pantry/{**catch-all}"
+                        ["PathPattern"] = "/api/{version}/{**catch-all}"
                     }
                 ]
             },
@@ -154,13 +174,13 @@ public static class ServiceCollectionExtensions
                 ClusterId = RouteConfiguration.RecipeClusterId,
                 Match = new RouteMatch
                 {
-                    Path = "/api/recipe/{**catch-all}"
+                    Path = "/api/{version}/recipe/{**catch-all}"
                 },
                 Transforms =
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/api/recipes/{**catch-all}"
+                        ["PathPattern"] = "/api/{version}/{**catch-all}"
                     }
                 ]
             },
@@ -170,13 +190,31 @@ public static class ServiceCollectionExtensions
                 ClusterId = RouteConfiguration.ShoppingListClusterId,
                 Match = new RouteMatch
                 {
-                    Path = "/api/shoppinglist/{**catch-all}"
+                    Path = "/api/{version}/shoppinglist/{**catch-all}"
                 },
                 Transforms =
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/api/shopping-lists/{**catch-all}"
+                        ["PathPattern"] = "/api/{version}/{**catch-all}"
+                    }
+                ]
+            },
+            new RouteConfig
+            {
+                RouteId = "notification-hub",
+                ClusterId = RouteConfiguration.NotificationClusterId,
+                AuthorizationPolicy = "Anonymous",
+                Order = 1,
+                Match = new RouteMatch
+                {
+                    Path = "/hubs/{**catch-all}"
+                },
+                Transforms =
+                [
+                    new Dictionary<string, string>
+                    {
+                        ["PathPattern"] = "/hubs/{**catch-all}"
                     }
                 ]
             },
@@ -186,13 +224,13 @@ public static class ServiceCollectionExtensions
                 ClusterId = RouteConfiguration.NotificationClusterId,
                 Match = new RouteMatch
                 {
-                    Path = "/api/notification/{**catch-all}"
+                    Path = "/api/{version}/notification/{**catch-all}"
                 },
                 Transforms =
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/{**catch-all}"
+                        ["PathPattern"] = "/api/{version}/{**catch-all}"
                     }
                 ]
             },
@@ -202,13 +240,13 @@ public static class ServiceCollectionExtensions
                 ClusterId = RouteConfiguration.AuditClusterId,
                 Match = new RouteMatch
                 {
-                    Path = "/api/audit/{**catch-all}"
+                    Path = "/api/{version}/audit/{**catch-all}"
                 },
                 Transforms =
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/{**catch-all}"
+                        ["PathPattern"] = "/api/{version}/{**catch-all}"
                     }
                 ]
             }

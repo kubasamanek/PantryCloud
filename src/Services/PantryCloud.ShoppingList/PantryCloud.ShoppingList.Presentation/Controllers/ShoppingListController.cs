@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +11,8 @@ using PantryCloud.ShoppingList.Application.Queries;
 namespace PantryCloud.ShoppingList.Presentation.Controllers;
 
 [ApiController]
-[Route("api/shopping-lists")]
+[ApiVersion(1)]
+[Route("api/v{version:apiVersion}/shopping-lists")]
 public class ShoppingListController(IMediator mediator, IMapper mapper) : ApiControllerBase(mediator, mapper)
 {
     [Authorize]

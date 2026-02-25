@@ -37,9 +37,13 @@ ingress:
       paths:
         - path: /api
           pathType: Prefix
+        - path: /hubs
+          pathType: Prefix
     - host: localhost
       paths:
         - path: /api
+          pathType: Prefix
+        - path: /hubs
           pathType: Prefix
 
 probes:

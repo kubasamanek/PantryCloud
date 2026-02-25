@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +10,8 @@ using PantryCloud.SharedKernel.Controllers;
 namespace PantryCloud.Audit.Presentation.Controllers;
 
 [ApiController]
-[Route("api/audit")]
+[ApiVersion(1)]
+[Route("api/v{version:apiVersion}/audit")]
 [Authorize]
 public class AuditController(IMediator mediator, IMapper mapper) : ApiControllerBase(mediator, mapper)
 {

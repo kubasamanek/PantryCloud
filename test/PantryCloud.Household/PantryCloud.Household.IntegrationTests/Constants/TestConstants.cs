@@ -7,7 +7,7 @@ public static class TestConstants
 
     public static class Endpoints
     {
-        private const string Base = "/api/households";
+        private const string Base = "/api/v1/households";
         public const string CreateHousehold = Base + "";
         public const string GetCurrentHousehold = Base + "/me";
         public const string SendInvite = Base + "/invite";

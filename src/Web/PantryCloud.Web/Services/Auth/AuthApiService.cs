@@ -4,7 +4,7 @@ namespace PantryCloud.Web.Services.Auth;
 
 public class AuthApiService(IHttpClientFactory httpClientFactory) : IAuthApi
 {
-    private const string BasePath = "api/identity/api/auth";
+    private const string BasePath = "api/v1/identity/auth";
 
     private HttpClient Client => httpClientFactory.CreateClient("Auth");
 

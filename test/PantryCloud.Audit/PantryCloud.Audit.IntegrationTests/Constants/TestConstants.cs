@@ -7,7 +7,7 @@ public static class TestConstants
 
     public static class Endpoints
     {
-        private const string Base = "/api/audit";
+        private const string Base = "/api/v1/audit";
         public static string ListHouseholdEntries(Guid householdId) => Base + $"/households/{householdId}/entries";
     }
 

@@ -191,7 +191,7 @@ infra-images: ## Pre-pull infrastructure images and load into Kind
 infra-install: namespace ## Deploy infrastructure (PostgreSQL, RabbitMQ, MongoDB, Redis)
 	helm upgrade --install pantry-infra $(INFRA_CHART) \
 		--namespace $(NAMESPACE) \
-		--wait --timeout 120s
+		--wait --timeout 300s
 
 .PHONY: infra-delete
 infra-delete: ## Delete infrastructure release
@@ -207,7 +207,7 @@ OBSERVABILITY_CHART := ./charts/observability
 observability-install: namespace ## Deploy observability stack (Prometheus, Grafana)
 	helm upgrade --install pantry-observability $(OBSERVABILITY_CHART) \
 		--namespace $(NAMESPACE) \
-		--wait --timeout 120s
+		--wait --timeout 300s
 
 .PHONY: observability-delete
 observability-delete: ## Delete observability stack

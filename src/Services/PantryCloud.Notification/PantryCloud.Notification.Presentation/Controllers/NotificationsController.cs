@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,8 @@ namespace PantryCloud.Notification.Presentation.Controllers;
 /// Serves GET /me for current user's notification history.
 /// </summary>
 [ApiController]
-[Route("")]
+[ApiVersion(1)]
+[Route("api/v{version:apiVersion}/notifications")]
 [Authorize]
 public class NotificationsController(IMediator mediator, IMapper mapper) : ApiControllerBase(mediator, mapper)
 {

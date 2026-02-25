@@ -41,6 +41,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IShoppingListManagementService, ShoppingListManagementService>();
 
         services.AddOpenTelemetryTracing(configuration);
+        services.AddApiVersioningDefaults();
         
         return services;
     }

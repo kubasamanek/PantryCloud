@@ -4,7 +4,7 @@ namespace PantryCloud.Web.Services.Sessions;
 
 public class SessionsApiService(IHttpClientFactory httpClientFactory) : ISessionsApi
 {
-    private const string BasePath = "api/identity/api/auth";
+    private const string BasePath = "api/v1/identity/auth";
 
     private HttpClient Client => httpClientFactory.CreateClient("Gateway");
 
