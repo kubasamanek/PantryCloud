@@ -48,7 +48,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<IPantryManagementService, PantryManagementService>();
 
-        services.AddPrometheusMetrics();
         services.AddOpenTelemetryTracing(configuration);
 
         return services;

@@ -268,6 +268,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{
 		deployments\k8s\charts\observability\templates\loki.yaml = deployments\k8s\charts\observability\templates\loki.yaml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NetworkPolicies", "NetworkPolicies", "{9FEA969A-753D-4FC2-85CD-3187C6095CC3}"
+	ProjectSection(SolutionItems) = preProject
+		deployments\k8s\charts\infrastructure\templates\network-policies\netpol-gateway-web.yaml = deployments\k8s\charts\infrastructure\templates\network-policies\netpol-gateway-web.yaml
+		deployments\k8s\charts\infrastructure\templates\network-policies\netpol-infrastructure.yaml = deployments\k8s\charts\infrastructure\templates\network-policies\netpol-infrastructure.yaml
+		deployments\k8s\charts\infrastructure\templates\network-policies\netpol-microservices.yaml = deployments\k8s\charts\infrastructure\templates\network-policies\netpol-microservices.yaml
+		deployments\k8s\charts\infrastructure\templates\network-policies\netpol-default.yaml = deployments\k8s\charts\infrastructure\templates\network-policies\netpol-default.yaml
+		deployments\k8s\charts\infrastructure\templates\network-policies\netpol-observability.yaml = deployments\k8s\charts\infrastructure\templates\network-policies\netpol-observability.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -983,5 +992,6 @@ Global
 		{99A942F4-5896-4E05-BF15-DC718BFC197B} = {E117BCA5-F0E0-4240-90CB-ABFA7D5DB366}
 		{3B1F1363-69F4-4754-8798-178F33CD7D88} = {3E303348-2A99-4133-AB3C-8E97F011EA74}
 		{41CFEC88-924F-452A-9D88-2DB997BAB6C5} = {3B1F1363-69F4-4754-8798-178F33CD7D88}
+		{9FEA969A-753D-4FC2-85CD-3187C6095CC3} = {99A942F4-5896-4E05-BF15-DC718BFC197B}
 	EndGlobalSection
 EndGlobal

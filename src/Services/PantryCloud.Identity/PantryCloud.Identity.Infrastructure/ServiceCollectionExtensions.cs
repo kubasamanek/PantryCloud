@@ -30,7 +30,6 @@ public static class ServiceCollectionExtensions
             options.UseNpgsql(connectionString));
 
         services.AddHealthChecks().AddNpgSql(connectionString!);
-        services.AddPrometheusMetrics();
         services.AddOpenTelemetryTracing(configuration);
         
         return services;

@@ -41,7 +41,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserContext, UserContext>();
         services.AddHostedService<AuditRetentionBackgroundService>();
 
-        services.AddPrometheusMetrics();
         services.AddOpenTelemetryTracing(configuration);
         
         return services;

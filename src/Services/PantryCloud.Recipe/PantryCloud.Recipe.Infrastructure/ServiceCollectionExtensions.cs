@@ -58,7 +58,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRecipeRepository, MongoRecipeRepository>();
         services.AddScoped<IRecipeSearchService, LocalMongoRecipeSearchService>();
         
-        services.AddPrometheusMetrics();
         services.AddOpenTelemetryTracing(configuration);
         
         return services;
