@@ -84,12 +84,21 @@ install-prereqs: ## Install Kind, kubectl, Helm via Homebrew (Docker must be ins
 .PHONY: cluster-create
 cluster-create: check-prereqs ## Create Kind cluster
 	kind create cluster --config kind-cluster.yaml
-	@echo "==> Waiting for cluster to be ready..."
-	kubectl wait --for=condition=Ready nodes --all --timeout=120s
 
 .PHONY: cluster-delete
 cluster-delete: ## Delete Kind cluster
 	kind delete cluster --name $(CLUSTER_NAME)
+
+.PHONY: calico-install
+calico-install: ## Install Calico CNI (required for NetworkPolicy enforcement)
+	kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.3/manifests/calico.yaml
+	@echo "==> Waiting for Calico pods to be ready..."
+	kubectl wait --namespace kube-system \
+		--for=condition=ready pod \
+		--selector=k8s-app=calico-node \
+		--timeout=180s
+	@echo "==> Waiting for nodes to be ready..."
+	kubectl wait --for=condition=Ready nodes --all --timeout=120s
 
 .PHONY: require-cluster
 require-cluster: ## Check that a Kubernetes cluster is reachable (used by infra-install, secrets, deploy-services)
@@ -262,7 +271,7 @@ undeploy-services: ## Undeploy all application services
 # ──────────────────────────────────────────────
 
 .PHONY: up
-up: cluster-create ingress-install images secrets infra-install observability-install deploy-services ## Full deploy: cluster + images + secrets + infra + observability + apps
+up: cluster-create calico-install ingress-install images secrets infra-install observability-install deploy-services ## Full deploy: cluster + calico + images + secrets + infra + observability + apps
 	@echo ""
 	@echo "============================================="
 	@echo " PantryCloud is running!"

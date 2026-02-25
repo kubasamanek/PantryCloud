@@ -1,0 +1,214 @@
+# ===================================================================
+# PostgreSQL-backed microservices
+# Applies to: identity, household, pantry, shoppinglist, audit
+# ===================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-microservice-postgres
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/instance
+        operator: In
+        values: [identity, household, pantry, shoppinglist, audit]
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Gateway > service (reverse proxy)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: api-gateway
+      ports:
+        - port: 8080
+          protocol: TCP
+    # Prometheus > service (metrics scrape)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - port: 8080
+          protocol: TCP
+    # Any microservice / gateway > service (JWKS discovery on identity)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: pantry-microservice
+      ports:
+        - port: 8080
+          protocol: TCP
+  egress:
+    # Service > PostgreSQL
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: postgresql
+      ports:
+        - port: 5432
+          protocol: TCP
+    # Service > RabbitMQ
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: rabbitmq
+      ports:
+        - port: 5672
+          protocol: TCP
+    # Service > Identity (JWKS)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: identity
+      ports:
+        - port: 8080
+          protocol: TCP
+    # Service > Alloy (OTLP traces)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: alloy
+      ports:
+        - port: 4317
+          protocol: TCP
+---
+# ===================================================================
+# Notification (PostgreSQL + Redis)
+# ===================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-microservice-notification
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: notification
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: api-gateway
+      ports:
+        - port: 8080
+          protocol: TCP
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - port: 8080
+          protocol: TCP
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: pantry-microservice
+      ports:
+        - port: 8080
+          protocol: TCP
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: postgresql
+      ports:
+        - port: 5432
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: rabbitmq
+      ports:
+        - port: 5672
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: redis
+      ports:
+        - port: 6379
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: identity
+      ports:
+        - port: 8080
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: alloy
+      ports:
+        - port: 4317
+          protocol: TCP
+---
+# ===================================================================
+# Recipe (MongoDB instead of PostgreSQL)
+# ===================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-microservice-recipe
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: recipe
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: api-gateway
+      ports:
+        - port: 8080
+          protocol: TCP
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - port: 8080
+          protocol: TCP
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: pantry-microservice
+      ports:
+        - port: 8080
+          protocol: TCP
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: mongodb
+      ports:
+        - port: 27017
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: rabbitmq
+      ports:
+        - port: 5672
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: identity
+      ports:
+        - port: 8080
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: alloy
+      ports:
+        - port: 4317
+          protocol: TCP
