@@ -79,7 +79,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
 
-        services.AddPrometheusMetrics();
         services.AddOpenTelemetryTracing(configuration);
 
         return services;

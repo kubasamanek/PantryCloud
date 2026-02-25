@@ -89,7 +89,6 @@ public static class ServiceCollectionExtensions
         services.AddReverseProxy()
             .AddTransforms<CorrelationIdTransformProvider>();
 
-        services.AddPrometheusMetrics();
         services.AddOpenTelemetryTracing(configuration);
 
         return services;

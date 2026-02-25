@@ -44,7 +44,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPreferencesService, PreferencesService>();
         services.AddScoped<IProfileService, ProfileService>();
 
-        services.AddPrometheusMetrics();
         services.AddOpenTelemetryTracing(configuration);
 
         return services;
