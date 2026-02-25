@@ -116,9 +116,11 @@ public sealed class NotificationTestFixture : IAsyncLifetime
         await publisher.PublishAsync(message, cancellationToken);
     }
 
+    private const string NotificationsApiBase = "/api/v1/notifications";
+
     public async Task<IReadOnlyList<NotificationDto>> GetMyNotificationsAsync(string accessToken, int limit = 50, DateTime? since = null, CancellationToken cancellationToken = default)
     {
-        var query = $"/me?limit={limit}";
+        var query = $"{NotificationsApiBase}/me?limit={limit}";
         if (since.HasValue)
         {
             query += "&since=" + Uri.EscapeDataString(since.Value.ToString("O"));
