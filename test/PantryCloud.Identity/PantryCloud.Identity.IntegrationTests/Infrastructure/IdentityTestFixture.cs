@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Security.Cryptography;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Networks;
@@ -49,6 +50,9 @@ public sealed class IdentityTestFixture : IAsyncLifetime
 
         await PostgresDatabaseSetup.CreateDatabaseAsync(_postgres, IntegrationConstants.Postgres.IdentityDatabase, IntegrationConstants.Postgres.User, IntegrationConstants.Postgres.DefaultDatabase);
         await PostgresDatabaseSetup.ApplyMigrationsAsync<ApplicationDbContext>(_postgres, IntegrationConstants.Postgres.IdentityDatabase, IntegrationConstants.Postgres.User, IntegrationConstants.Postgres.Password, IntegrationConstants.Postgres.Port);
+
+        var secretsPath = SolutionPathHelper.GetPathFromSolutionRoot("src", "Services", "PantryCloud.Identity", "PantryCloud.Identity.Presentation", "Secrets");
+        EnsureTestJwtKeys(secretsPath);
 
         await IdentityImageBuilder.BuildAsync();
         await _identityApi.StartAsync();
@@ -204,6 +208,21 @@ public sealed class IdentityTestFixture : IAsyncLifetime
         return new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseNpgsql(ConnectionString)
             .Options;
+    }
+
+    /// <summary>
+    /// Ensures the Secrets directory exists with private.pem and public.pem so the Identity container bind mount succeeds.
+    /// </summary>
+    private static void EnsureTestJwtKeys(string secretsPath)
+    {
+        Directory.CreateDirectory(secretsPath);
+        var privatePath = Path.Combine(secretsPath, "private.pem");
+        var publicPath = Path.Combine(secretsPath, "public.pem");
+        if (File.Exists(privatePath) && File.Exists(publicPath))
+            return;
+        using var rsa = RSA.Create(2048);
+        File.WriteAllText(privatePath, rsa.ExportRSAPrivateKeyPem());
+        File.WriteAllText(publicPath, rsa.ExportRSAPublicKeyPem());
     }
 
     public async Task DisposeAsync()
