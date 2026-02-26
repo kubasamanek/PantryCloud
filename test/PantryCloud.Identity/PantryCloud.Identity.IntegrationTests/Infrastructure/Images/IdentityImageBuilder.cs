@@ -11,6 +11,6 @@ public static class IdentityImageBuilder
     public static async Task BuildAsync(CancellationToken ct = default)
     {
         var solutionDir = CommonDirectoryPath.GetSolutionDirectory().DirectoryPath;
-        await DockerImageHelper.BuildImageAsync(ImageName, DockerfilePath, solutionDir, ct);
+        await DockerImageHelper.BuildImageAsync(ImageName, DockerfilePath, solutionDir, ct, forceRebuild: true);
     }
 }

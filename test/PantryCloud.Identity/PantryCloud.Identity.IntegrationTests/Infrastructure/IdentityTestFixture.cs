@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Security.Cryptography;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Networks;
@@ -18,7 +19,8 @@ public sealed class IdentityTestFixture : IAsyncLifetime
 {
     private readonly INetwork _network;
     private readonly PostgreSqlContainer _postgres;
-    private readonly IContainer _identityApi;
+    private IContainer _identityApi = null!;
+    private string? _secretsTempPath;
     private Respawner _respawner = null!;
 
     public HttpClient HttpClient { get; private set; } = null!;
@@ -33,13 +35,6 @@ public sealed class IdentityTestFixture : IAsyncLifetime
             .Build();
 
         _postgres = PostgresContainer.Create(_network).Build();
-        var secretsPath = SolutionPathHelper.GetPathFromSolutionRoot("src", "Services", "PantryCloud.Identity", "PantryCloud.Identity.Presentation", "Secrets");
-        _identityApi = IdentityContainer.Create(
-            IdentityImageBuilder.ImageName,
-            _network,
-            $"Host={IntegrationConstants.Postgres.Host};Port={IntegrationConstants.Postgres.Port};Database={IntegrationConstants.Postgres.IdentityDatabase};Username={IntegrationConstants.Postgres.User};Password={IntegrationConstants.Postgres.Password}",
-            secretsPath
-        ).Build();
     }
 
     public async Task InitializeAsync()
@@ -50,7 +45,18 @@ public sealed class IdentityTestFixture : IAsyncLifetime
         await PostgresDatabaseSetup.CreateDatabaseAsync(_postgres, IntegrationConstants.Postgres.IdentityDatabase, IntegrationConstants.Postgres.User, IntegrationConstants.Postgres.DefaultDatabase);
         await PostgresDatabaseSetup.ApplyMigrationsAsync<ApplicationDbContext>(_postgres, IntegrationConstants.Postgres.IdentityDatabase, IntegrationConstants.Postgres.User, IntegrationConstants.Postgres.Password, IntegrationConstants.Postgres.Port);
 
+        _secretsTempPath = Path.Combine(Path.GetTempPath(), "pantrycloud-identity-test-" + Guid.NewGuid().ToString("N"));
+        EnsureTestJwtKeys(_secretsTempPath);
+
         await IdentityImageBuilder.BuildAsync();
+
+        var connectionString = $"Host={IntegrationConstants.Postgres.Host};Port={IntegrationConstants.Postgres.Port};Database={IntegrationConstants.Postgres.IdentityDatabase};Username={IntegrationConstants.Postgres.User};Password={IntegrationConstants.Postgres.Password}";
+        _identityApi = IdentityContainer.Create(
+            IdentityImageBuilder.ImageName,
+            _network,
+            connectionString,
+            _secretsTempPath
+        ).Build();
         await _identityApi.StartAsync();
 
         BaseAddress = $"http://127.0.0.1:{_identityApi.GetMappedPublicPort(IntegrationConstants.Identity.Port)}";
@@ -206,10 +212,52 @@ public sealed class IdentityTestFixture : IAsyncLifetime
             .Options;
     }
 
+    /// <summary>
+    /// Creates a temp directory with private.pem and public.pem for the Identity container bind mount.
+    /// Writes via temp file + atomic move to avoid partial reads if tests run concurrently.
+    /// Caller is responsible for deleting the directory in DisposeAsync.
+    /// </summary>
+    private static void EnsureTestJwtKeys(string secretsPath)
+    {
+        Directory.CreateDirectory(secretsPath);
+        var privatePath = Path.Combine(secretsPath, "private.pem");
+        var publicPath = Path.Combine(secretsPath, "public.pem");
+        using var rsa = RSA.Create(2048);
+        var privatePem = rsa.ExportRSAPrivateKeyPem();
+        var publicPem = rsa.ExportRSAPublicKeyPem();
+        WriteAtomic(privatePath, privatePem);
+        WriteAtomic(publicPath, publicPem);
+    }
+
+    private static void WriteAtomic(string targetPath, string contents)
+    {
+        var tempPath = targetPath + ".tmp." + Guid.NewGuid().ToString("N");
+        try
+        {
+            File.WriteAllText(tempPath, contents);
+            File.Move(tempPath, targetPath, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(tempPath))
+                try { File.Delete(tempPath); } catch { /* ignore */ }
+        }
+    }
+
     public async Task DisposeAsync()
     {
         await _identityApi.DisposeAsync();
         await _postgres.DisposeAsync();
         await _network.DisposeAsync();
+        if (_secretsTempPath != null && Directory.Exists(_secretsTempPath))
+        {
+            try
+            {
+                foreach (var file in Directory.EnumerateFiles(_secretsTempPath))
+                    File.Delete(file);
+                Directory.Delete(_secretsTempPath);
+            }
+            catch { /* best-effort cleanup */ }
+        }
     }
 }

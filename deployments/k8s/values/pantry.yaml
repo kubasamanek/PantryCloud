@@ -20,7 +20,6 @@ env:
 
 existingSecrets:
   - pantry-api-secrets
-
 resources:
   requests:
     cpu: 100m
@@ -28,3 +27,15 @@ resources:
   limits:
     cpu: 500m
     memory: 512Mi
+
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 80
+
+pdb:
+  enabled: false
+  minAvailable: null
+  maxUnavailable: 1

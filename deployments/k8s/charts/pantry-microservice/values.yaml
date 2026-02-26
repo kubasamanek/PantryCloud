@@ -62,9 +62,12 @@ ingress:
 volumes: []
 volumeMounts: []
 
+# PodDisruptionBudget configuration
+# Only one of minAvailable / maxUnavailable should be non-null when enabled.
 pdb:
   enabled: false
-  minAvailable: 1
+  minAvailable: null
+  maxUnavailable: 1
 
 nodeSelector: {}
 tolerations: []

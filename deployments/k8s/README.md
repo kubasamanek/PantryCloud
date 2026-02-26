@@ -98,3 +98,16 @@ make deploy-services
 | `make status` | Display the status of pods, services, and ingress. |
 | `make deploy-<svc>` | Deploy a specific service (e.g., `make deploy-identity`). |
 | `make logs-<svc>` | Tail logs for a specific service deployment. |
+
+## Replicas and PodDisruptionBudgets
+
+- **Replica defaults**
+  - `api-gateway` and `identity-api` are deployed with **2 replicas** by default.
+  - All other services (`household`, `pantry`, `shoppinglist`, `recipe`, `notification`, `audit`, `web`) are deployed with **1 replica**.
+- **Horizontal scaling**
+  - HPA is enabled for all services, with `minReplicas` matching the defaults above (2 for gateway/identity, 1 for the rest).
+- **PDBs**
+  - For `api-gateway` and `identity-api`, a PDB is enabled with `minAvailable: 1`, so at least one pod remains available during voluntary disruptions (for example, when draining a node).
+  - For single‑replica services, the PDB wiring is present in the chart but disabled in the default values; this avoids blocking maintenance in the single‑node kind cluster while still keeping the configuration ready for a multi‑node environment.
+
+This layout models a common production pattern in a lightweight local setup: entrypoint services (gateway and identity) are redundant, while domain services scale out via HPA when needed.

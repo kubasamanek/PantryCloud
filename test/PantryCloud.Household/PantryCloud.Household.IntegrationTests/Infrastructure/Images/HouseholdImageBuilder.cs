@@ -11,6 +11,6 @@ public static class HouseholdImageBuilder
     public static async Task BuildAsync(CancellationToken ct = default)
     {
         var solutionDir = CommonDirectoryPath.GetSolutionDirectory().DirectoryPath;
-        await DockerImageHelper.BuildImageAsync(ImageName, TestConstants.DockerFilePath, solutionDir, ct);
+        await DockerImageHelper.BuildImageAsync(ImageName, TestConstants.DockerFilePath, solutionDir, ct, forceRebuild: true);
     }
 }

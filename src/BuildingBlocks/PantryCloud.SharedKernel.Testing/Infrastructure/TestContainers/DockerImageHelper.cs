@@ -12,15 +12,16 @@ public static class DockerImageHelper
 {
     /// <summary>
     /// Builds a Docker image from a Dockerfile using the Docker CLI.
-    /// Skips the build if the image already exists locally.
+    /// Skips the build if the image already exists locally unless <paramref name="forceRebuild"/> is true.
     /// </summary>
     public static async Task BuildImageAsync(
         string imageName,
         string dockerfilePath,
         string buildContext,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        bool forceRebuild = false)
     {
-        if (await ImageExistsAsync(imageName, cancellationToken))
+        if (!forceRebuild && await ImageExistsAsync(imageName, cancellationToken))
             return;
 
         var psi = new ProcessStartInfo("docker", $"build -t {imageName} -f {dockerfilePath} .")
