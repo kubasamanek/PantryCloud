@@ -48,4 +48,5 @@ node_modules/
 package-lock.json
 package.json
 
-**/PantryCloud.Identity.Presentation/Secrets/*.pem
+# Secrets
+*.pem
