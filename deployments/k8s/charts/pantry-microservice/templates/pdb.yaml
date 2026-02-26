@@ -1,4 +1,12 @@
 {{- if .Values.pdb.enabled }}
+{{- $minSet := ne .Values.pdb.minAvailable nil }}
+{{- $maxSet := ne .Values.pdb.maxUnavailable nil }}
+{{- if and $minSet $maxSet }}
+{{- fail "pdb: only one of minAvailable or maxUnavailable may be set" }}
+{{- end }}
+{{- if not (or $minSet $maxSet) }}
+{{- fail "pdb: exactly one of minAvailable or maxUnavailable must be set when pdb.enabled is true" }}
+{{- end }}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -6,9 +14,9 @@ metadata:
   labels:
     {{- include "pantry-microservice.labels" . | nindent 4 }}
 spec:
-  {{- if .Values.pdb.minAvailable }}
+  {{- if $minSet }}
   minAvailable: {{ .Values.pdb.minAvailable }}
-  {{- else if .Values.pdb.maxUnavailable }}
+  {{- else }}
   maxUnavailable: {{ .Values.pdb.maxUnavailable }}
   {{- end }}
   selector:
