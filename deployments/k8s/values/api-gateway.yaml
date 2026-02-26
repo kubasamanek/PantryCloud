@@ -1,4 +1,4 @@
-replicaCount: 1
+replicaCount: 2
 
 image:
   repository: samanekj/apigateway
@@ -57,3 +57,16 @@ resources:
   limits:
     cpu: 500m
     memory: 512Mi
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 80
+
+pdb:
+  enabled: true
+  # With 2 replicas, keep at least 1 available during voluntary disruptions.
+  minAvailable: 1
+  maxUnavailable: null
