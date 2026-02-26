@@ -59,6 +59,14 @@ services:
     networks:
       - pantry-network
 
+  redis:
+    image: redis:7-alpine
+    container_name: pantry-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - pantry-network
+
   # --- FRONTEND ---
   web:
     container_name: pantry-web
@@ -104,6 +112,17 @@ services:
       - pantry-network
 
   # --- SERVICES ---
+  jwt-keygen:
+    image: alpine
+    container_name: pantry-jwt-keygen
+    command: >
+      sh -c 'apk add --no-cache openssl && (test -f /secrets/private.pem || (openssl genrsa -out /secrets/private.pem 2048 && openssl rsa -in /secrets/private.pem -pubout -out /secrets/public.pem)) && chmod 644 /secrets/private.pem /secrets/public.pem'
+    volumes:
+      - jwt-secrets:/secrets
+    restart: "no"
+    networks:
+      - pantry-network
+
   identity-api:
     container_name: pantry-identity
     build:
@@ -131,8 +150,10 @@ services:
     ports:
       - "5072:8080"
     volumes:
-      - ../src/Services/PantryCloud.Identity/PantryCloud.Identity.Presentation/Secrets:/app/secrets:ro
+      - jwt-secrets:/app/secrets:ro
     depends_on:
+      jwt-keygen:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
     networks:
@@ -208,6 +229,7 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
       - IsDevelopment=true
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=notification_db;Username=admin;Password=password
+      - ConnectionStrings__Redis=redis:6379
       - Messaging__RabbitMQ__Host=rabbitmq
       - Messaging__RabbitMQ__Username=admin
       - Messaging__RabbitMQ__Password=password
@@ -310,6 +332,7 @@ volumes:
   postgres-data:
   rabbitmq-data:
   mongodb-data:
+  jwt-secrets:
 
 networks:
   pantry-network:
