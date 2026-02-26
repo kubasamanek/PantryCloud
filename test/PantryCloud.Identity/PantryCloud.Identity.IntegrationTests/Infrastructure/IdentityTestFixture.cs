@@ -9,6 +9,7 @@ using PantryCloud.Identity.Infrastructure;
 using PantryCloud.Identity.Infrastructure.Persistence;
 using PantryCloud.Identity.IntegrationTests.Infrastructure.Containers;
 using PantryCloud.Identity.IntegrationTests.Infrastructure.Images;
+using PantryCloud.SharedKernel.Testing.Infrastructure.Environment;
 using Respawn;
 using Testcontainers.PostgreSql;
 
