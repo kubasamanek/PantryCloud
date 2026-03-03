@@ -9,7 +9,7 @@ namespace PantryCloud.Household.Application.Commands.Handlers;
 
 public class AcceptHouseholdInvitationCommandHandler(
     IInvitationService invitationService,
-    IMessageBus messageBus,
+    IOutboxWriter outboxWriter,
     ICorrelationIdProvider correlationIdProvider)
     : IRequestHandler<AcceptHouseholdInvitationCommand, ErrorOr<AcceptHouseholdInvitationResponseDto>>
 {
@@ -17,8 +17,8 @@ public class AcceptHouseholdInvitationCommandHandler(
     {
         var result = await invitationService.AcceptHouseholdInvitation(request.Request, cancellationToken);
 
-        return await result.PublishIfSuccessAsync(
-            messageBus,
+        return await result.WriteToOutboxIfSuccessAsync(
+            outboxWriter,
             (response, correlationId) => new MemberJoinedHouseholdEvent
             {
                 HouseholdId = response.HouseholdId!.Value,

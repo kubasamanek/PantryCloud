@@ -84,6 +84,25 @@ namespace PantryCloud.Notification.Infrastructure.Migrations
 
                     b.ToTable("UserNotifications");
                 });
+
+            modelBuilder.Entity("PantryCloud.SharedKernel.Outbox.ProcessedInboxMessage", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.Property<DateTime>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("MessageId");
+
+                    b.ToTable("ProcessedInboxMessages", (string)null);
+                });
 #pragma warning restore 612, 618
         }
     }

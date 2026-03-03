@@ -9,7 +9,7 @@ namespace PantryCloud.Household.Application.Commands.Handlers;
 
 public class KickMemberCommandHandler(
     IHouseholdManagementService householdManagementService,
-    IMessageBus messageBus,
+    IOutboxWriter outboxWriter,
     ICorrelationIdProvider correlationIdProvider)
     : IRequestHandler<KickMemberCommand, ErrorOr<KickMemberResponseDto>>
 {
@@ -17,8 +17,8 @@ public class KickMemberCommandHandler(
     {
         var result = await householdManagementService.KickMemberAsync(request.Request, cancellationToken);
 
-        return await result.PublishIfSuccessAsync(
-            messageBus,
+        return await result.WriteToOutboxIfSuccessAsync(
+            outboxWriter,
             (response, correlationId) => new MemberLeftHouseholdEvent
             {
                 HouseholdId = response.HouseholdId,

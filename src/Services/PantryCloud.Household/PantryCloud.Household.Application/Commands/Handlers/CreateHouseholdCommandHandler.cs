@@ -9,7 +9,7 @@ namespace PantryCloud.Household.Application.Commands.Handlers;
 
 public class CreateHouseholdCommandHandler(
     IHouseholdManagementService householdManagementService,
-    IMessageBus messageBus,
+    IOutboxWriter outboxWriter,
     ICorrelationIdProvider correlationIdProvider)
     : IRequestHandler<CreateHouseholdCommand, ErrorOr<CreateHouseholdResponseDto>>
 {
@@ -17,8 +17,8 @@ public class CreateHouseholdCommandHandler(
     {
         var result = await householdManagementService.CreateHousehold(request.Request, cancellationToken);
 
-        return await result.PublishIfSuccessAsync(
-            messageBus,
+        return await result.WriteToOutboxIfSuccessAsync(
+            outboxWriter,
             (response, correlationId) => new MemberJoinedHouseholdEvent
             {
                 HouseholdId = response.Id,

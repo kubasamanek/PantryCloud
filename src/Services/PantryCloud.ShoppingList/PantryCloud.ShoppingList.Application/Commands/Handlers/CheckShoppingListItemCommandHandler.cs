@@ -9,7 +9,7 @@ namespace PantryCloud.ShoppingList.Application.Commands.Handlers;
 
 public class CheckShoppingListItemCommandHandler(
     IShoppingListManagementService shoppingListManagementService,
-    IMessageBus messageBus,
+    IOutboxWriter outboxWriter,
     ICorrelationIdProvider correlationIdProvider)
     : IRequestHandler<CheckShoppingListItemCommand, ErrorOr<CheckShoppingListItemResponseDto>>
 {
@@ -20,9 +20,10 @@ public class CheckShoppingListItemCommandHandler(
         if (result.IsError)
             return result;
 
-        if (result.Value.AllItemsChecked && result.Value.HouseholdId.HasValue && result.Value.ShoppingListId.HasValue && result.Value.ShoppingListName != null && result.Value.CheckedByUserId.HasValue)
+        // All items in a shopping list checked
+        if (result.Value is { AllItemsChecked: true, HouseholdId: not null, ShoppingListId: not null, ShoppingListName: not null, CheckedByUserId: not null })
         {
-            await messageBus.PublishAsync(new ShoppingListAllItemsCheckedEvent
+            await outboxWriter.WriteAsync(new ShoppingListAllItemsCheckedEvent
             {
                 HouseholdId = result.Value.HouseholdId.Value,
                 ShoppingListId = result.Value.ShoppingListId.Value,
@@ -35,5 +36,3 @@ public class CheckShoppingListItemCommandHandler(
         return result;
     }
 }
-
-

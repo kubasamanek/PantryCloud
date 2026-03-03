@@ -9,7 +9,7 @@ namespace PantryCloud.Pantry.Application.Commands.Handlers;
 
 public class UpdatePantryItemCommandHandler(
     IPantryManagementService pantryManagementService,
-    IMessageBus messageBus,
+    IOutboxWriter outboxWriter,
     ICorrelationIdProvider correlationIdProvider) : IRequestHandler<UpdatePantryItemCommand, ErrorOr<UpdatePantryItemResponseDto>>
 {
     public async Task<ErrorOr<UpdatePantryItemResponseDto>> Handle(UpdatePantryItemCommand request, CancellationToken cancellationToken)
@@ -19,7 +19,7 @@ public class UpdatePantryItemCommandHandler(
         if (result.IsError)
             return result;
 
-        await messageBus.PublishAsync(new PantryItemUpdatedEvent
+        await outboxWriter.WriteAsync(new PantryItemUpdatedEvent
         {
             HouseholdId = result.Value.HouseholdId,
             ItemId = result.Value.Id,
@@ -31,7 +31,7 @@ public class UpdatePantryItemCommandHandler(
 
         if (result.Value.Quantity == 0)
         {
-            await messageBus.PublishAsync(new PantryItemDepletedEvent
+            await outboxWriter.WriteAsync(new PantryItemDepletedEvent
             {
                 HouseholdId = result.Value.HouseholdId,
                 ItemId = result.Value.Id,
@@ -41,7 +41,7 @@ public class UpdatePantryItemCommandHandler(
             }, cancellationToken);
         }
 
+
         return result;
     }
 }
-

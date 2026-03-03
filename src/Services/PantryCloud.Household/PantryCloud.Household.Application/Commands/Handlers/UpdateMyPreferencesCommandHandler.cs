@@ -9,7 +9,7 @@ namespace PantryCloud.Household.Application.Commands.Handlers;
 
 public class UpdateMyPreferencesCommandHandler(
     IPreferencesService preferencesService,
-    IMessageBus messageBus,
+    IOutboxWriter outboxWriter,
     ICorrelationIdProvider correlationIdProvider)
     : IRequestHandler<UpdateMyPreferencesCommand, ErrorOr<UpdateMyPreferencesResponseDto>>
 {
@@ -17,16 +17,15 @@ public class UpdateMyPreferencesCommandHandler(
     {
         var result = await preferencesService.UpdateMyPreferencesAsync(request.Request, cancellationToken);
 
-        if (result.IsError)
-            return result;
-
-        await messageBus.PublishAsync(new PreferenceAddedEvent
-        {
-            HouseholdId = result.Value.HouseholdId,
-            UserId = result.Value.UserId,
-            CorrelationId = correlationIdProvider.GetCorrelationId()
-        }, cancellationToken);
-
-        return result;
+        return await result.WriteToOutboxIfSuccessAsync(
+            outboxWriter,
+            (response, correlationId) => new PreferenceAddedEvent
+            {
+                HouseholdId = response.HouseholdId,
+                UserId = response.UserId,
+                CorrelationId = correlationId
+            },
+            correlationIdProvider,
+            cancellationToken);
     }
 }

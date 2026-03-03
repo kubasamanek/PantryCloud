@@ -9,7 +9,7 @@ namespace PantryCloud.ShoppingList.Application.Commands.Handlers;
 
 public class CreateShoppingListCommandHandler(
     IShoppingListManagementService shoppingListManagementService,
-    IMessageBus messageBus,
+    IOutboxWriter outboxWriter,
     ICorrelationIdProvider correlationIdProvider)
     : IRequestHandler<CreateShoppingListCommand, ErrorOr<CreateShoppingListResponseDto>>
 {
@@ -17,20 +17,17 @@ public class CreateShoppingListCommandHandler(
     {
         var result = await shoppingListManagementService.CreateShoppingListAsync(request.Request, cancellationToken);
 
-        if (result.IsError)
-            return result;
-
-        await messageBus.PublishAsync(new ShoppingListCreatedEvent
-        {
-            HouseholdId = result.Value.HouseholdId,
-            ShoppingListId = result.Value.Id,
-            ShoppingListName = result.Value.Name,
-            CreatedByUserId = result.Value.CreatedBy,
-            CorrelationId = correlationIdProvider.GetCorrelationId()
-        }, cancellationToken);
-
-        return result;
+        return await result.WriteToOutboxIfSuccessAsync(
+            outboxWriter,
+            (response, correlationId) => new ShoppingListCreatedEvent
+            {
+                HouseholdId = response.HouseholdId,
+                ShoppingListId = response.Id,
+                ShoppingListName = response.Name,
+                CreatedByUserId = response.CreatedBy,
+                CorrelationId = correlationId
+            },
+            correlationIdProvider,
+            cancellationToken);
     }
 }
-
-
