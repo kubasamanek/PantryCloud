@@ -11,7 +11,7 @@ namespace PantryCloud.Pantry.Infrastructure.Services;
 
 public class ExpirationCheckService(
     PantryDbContext dbContext,
-    IMessageBus messageBus,
+    IOutboxWriter outboxWriter,
     IOptions<ExpirationCheckOptions> options,
     TimeProvider timeProvider,
     ILogger<ExpirationCheckService> logger) : IExpirationCheckService
@@ -80,12 +80,14 @@ public class ExpirationCheckService(
                     CorrelationId = Guid.NewGuid().ToString()
                 };
 
-                await messageBus.PublishAsync(@event, cancellationToken);
+                await outboxWriter.WriteAsync(@event, cancellationToken);
                 logger.LogDebug(
-                    "Published PantryItemsExpiringSoonEvent for household {HouseholdId} with {ItemCount} items",
+                    "Queued PantryItemsExpiringSoonEvent to outbox for household {HouseholdId} with {ItemCount} items",
                     householdGroup.Key,
                     expiringItems.Count);
             }
+
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
     }
 

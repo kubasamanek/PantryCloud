@@ -9,7 +9,7 @@ namespace PantryCloud.Household.Application.Commands.Handlers;
 
 public class LeaveHouseholdCommandHandler(
     IHouseholdManagementService householdManagementService,
-    IMessageBus messageBus,
+    IOutboxWriter outboxWriter,
     ICorrelationIdProvider correlationIdProvider)
     : IRequestHandler<LeaveHouseholdCommand, ErrorOr<LeaveHouseholdResponseDto>>
 {
@@ -17,8 +17,8 @@ public class LeaveHouseholdCommandHandler(
     {
         var result = await householdManagementService.LeaveHousehold(request.Request, cancellationToken);
 
-        return await result.PublishIfSuccessAsync(
-            messageBus,
+        return await result.WriteToOutboxIfSuccessAsync(
+            outboxWriter,
             (response, correlationId) => new MemberLeftHouseholdEvent
             {
                 HouseholdId = response.HouseholdId!.Value,

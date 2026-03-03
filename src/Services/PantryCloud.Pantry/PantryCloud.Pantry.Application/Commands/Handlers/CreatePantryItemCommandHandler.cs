@@ -9,27 +9,25 @@ namespace PantryCloud.Pantry.Application.Commands.Handlers;
 
 public class CreatePantryItemCommandHandler(
     IPantryManagementService pantryManagementService,
-    IMessageBus messageBus,
+    IOutboxWriter outboxWriter,
     ICorrelationIdProvider correlationIdProvider) : IRequestHandler<CreatePantryItemCommand, ErrorOr<CreatePantryItemResponseDto>>
 {
     public async Task<ErrorOr<CreatePantryItemResponseDto>> Handle(CreatePantryItemCommand request, CancellationToken cancellationToken)
     {
         var result = await pantryManagementService.CreatePantryItemAsync(request.Request, cancellationToken);
 
-        if (result.IsError)
-            return result;
-
-        await messageBus.PublishAsync(new PantryItemCreatedEvent
-        {
-            HouseholdId = result.Value.HouseholdId,
-            ItemId = result.Value.Id,
-            ItemName = result.Value.Name,
-            Quantity = result.Value.Quantity,
-            UserId = result.Value.CreatedBy,
-            CorrelationId = correlationIdProvider.GetCorrelationId()
-        }, cancellationToken);
-
-        return result;
+        return await result.WriteToOutboxIfSuccessAsync(
+            outboxWriter,
+            (response, correlationId) => new PantryItemCreatedEvent
+            {
+                HouseholdId = response.HouseholdId,
+                ItemId = response.Id,
+                ItemName = response.Name,
+                Quantity = response.Quantity,
+                UserId = response.CreatedBy,
+                CorrelationId = correlationId
+            },
+            correlationIdProvider,
+            cancellationToken);
     }
 }
-

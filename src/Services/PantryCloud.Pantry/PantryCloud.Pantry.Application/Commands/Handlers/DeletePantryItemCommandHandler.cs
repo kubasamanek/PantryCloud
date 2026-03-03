@@ -9,26 +9,24 @@ namespace PantryCloud.Pantry.Application.Commands.Handlers;
 
 public class DeletePantryItemCommandHandler(
     IPantryManagementService pantryManagementService,
-    IMessageBus messageBus,
+    IOutboxWriter outboxWriter,
     ICorrelationIdProvider correlationIdProvider) : IRequestHandler<DeletePantryItemCommand, ErrorOr<DeletePantryItemResponseDto>>
 {
     public async Task<ErrorOr<DeletePantryItemResponseDto>> Handle(DeletePantryItemCommand request, CancellationToken cancellationToken)
     {
         var result = await pantryManagementService.DeletePantryItemAsync(request.Request, cancellationToken);
 
-        if (result.IsError)
-            return result;
-
-        await messageBus.PublishAsync(new PantryItemDeletedEvent
-        {
-            HouseholdId = result.Value.HouseholdId,
-            ItemId = result.Value.Id,
-            ItemName = result.Value.ItemName,
-            InitiatedByUserId = result.Value.InitiatedByUserId,
-            CorrelationId = correlationIdProvider.GetCorrelationId()
-        }, cancellationToken);
-
-        return result;
+        return await result.WriteToOutboxIfSuccessAsync(
+            outboxWriter,
+            (response, correlationId) => new PantryItemDeletedEvent
+            {
+                HouseholdId = response.HouseholdId,
+                ItemId = response.Id,
+                ItemName = response.ItemName,
+                InitiatedByUserId = response.InitiatedByUserId,
+                CorrelationId = correlationId
+            },
+            correlationIdProvider,
+            cancellationToken);
     }
 }
-

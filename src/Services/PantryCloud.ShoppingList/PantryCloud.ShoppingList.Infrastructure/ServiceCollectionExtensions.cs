@@ -27,6 +27,10 @@ public static class ServiceCollectionExtensions
         services.AddDbContextWithAuditing<ShoppingListDbContext>(options =>
             options.UseNpgsql(connectionString));
 
+        services.AddScoped<DbContext>(sp => sp.GetRequiredService<ShoppingListDbContext>());
+
+        services.AddOutboxRelay<ShoppingListDbContext>();
+
         services.AddMessaging(configuration, typeof(ServiceCollectionExtensions).Assembly);
 
         services.AddHealthChecks().AddNpgSql(connectionString!);

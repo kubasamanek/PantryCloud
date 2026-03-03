@@ -120,4 +120,9 @@ internal static class Constants
         public const string AppleSearchTermUpper = "APPLE";
         public const string WhitespaceSearchTerm = "   ";
     }
+    public static class Outbox
+    {
+        public const string CorrelationId = "outbox-correlation-id-123";
+        public const string SuccessValue = "success-result";
+    }
 }

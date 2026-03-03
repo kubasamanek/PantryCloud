@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -17,7 +16,7 @@ public class ExpirationCheckServiceTests
     private readonly ILogger<ExpirationCheckService> _logger = TestHelper.MockLogger<ExpirationCheckService>();
 
     [Fact]
-    public async Task RunAsync_ShouldPublishEvent_WhenItemsExpiringInNextThreeDays()
+    public async Task RunAsync_ShouldWriteEventToOutbox_WhenItemsExpiringInNextThreeDays()
     {
         var householdId = Guid.NewGuid();
         var now = new DateTime(2026, 2, 2, 12, 0, 0, DateTimeKind.Utc);
@@ -25,31 +24,31 @@ public class ExpirationCheckServiceTests
         var tomorrow = today.AddDays(1);
         var dayAfterTomorrow = today.AddDays(2);
 
-        await using var db = TestHelper.CreateInMemoryContext(nameof(RunAsync_ShouldPublishEvent_WhenItemsExpiringInNextThreeDays));
+        await using var db = TestHelper.CreateInMemoryContext(nameof(RunAsync_ShouldWriteEventToOutbox_WhenItemsExpiringInNextThreeDays));
         db.PantryItems.AddRange(
             CreatePantryItem(householdId, Constants.ExpirationCheck.MilkName, today),
             CreatePantryItem(householdId, Constants.ExpirationCheck.BreadName, tomorrow),
             CreatePantryItem(householdId, Constants.ExpirationCheck.EggsName, dayAfterTomorrow));
         await db.SaveChangesAsync();
 
-        var publishedEvents = new List<PantryItemsExpiringSoonEvent>();
-        var messageBus = Substitute.For<IMessageBus>();
-        messageBus.PublishAsync(Arg.Any<PantryItemsExpiringSoonEvent>(), Arg.Any<CancellationToken>())
+        var writtenEvents = new List<PantryItemsExpiringSoonEvent>();
+        var outboxWriter = Substitute.For<IOutboxWriter>();
+        outboxWriter.WriteAsync(Arg.Any<PantryItemsExpiringSoonEvent>(), Arg.Any<CancellationToken>())
             .Returns(call =>
             {
-                publishedEvents.Add(call.Arg<PantryItemsExpiringSoonEvent>());
+                writtenEvents.Add(call.Arg<PantryItemsExpiringSoonEvent>());
                 return Task.CompletedTask;
             });
 
         var options = Options.Create(new ExpirationCheckOptions { BatchSize = 50, BatchDelayMs = 0 });
         var timeProvider = new Microsoft.Extensions.Time.Testing.FakeTimeProvider(now);
 
-        var service = new ExpirationCheckService(db, messageBus, options, timeProvider, _logger);
+        var service = new ExpirationCheckService(db, outboxWriter, options, timeProvider, _logger);
 
         await service.RunAsync(CancellationToken.None);
 
-        publishedEvents.ShouldHaveSingleItem();
-        var evt = publishedEvents[0];
+        writtenEvents.ShouldHaveSingleItem();
+        var evt = writtenEvents[0];
         evt.HouseholdId.ShouldBe(householdId);
         evt.Items.Count.ShouldBe(3);
 
@@ -59,58 +58,58 @@ public class ExpirationCheckServiceTests
     }
 
     [Fact]
-    public async Task RunAsync_ShouldNotPublish_WhenNoExpiringItems()
+    public async Task RunAsync_ShouldNotWriteToOutbox_WhenNoExpiringItems()
     {
         var householdId = Guid.NewGuid();
         var now = new DateTime(2026, 2, 2, 12, 0, 0, DateTimeKind.Utc);
 
-        await using var db = TestHelper.CreateInMemoryContext(nameof(RunAsync_ShouldNotPublish_WhenNoExpiringItems));
+        await using var db = TestHelper.CreateInMemoryContext(nameof(RunAsync_ShouldNotWriteToOutbox_WhenNoExpiringItems));
         db.PantryItems.Add(CreatePantryItem(householdId, Constants.ExpirationCheck.MilkName, now.AddDays(5)));
         await db.SaveChangesAsync();
 
-        var messageBus = Substitute.For<IMessageBus>();
+        var outboxWriter = Substitute.For<IOutboxWriter>();
         var options = Options.Create(new ExpirationCheckOptions());
         var timeProvider = new Microsoft.Extensions.Time.Testing.FakeTimeProvider(now);
 
-        var service = new ExpirationCheckService(db, messageBus, options, timeProvider, _logger);
+        var service = new ExpirationCheckService(db, outboxWriter, options, timeProvider, _logger);
 
         await service.RunAsync(CancellationToken.None);
 
-        await messageBus.DidNotReceive().PublishAsync(Arg.Any<PantryItemsExpiringSoonEvent>(), Arg.Any<CancellationToken>());
+        await outboxWriter.DidNotReceive().WriteAsync(Arg.Any<PantryItemsExpiringSoonEvent>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task RunAsync_ShouldPublishPerHousehold_WhenMultipleHouseholdsHaveExpiringItems()
+    public async Task RunAsync_ShouldWriteOneEventPerHousehold_WhenMultipleHouseholdsHaveExpiringItems()
     {
         var household1 = Guid.NewGuid();
         var household2 = Guid.NewGuid();
         var now = new DateTime(2026, 2, 2, 12, 0, 0, DateTimeKind.Utc);
         var today = now.Date;
 
-        await using var db = TestHelper.CreateInMemoryContext(nameof(RunAsync_ShouldPublishPerHousehold_WhenMultipleHouseholdsHaveExpiringItems));
+        await using var db = TestHelper.CreateInMemoryContext(nameof(RunAsync_ShouldWriteOneEventPerHousehold_WhenMultipleHouseholdsHaveExpiringItems));
         db.PantryItems.Add(CreatePantryItem(household1, Constants.ExpirationCheck.MilkName, today));
         db.PantryItems.Add(CreatePantryItem(household2, Constants.ExpirationCheck.BreadName, today));
         await db.SaveChangesAsync();
 
-        var publishedEvents = new List<PantryItemsExpiringSoonEvent>();
-        var messageBus = Substitute.For<IMessageBus>();
-        messageBus.PublishAsync(Arg.Any<PantryItemsExpiringSoonEvent>(), Arg.Any<CancellationToken>())
+        var writtenEvents = new List<PantryItemsExpiringSoonEvent>();
+        var outboxWriter = Substitute.For<IOutboxWriter>();
+        outboxWriter.WriteAsync(Arg.Any<PantryItemsExpiringSoonEvent>(), Arg.Any<CancellationToken>())
             .Returns(call =>
             {
-                publishedEvents.Add(call.Arg<PantryItemsExpiringSoonEvent>());
+                writtenEvents.Add(call.Arg<PantryItemsExpiringSoonEvent>());
                 return Task.CompletedTask;
             });
 
         var options = Options.Create(new ExpirationCheckOptions { BatchSize = 50, BatchDelayMs = 0 });
         var timeProvider = new Microsoft.Extensions.Time.Testing.FakeTimeProvider(now);
 
-        var service = new ExpirationCheckService(db, messageBus, options, timeProvider, _logger);
+        var service = new ExpirationCheckService(db, outboxWriter, options, timeProvider, _logger);
 
         await service.RunAsync(CancellationToken.None);
 
-        publishedEvents.Count.ShouldBe(2);
-        publishedEvents.ShouldContain(e => e.HouseholdId == household1 && e.Items.Count == 1 && e.Items[0].Name == Constants.ExpirationCheck.MilkName);
-        publishedEvents.ShouldContain(e => e.HouseholdId == household2 && e.Items.Count == 1 && e.Items[0].Name == Constants.ExpirationCheck.BreadName);
+        writtenEvents.Count.ShouldBe(2);
+        writtenEvents.ShouldContain(e => e.HouseholdId == household1 && e.Items.Count == 1 && e.Items[0].Name == Constants.ExpirationCheck.MilkName);
+        writtenEvents.ShouldContain(e => e.HouseholdId == household2 && e.Items.Count == 1 && e.Items[0].Name == Constants.ExpirationCheck.BreadName);
     }
 
     [Fact]
@@ -125,25 +124,25 @@ public class ExpirationCheckServiceTests
         db.PantryItems.Add(CreatePantryItem(householdId, Constants.ExpirationCheck.NoExpiryName, null));
         await db.SaveChangesAsync();
 
-        var publishedEvents = new List<PantryItemsExpiringSoonEvent>();
-        var messageBus = Substitute.For<IMessageBus>();
-        messageBus.PublishAsync(Arg.Any<PantryItemsExpiringSoonEvent>(), Arg.Any<CancellationToken>())
+        var writtenEvents = new List<PantryItemsExpiringSoonEvent>();
+        var outboxWriter = Substitute.For<IOutboxWriter>();
+        outboxWriter.WriteAsync(Arg.Any<PantryItemsExpiringSoonEvent>(), Arg.Any<CancellationToken>())
             .Returns(call =>
             {
-                publishedEvents.Add(call.Arg<PantryItemsExpiringSoonEvent>());
+                writtenEvents.Add(call.Arg<PantryItemsExpiringSoonEvent>());
                 return Task.CompletedTask;
             });
 
         var options = Options.Create(new ExpirationCheckOptions());
         var timeProvider = new Microsoft.Extensions.Time.Testing.FakeTimeProvider(now);
 
-        var service = new ExpirationCheckService(db, messageBus, options, timeProvider, _logger);
+        var service = new ExpirationCheckService(db, outboxWriter, options, timeProvider, _logger);
 
         await service.RunAsync(CancellationToken.None);
 
-        publishedEvents.ShouldHaveSingleItem();
-        publishedEvents[0].Items.Count.ShouldBe(1);
-        publishedEvents[0].Items[0].Name.ShouldBe(Constants.ExpirationCheck.MilkName);
+        writtenEvents.ShouldHaveSingleItem();
+        writtenEvents[0].Items.Count.ShouldBe(1);
+        writtenEvents[0].Items[0].Name.ShouldBe(Constants.ExpirationCheck.MilkName);
     }
 
     private static PantryItem CreatePantryItem(Guid householdId, string name, DateTime? expirationDate)

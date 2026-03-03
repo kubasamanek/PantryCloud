@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PantryCloud.SharedKernel.Identity;
+using PantryCloud.SharedKernel.Messaging;
 
 namespace PantryCloud.SharedKernel.Persistence;
 
@@ -29,6 +30,30 @@ public static class ServiceCollectionExtensions
             var interceptor = serviceProvider.GetRequiredService<AuditableEntityInterceptor>();
             options.AddInterceptors(interceptor);
         });
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the <see cref="OutboxWriter{TDbContext}"/> and <see cref="OutboxRelayWorker{TDbContext}"/>
+    /// so that integration events written via <see cref="IOutboxWriter"/> are relayed to the message broker
+    /// by a background worker.
+    /// </summary>
+    /// <typeparam name="TDbContext">The DbContext that owns the OutboxMessages table.</typeparam>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configureOptions">Optional override for relay worker options.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddOutboxRelay<TDbContext>(
+        this IServiceCollection services,
+        Action<OutboxRelayOptions>? configureOptions = null)
+        where TDbContext : DbContext
+    {
+        var options = new OutboxRelayOptions();
+        configureOptions?.Invoke(options);
+
+        services.AddSingleton(options);
+        services.AddScoped<IOutboxWriter, OutboxWriter<TDbContext>>();
+        services.AddHostedService<OutboxRelayWorker<TDbContext>>();
 
         return services;
     }

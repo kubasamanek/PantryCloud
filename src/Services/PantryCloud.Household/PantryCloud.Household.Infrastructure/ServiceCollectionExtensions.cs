@@ -28,6 +28,10 @@ public static class ServiceCollectionExtensions
         services.AddDbContextWithAuditing<HouseholdDbContext>(options =>
             options.UseNpgsql(connectionString));
 
+        services.AddScoped<DbContext>(sp => sp.GetRequiredService<HouseholdDbContext>());
+
+        services.AddOutboxRelay<HouseholdDbContext>();
+
         services.AddMessaging(configuration, typeof(CreateHouseholdCommand).Assembly);
 
         services.AddHealthChecks().AddNpgSql(connectionString!);

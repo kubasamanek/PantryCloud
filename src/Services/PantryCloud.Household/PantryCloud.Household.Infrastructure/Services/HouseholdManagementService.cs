@@ -84,7 +84,6 @@ public class HouseholdManagementService(
 
         DbContext.Households.Add(household);
         DbContext.Members.Add(member);
-
         await DbContext.SaveChangesAsync(cancellationToken);
 
         Logger.LogInformation("Created household for {UserId}", UserId);
@@ -141,7 +140,6 @@ public class HouseholdManagementService(
             DbContext.Members.Remove(member);
             Logger.LogInformation("User {UserId} left the household", UserId);
         }
-
         await DbContext.SaveChangesAsync(cancellationToken);
 
         return new LeaveHouseholdResponseDto(householdId, UserId, UserEmail, DateTime.UtcNow);

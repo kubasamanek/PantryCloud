@@ -348,7 +348,6 @@ public class ShoppingListManagementService(
         item.IsChecked = !item.IsChecked;
         item.CheckedBy = item.IsChecked ? UserId : null;
         item.CheckedAt = item.IsChecked ? DateTime.UtcNow : null;
-
         await DbContext.SaveChangesAsync(cancellationToken);
 
         var shoppingList = await DbContext.ShoppingLists

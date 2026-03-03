@@ -9,7 +9,7 @@ namespace PantryCloud.Household.Application.Commands.Handlers;
 
 public class TransferOwnershipCommandHandler(
     IHouseholdManagementService householdManagementService,
-    IMessageBus messageBus,
+    IOutboxWriter outboxWriter,
     ICorrelationIdProvider correlationIdProvider)
     : IRequestHandler<TransferOwnershipCommand, ErrorOr<TransferOwnershipResponseDto>>
 {
@@ -17,8 +17,8 @@ public class TransferOwnershipCommandHandler(
     {
         var result = await householdManagementService.TransferOwnershipAsync(request.Request, cancellationToken);
 
-        return await result.PublishIfSuccessAsync(
-            messageBus,
+        return await result.WriteToOutboxIfSuccessAsync(
+            outboxWriter,
             (response, correlationId) => new OwnershipTransferredEvent
             {
                 HouseholdId = response.HouseholdId,

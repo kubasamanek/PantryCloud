@@ -29,6 +29,10 @@ public static class ServiceCollectionExtensions
         services.AddDbContextWithAuditing<PantryDbContext>(options =>
             options.UseNpgsql(connectionString));
 
+        services.AddScoped<DbContext>(sp => sp.GetRequiredService<PantryDbContext>());
+
+        services.AddOutboxRelay<PantryDbContext>();
+
         services.AddMessaging(configuration, typeof(ServiceCollectionExtensions).Assembly);
 
         services.AddHealthChecks().AddNpgSql(connectionString!);
