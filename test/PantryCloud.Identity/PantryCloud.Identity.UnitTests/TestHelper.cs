@@ -8,6 +8,7 @@ using PantryCloud.Identity.Core.Entities;
 using PantryCloud.Identity.Infrastructure;
 using PantryCloud.Identity.Infrastructure.Persistence;
 using PantryCloud.Identity.Infrastructure.Services;
+using PantryCloud.SharedKernel.Email;
 
 namespace PantryCloud.Identity.UnitTests;
 
@@ -23,12 +24,14 @@ internal static class TestHelper
 
     public static ITokenProvider MockTokenProvider(string accessToken = "ACCESS_TOKEN",
         string refreshToken = "REFRESH_TOKEN",
-        string passwordResetToken = "PASSWORD_RESET_TOKEN")
+        string passwordResetToken = "PASSWORD_RESET_TOKEN",
+        string verifyEmailToken = "VERIFY_EMAIL_TOKEN")
     {
         var tp = Substitute.For<ITokenProvider>();
         tp.CreateAccessToken(Arg.Any<ApplicationUser>(), Arg.Any<Guid?>()).Returns(accessToken);
         tp.CreateRefreshToken().Returns(refreshToken);
         tp.CreatePasswordResetToken().Returns(passwordResetToken);
+        tp.CreateVerifyEmailToken().Returns(verifyEmailToken);
 
         return tp;
     }
@@ -50,6 +53,9 @@ internal static class TestHelper
 
     public static ILogger<AuthService> MockLogger()
         => Substitute.For<ILogger<AuthService>>();
+
+    public static IEmailSender MockEmailSender()
+        => Substitute.For<IEmailSender>();
 
     public static ApplicationUser MakeUser(string email, string password, bool verified = false)
     {

@@ -1,4 +1,3 @@
-using System.Net.Mail;
 using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +8,7 @@ using PantryCloud.Identity.Core;
 using PantryCloud.Identity.Core.Entities;
 using PantryCloud.Identity.Core.Errors;
 using PantryCloud.Identity.Infrastructure.Persistence;
+using PantryCloud.SharedKernel.Email;
 
 namespace PantryCloud.Identity.Infrastructure.Services;
 
@@ -17,7 +17,8 @@ public class AuthService(
     ApplicationDbContext dbContext,
     ILogger<AuthService> logger,
     ApiConfiguration config,
-    IIdentityUserContext userContext) : IAuthService
+    IIdentityUserContext userContext,
+    IEmailSender emailSender) : IAuthService
 {
     public async Task<ErrorOr<RegisterResponseDto>> RegisterAsync(RegisterRequestDto request, CancellationToken cancellationToken)
     {
@@ -52,7 +53,9 @@ public class AuthService(
 
         logger.LogInformation("User registered successfully with ID: {UserId}", user.Id);
 
-        // TODO: Send confirmation email
+        var verifyUrl = $"{config.App.FrontendUrl}/verify-email?email={Uri.EscapeDataString(request.Email)}&token={Uri.EscapeDataString(verifyEmailTokenString)}";
+        var verifyBody = string.Format(Constants.VerifyEmailBodyTemplate, verifyUrl);
+        await emailSender.SendAsync(request.Email, Constants.VerifyEmailSubject, verifyBody, cancellationToken);
 
         return new RegisterResponseDto(user.Id.ToString(), verifyEmailTokenString);
     }
@@ -106,12 +109,10 @@ public class AuthService(
             .FirstOrDefaultAsync(s => s.RefreshToken == request.RefreshToken, cancellationToken);
 
         if (session?.User == null)
-
-            if (session?.User == null)
-            {
-                logger.LogWarning("Refresh token failed: token not found");
-                return AuthErrors.InvalidRefreshToken;
-            }
+        {
+            logger.LogWarning("Refresh token failed: token not found");
+            return AuthErrors.InvalidRefreshToken;
+        }
 
         var user = session.User;
 
@@ -168,19 +169,8 @@ public class AuthService(
         await dbContext.ResetPasswordTokens.AddAsync(entity, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        if (config.App.SendEmails)
-        {
-            using var client = new SmtpClient(config.Email.Host, config.Email.Port);
-            using var message = new MailMessage();
-
-            message.From = new MailAddress(config.Email.From);
-            message.Subject = Constants.ResetPasswordEmailSubject;
-            message.Body = string.Format(Constants.ResetPasswordEmailBodyTemplate, callbackUrl);
-            message.IsBodyHtml = true;
-            message.To.Add(user.Email);
-
-            await client.SendMailAsync(message, cancellationToken);
-        }
+        var resetBody = string.Format(Constants.ResetPasswordEmailBodyTemplate, callbackUrl);
+        await emailSender.SendAsync(user.Email, Constants.ResetPasswordEmailSubject, resetBody, cancellationToken);
 
         return new ForgotPasswordResponseDto(token, callbackUrl);
     }

@@ -67,6 +67,15 @@ services:
     networks:
       - pantry-network
 
+  smtp4dev:
+    image: rnwood/smtp4dev:latest
+    container_name: pantry-smtp4dev
+    ports:
+      - "5080:80"    # Web UI
+      - "2525:25"    # SMTP
+    networks:
+      - pantry-network
+
   # --- FRONTEND ---
   web:
     container_name: pantry-web
@@ -142,8 +151,9 @@ services:
       - App__AuthorityBaseUrl=http://localhost:5050/api/identity
       - App__ResetPasswordTokenExpirationInMinutes=60
       - App__VerifyEmailTokenExpirationInMinutes=60
-      - Email__Host=localhost
-      - Email__Port=2525
+      - App__SendEmails=true
+      - Email__Host=smtp4dev
+      - Email__Port=25
       - Email__Username=
       - Email__Password=
       - Email__From=admin@pantrycloud.dev
@@ -156,6 +166,8 @@ services:
         condition: service_completed_successfully
       postgres:
         condition: service_healthy
+      smtp4dev:
+        condition: service_started
     networks:
       - pantry-network
 
@@ -170,6 +182,14 @@ services:
       - IsDevelopment=true
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=household_db;Username=admin;Password=password;
       - App__IdentityUrl=http://identity-api:8080
+      - App__FrontendUrl=http://localhost:3000
+      - App__SendEmails=true
+      - App__InvitationExpirationMinutes=2
+      - Email__Host=smtp4dev
+      - Email__Port=25
+      - Email__UserName=
+      - Email__Password=
+      - Email__From=noreply@pantrycloud.dev
       - Jwt__Issuer=pantry-identity
       - Jwt__Audience=pantry-cloud
       - Messaging__RabbitMQ__Host=rabbitmq
@@ -184,6 +204,8 @@ services:
         condition: service_started
       rabbitmq:
         condition: service_healthy
+      smtp4dev:
+        condition: service_started
     networks:
       - pantry-network
 

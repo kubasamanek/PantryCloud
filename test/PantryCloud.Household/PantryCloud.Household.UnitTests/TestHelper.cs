@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using PantryCloud.Household.Core;
 using PantryCloud.Household.Infrastructure.Persistence;
+using PantryCloud.SharedKernel.Email;
 using PantryCloud.SharedKernel.Identity;
 
 namespace PantryCloud.Household.UnitTests;
@@ -24,6 +25,9 @@ internal static class TestHelper
         var tp = new ApiConfiguration();
         return tp;
     }
+
+    public static IEmailSender MockEmailSender()
+        => Substitute.For<IEmailSender>();
 
     public static ILogger<T> MockLogger<T>() where T : class
         => Substitute.For<ILogger<T>>();
