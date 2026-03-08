@@ -22,4 +22,5 @@ public static class Routes
     public const string Pantry = "/pantry";
     public const string Recipes = "/recipes";
     public const string ShoppingList = "/shopping-list";
+    public const string Audit = "/audit";
 }

@@ -1,5 +1,3 @@
-using PantryCloud.SharedKernel.Outbox;
-
 namespace PantryCloud.SharedKernel.Messaging;
 
 /// <summary>

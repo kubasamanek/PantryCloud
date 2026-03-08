@@ -17,4 +17,6 @@ public static class ApiPaths
     public const string Recipe = "api/" + Version + "/recipe/recipes";
 
     public const string Notification = "api/" + Version + "/notification/notifications";
+
+    public const string Audit = "api/" + Version + "/audit/audit";
 }
