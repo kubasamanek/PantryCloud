@@ -17,7 +17,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers <see cref="SmtpEmailSender"/> as <see cref="IEmailSender"/>. Requires <see cref="EmailSenderOptions"/> to be configured (e.g. services.Configure&lt;EmailSenderOptions&gt;(configuration.GetSection(EmailSenderOptions.SectionName))).
+    /// Registers <see cref="SmtpEmailSender"/> as <see cref="IEmailSender"/>. Requires <see cref="EmailSenderOptions"/> to be configured.
     /// </summary>
     public static IServiceCollection AddSmtpEmailSender(this IServiceCollection services)
     {

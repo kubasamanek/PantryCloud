@@ -1,7 +1,7 @@
 namespace PantryCloud.SharedKernel.Email;
 
 /// <summary>
-/// Configuration for SMTP-based email sending. Bind from config (e.g. Email:Host, Email:Port).
+/// Configuration for SMTP-based email sending.
 /// </summary>
 public class EmailSenderOptions
 {

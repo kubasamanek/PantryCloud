@@ -1,7 +1,7 @@
 namespace PantryCloud.SharedKernel.Email;
 
 /// <summary>
-/// Abstraction for sending email. Implementations may send via SMTP or log only (simulation).
+/// Abstraction for sending email.
 /// </summary>
 public interface IEmailSender
 {
