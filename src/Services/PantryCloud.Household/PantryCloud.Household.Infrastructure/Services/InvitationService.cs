@@ -4,10 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PantryCloud.Household.Application;
 using PantryCloud.Household.Application.Dtos;
+using PantryCloud.Household.Core;
 using PantryCloud.Household.Core.Entities;
 using PantryCloud.Household.Core.Enums;
 using PantryCloud.Household.Core.Errors;
 using PantryCloud.Household.Infrastructure.Persistence;
+using PantryCloud.Household.Infrastructure;
+using PantryCloud.SharedKernel.Email;
 using PantryCloud.SharedKernel.Identity;
 using PantryCloud.SharedKernel.Services;
 
@@ -16,7 +19,9 @@ namespace PantryCloud.Household.Infrastructure.Services;
 public class InvitationService(
     ILogger<InvitationService> logger,
     IUserContext userContext,
-    HouseholdDbContext dbContext)
+    HouseholdDbContext dbContext,
+    IEmailSender emailSender,
+    ApiConfiguration config)
     : BaseDbContextService<InvitationService, HouseholdDbContext>(dbContext, userContext, logger), IInvitationService
 {
     public async Task<ErrorOr<SendHouseholdInvitationResponseDto>> SendHouseholdInvitation(SendHouseholdInvitationRequestDto request, CancellationToken cancellationToken)
@@ -56,18 +61,23 @@ public class InvitationService(
             return new SendHouseholdInvitationResponseDto(existingInvitation.Code);
         }
 
+        var expirationMinutes = config.App.InvitationExpirationMinutes;
         var newInvitation = new HouseholdInvitation
         {
             Code = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
             Email = request.ToEmail,
             HouseholdId = invitationHouseholdId,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(2)
+            ExpiresAt = DateTime.UtcNow.AddMinutes(expirationMinutes)
         };
 
         await DbContext.Invitations.AddAsync(newInvitation, cancellationToken);
         await DbContext.SaveChangesAsync(cancellationToken);
 
         Logger.LogInformation("User {Email} sent new invitation to {NewInvitationEmail}", UserEmail, newInvitation.Email);
+
+        var inviteLink = $"{config.App.FrontendUrl.TrimEnd('/')}/join?code={Uri.EscapeDataString(newInvitation.Code)}";
+        var htmlBody = string.Format(Constants.HouseholdInvitationEmailBodyTemplate, inviteLink, expirationMinutes);
+        await emailSender.SendAsync(request.ToEmail, Constants.HouseholdInvitationEmailSubject, htmlBody, cancellationToken);
 
         return new SendHouseholdInvitationResponseDto(newInvitation.Code);
     }

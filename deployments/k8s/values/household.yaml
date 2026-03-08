@@ -12,6 +12,8 @@ env:
   Jwt__Issuer: pantry-identity
   Jwt__Audience: pantry-cloud
   App__IdentityUrl: http://identity-api:8080
+  App__FrontendUrl: http://pantry.test
+  App__InvitationExpirationMinutes: "2"
   Messaging__RabbitMQ__Host: pantry-rabbitmq
 
 existingSecrets:

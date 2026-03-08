@@ -4,7 +4,9 @@ using PantryCloud.Household.Application.Dtos;
 using PantryCloud.Household.Core.Entities;
 using PantryCloud.Household.Core.Enums;
 using PantryCloud.Household.Core.Errors;
+using PantryCloud.Household.Core;
 using PantryCloud.Household.Infrastructure.Services;
+using PantryCloud.SharedKernel.Email;
 using Shouldly;
 
 using HouseholdEntity = PantryCloud.Household.Core.Entities.Household;
@@ -14,6 +16,8 @@ namespace PantryCloud.Household.UnitTests.Invitation;
 public class InvitationServiceTests
 {
     private readonly ILogger<InvitationService> _logger = TestHelper.MockLogger<InvitationService>();
+    private readonly IEmailSender _emailSender = TestHelper.MockEmailSender();
+    private readonly ApiConfiguration _config = TestHelper.MockConfiguration();
 
     [Fact]
     public async Task SendHouseholdInvitation_ShouldCreateInvitation_WhenValidRequest()
@@ -29,7 +33,7 @@ public class InvitationServiceTests
         });
         await db.SaveChangesAsync();
 
-        var service = new InvitationService(_logger, userContext, db);
+        var service = new InvitationService(_logger, userContext, db, _emailSender, _config);
 
         var request = new SendHouseholdInvitationRequestDto(Constants.Invitation.InviteeEmail, Constants.Household.Id.ToString());
 
@@ -61,7 +65,7 @@ public class InvitationServiceTests
         });
         await db.SaveChangesAsync();
 
-        var service = new InvitationService(_logger, userContext, db);
+        var service = new InvitationService(_logger, userContext, db, _emailSender, _config);
 
         var request = new SendHouseholdInvitationRequestDto(Constants.Invitation.InviteeEmail, Constants.Household.Id.ToString());
 
@@ -93,7 +97,7 @@ public class InvitationServiceTests
 
         await db.SaveChangesAsync();
 
-        var service = new InvitationService(_logger, userContext, db);
+        var service = new InvitationService(_logger, userContext, db, _emailSender, _config);
 
         var result = await service.AcceptHouseholdInvitation(new AcceptHouseholdInvitationRequestDto(Constants.Invitation.ValidCode), CancellationToken.None);
 
@@ -129,7 +133,7 @@ public class InvitationServiceTests
 
         await db.SaveChangesAsync();
 
-        var service = new InvitationService(_logger, userContext, db);
+        var service = new InvitationService(_logger, userContext, db, _emailSender, _config);
 
         var result = await service.AcceptHouseholdInvitation(new AcceptHouseholdInvitationRequestDto(Constants.Invitation.ValidCode), CancellationToken.None);
 
@@ -155,7 +159,7 @@ public class InvitationServiceTests
         });
         await db.SaveChangesAsync();
 
-        var service = new InvitationService(_logger, userContext, db);
+        var service = new InvitationService(_logger, userContext, db, _emailSender, _config);
 
         var result = await service.AcceptHouseholdInvitation(new AcceptHouseholdInvitationRequestDto(Constants.Invitation.ValidCode), CancellationToken.None);
 
@@ -177,7 +181,7 @@ public class InvitationServiceTests
         });
         await db.SaveChangesAsync();
 
-        var service = new InvitationService(_logger, userContext, db);
+        var service = new InvitationService(_logger, userContext, db, _emailSender, _config);
         var result = await service.AcceptHouseholdInvitation(new AcceptHouseholdInvitationRequestDto(Constants.Invitation.ValidCode), CancellationToken.None);
 
         result.IsError.ShouldBeTrue();
@@ -190,7 +194,7 @@ public class InvitationServiceTests
         await using var db = TestHelper.CreateInMemoryContext(nameof(SendHouseholdInvitation_ShouldReturnError_WhenUserNotInHousehold));
         var userContext = TestHelper.CreateMockUserContext(Constants.User.Id, Constants.User.Email);
 
-        var service = new InvitationService(_logger, userContext, db);
+        var service = new InvitationService(_logger, userContext, db, _emailSender, _config);
         var request = new SendHouseholdInvitationRequestDto(Constants.Invitation.InviteeEmail, Constants.Household.Id.ToString());
 
         var result = await service.SendHouseholdInvitation(request, CancellationToken.None);
@@ -213,7 +217,7 @@ public class InvitationServiceTests
         });
         await db.SaveChangesAsync();
 
-        var service = new InvitationService(_logger, userContext, db);
+        var service = new InvitationService(_logger, userContext, db, _emailSender, _config);
         var request = new SendHouseholdInvitationRequestDto(Constants.Invitation.InviteeEmail, Constants.Household.Id.ToString());
 
         var result = await service.SendHouseholdInvitation(request, CancellationToken.None);
@@ -237,7 +241,7 @@ public class InvitationServiceTests
         });
         await db.SaveChangesAsync();
 
-        var service = new InvitationService(_logger, userContext, db);
+        var service = new InvitationService(_logger, userContext, db, _emailSender, _config);
         var request = new SendHouseholdInvitationRequestDto(Constants.Invitation.InviteeEmail, Constants.Household.Id.ToString());
 
         var result = await service.SendHouseholdInvitation(request, CancellationToken.None);
@@ -269,7 +273,7 @@ public class InvitationServiceTests
         db.Households.Add(new HouseholdEntity { Id = Constants.Household.Id, Name = Constants.HouseholdNames.Target });
         await db.SaveChangesAsync();
 
-        var service = new InvitationService(_logger, userContext, db);
+        var service = new InvitationService(_logger, userContext, db, _emailSender, _config);
 
         var result = await service.AcceptHouseholdInvitation(new AcceptHouseholdInvitationRequestDto(Constants.Invitation.ValidCode), CancellationToken.None);
 

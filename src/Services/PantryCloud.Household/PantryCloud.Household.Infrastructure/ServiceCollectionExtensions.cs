@@ -9,6 +9,7 @@ using PantryCloud.Household.Infrastructure.Services;
 using PantryCloud.SharedKernel.Correlation;
 using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.SharedKernel.Identity;
+using PantryCloud.SharedKernel.Email;
 using PantryCloud.SharedKernel.Messaging;
 using PantryCloud.SharedKernel.Observability;
 using PantryCloud.SharedKernel.Persistence;
@@ -47,6 +48,19 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IInvitationService, InvitationService>();
         services.AddScoped<IPreferencesService, PreferencesService>();
         services.AddScoped<IProfileService, ProfileService>();
+
+        services.Configure<PantryCloud.SharedKernel.Email.EmailSenderOptions>(opts =>
+        {
+            opts.Host = apiConfiguration.Email.Host;
+            opts.Port = apiConfiguration.Email.Port;
+            opts.From = apiConfiguration.Email.From;
+            opts.UserName = apiConfiguration.Email.UserName;
+            opts.Password = apiConfiguration.Email.Password;
+        });
+        if (apiConfiguration.App.SendEmails)
+            services.AddSmtpEmailSender();
+        else
+            services.AddLoggingEmailSender();
 
         services.AddOpenTelemetryTracing(configuration);
         services.AddApiVersioningDefaults();

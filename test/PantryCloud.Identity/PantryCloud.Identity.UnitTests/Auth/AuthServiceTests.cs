@@ -6,6 +6,7 @@ using PantryCloud.Identity.Application.DTOs;
 using PantryCloud.Identity.Core;
 using PantryCloud.Identity.Core.Errors;
 using PantryCloud.Identity.Infrastructure.Services;
+using PantryCloud.SharedKernel.Email;
 using Shouldly;
 
 namespace PantryCloud.Identity.UnitTests.Auth;
@@ -17,12 +18,13 @@ public class AuthServiceTests
     private readonly ApiConfiguration _configurationMock = TestHelper.MockConfiguration();
 
     private readonly IIdentityUserContext _userContextMock = TestHelper.MockIdentityUserContext();
+    private readonly IEmailSender _emailSenderMock = TestHelper.MockEmailSender();
 
     [Fact]
     public async Task RegisterAsync_ShouldCreateUser_AndReturnId_WhenNewEmail()
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(RegisterAsync_ShouldCreateUser_AndReturnId_WhenNewEmail));
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var request = new RegisterRequestDto(Constants.User.Email, Constants.Passwords.Strong);
 
@@ -45,7 +47,7 @@ public class AuthServiceTests
         db.Users.Add(existing);
         await db.SaveChangesAsync();
 
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var request = new RegisterRequestDto(existing.Email, Constants.Passwords.Example);
 
@@ -64,7 +66,7 @@ public class AuthServiceTests
         await db.SaveChangesAsync();
 
         var tokenProvider = TestHelper.MockTokenProvider(accessToken: Constants.Tokens.AccessToken, refreshToken: Constants.Tokens.RefreshToken);
-        var authService = new AuthService(tokenProvider, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(tokenProvider, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var request = new LoginRequestDto(user.Email, Constants.Passwords.Strong);
 
@@ -84,7 +86,7 @@ public class AuthServiceTests
     public async Task LoginAsync_ShouldReturnError_WhenUserNotFound()
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(LoginAsync_ShouldReturnError_WhenUserNotFound));
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await authService.LoginAsync(
             new LoginRequestDto(Constants.User.Email, Constants.Passwords.Wrong),
@@ -104,7 +106,7 @@ public class AuthServiceTests
 
         var tokenProvider = TestHelper.MockTokenProvider();
         var logger = TestHelper.MockLogger();
-        var authService = new AuthService(tokenProvider, db, logger, _configurationMock, _userContextMock);
+        var authService = new AuthService(tokenProvider, db, logger, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await authService.LoginAsync(
             new LoginRequestDto(user.Email, Constants.Passwords.Wrong),
@@ -133,7 +135,7 @@ public class AuthServiceTests
         await db.SaveChangesAsync();
 
         var tokenProvider = TestHelper.MockTokenProvider(accessToken: Constants.Tokens.NewAccessToken, refreshToken: Constants.Tokens.NewRefreshToken);
-        var authService = new AuthService(tokenProvider, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(tokenProvider, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await authService.RefreshTokenAsync(
             new RefreshTokenRequestDto(Constants.Tokens.OldRefreshToken),
@@ -152,7 +154,7 @@ public class AuthServiceTests
     public async Task RefreshTokenAsync_ShouldReturnError_WhenTokenNotFound()
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(RefreshTokenAsync_ShouldReturnError_WhenTokenNotFound));
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await authService.RefreshTokenAsync(
             new RefreshTokenRequestDto(Constants.Tokens.NonExistent),
@@ -179,7 +181,7 @@ public class AuthServiceTests
         });
         await db.SaveChangesAsync();
 
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await authService.RefreshTokenAsync(
             new RefreshTokenRequestDto(Constants.Tokens.ExpiredRefreshToken),
@@ -197,7 +199,7 @@ public class AuthServiceTests
         db.Users.Add(user);
         await db.SaveChangesAsync();
 
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await authService.ForgotPasswordAsync(
             new ForgotPasswordRequestDto(user.Email), CancellationToken.None);
@@ -213,7 +215,7 @@ public class AuthServiceTests
     public async Task ForgotPasswordAsync_ShouldReturnError_WhenUserDoesNotExist()
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(ForgotPasswordAsync_ShouldReturnError_WhenUserDoesNotExist));
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await authService.ForgotPasswordAsync(new ForgotPasswordRequestDto(Constants.User.NotFoundEmail), CancellationToken.None);
 
@@ -234,7 +236,7 @@ public class AuthServiceTests
         db.ResetPasswordTokens.Add(token);
         await db.SaveChangesAsync();
 
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await authService.ResetPasswordAsync(
             new ResetPasswordRequestDto(user.Email, token.Token, Constants.Passwords.New), CancellationToken.None);
@@ -254,7 +256,7 @@ public class AuthServiceTests
         db.ResetPasswordTokens.Add(token);
         await db.SaveChangesAsync();
 
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await authService.ResetPasswordAsync(new ResetPasswordRequestDto(user.Email, token.Token, Constants.Passwords.New), CancellationToken.None);
 
@@ -272,7 +274,7 @@ public class AuthServiceTests
         db.ResetPasswordTokens.Add(token);
         await db.SaveChangesAsync();
 
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await authService.ResetPasswordAsync(
             new ResetPasswordRequestDto(user.Email, token.Token, Constants.Passwords.New), CancellationToken.None);
@@ -291,7 +293,7 @@ public class AuthServiceTests
         // Do not add the token to db
         await db.SaveChangesAsync();
 
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await authService.ResetPasswordAsync(
             new ResetPasswordRequestDto(user.Email, token.Token, Constants.Passwords.New), CancellationToken.None);
@@ -311,7 +313,7 @@ public class AuthServiceTests
         db.VerifyEmailTokens.Add(token);
         await db.SaveChangesAsync();
 
-        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await service.VerifyEmailAsync(new VerifyEmailRequestDto(user.Email, token.Token), CancellationToken.None);
 
@@ -333,7 +335,7 @@ public class AuthServiceTests
         db.VerifyEmailTokens.Add(token);
         await db.SaveChangesAsync();
 
-        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await service.VerifyEmailAsync(
             new VerifyEmailRequestDto(Constants.User.NotFoundEmail, token.Token),
@@ -351,7 +353,7 @@ public class AuthServiceTests
         db.Users.Add(user);
         await db.SaveChangesAsync();
 
-        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await service.VerifyEmailAsync(
             new VerifyEmailRequestDto(user.Email, Constants.Tokens.Invalid),
@@ -372,7 +374,7 @@ public class AuthServiceTests
         db.VerifyEmailTokens.Add(token);
         await db.SaveChangesAsync();
 
-        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await service.VerifyEmailAsync(
             new VerifyEmailRequestDto(user.Email, token.Token),
@@ -393,7 +395,7 @@ public class AuthServiceTests
         db.VerifyEmailTokens.Add(token);
         await db.SaveChangesAsync();
 
-        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var service = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await service.VerifyEmailAsync(
             new VerifyEmailRequestDto(user.Email, token.Token),
@@ -411,7 +413,7 @@ public class AuthServiceTests
         db.Users.Add(user);
         await db.SaveChangesAsync();
 
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await authService.LoginAsync(
             new LoginRequestDto(Constants.User.Email, Constants.Passwords.Strong),
@@ -440,7 +442,7 @@ public class AuthServiceTests
         await db.SaveChangesAsync();
 
         var userContext = TestHelper.MockIdentityUserContext(user.Id, sessionId);
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, userContext);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, userContext, _emailSenderMock);
 
         var result = await authService.ListSessionsAsync(CancellationToken.None);
 
@@ -469,7 +471,7 @@ public class AuthServiceTests
         await db.SaveChangesAsync();
 
         var userContext = TestHelper.MockIdentityUserContext(user.Id, null);
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, userContext);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, userContext, _emailSenderMock);
 
         var result = await authService.RevokeSessionAsync(sessionId, CancellationToken.None);
 
@@ -482,7 +484,7 @@ public class AuthServiceTests
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(RevokeSessionAsync_ShouldReturnError_WhenSessionNotFound));
         var userContext = TestHelper.MockIdentityUserContext(Constants.User.Id, null);
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, userContext);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, userContext, _emailSenderMock);
 
         var result = await authService.RevokeSessionAsync(Guid.NewGuid(), CancellationToken.None);
 
@@ -520,7 +522,7 @@ public class AuthServiceTests
         await db.SaveChangesAsync();
 
         var userContext = TestHelper.MockIdentityUserContext(user.Id, currentSessionId);
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, userContext);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, userContext, _emailSenderMock);
 
         var result = await authService.RevokeAllOtherSessionsAsync(CancellationToken.None);
 
@@ -534,7 +536,7 @@ public class AuthServiceTests
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(RevokeAllOtherSessionsAsync_ShouldReturnError_WhenNoCurrentSession));
         var userContext = TestHelper.MockIdentityUserContext(Constants.User.Id, null);
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, userContext);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, userContext, _emailSenderMock);
 
         var result = await authService.RevokeAllOtherSessionsAsync(CancellationToken.None);
 
@@ -560,7 +562,7 @@ public class AuthServiceTests
         });
         await db.SaveChangesAsync();
 
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await authService.LogoutAsync(new LogoutRequestDto(Constants.Tokens.RefreshToken), CancellationToken.None);
 
@@ -572,7 +574,7 @@ public class AuthServiceTests
     public async Task LogoutAsync_ShouldReturnError_WhenInvalidRefreshToken()
     {
         await using var db = TestHelper.CreateInMemoryContext(nameof(LogoutAsync_ShouldReturnError_WhenInvalidRefreshToken));
-        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock);
+        var authService = new AuthService(_tokenProviderMock, db, _loggerMock, _configurationMock, _userContextMock, _emailSenderMock);
 
         var result = await authService.LogoutAsync(new LogoutRequestDto(Constants.Tokens.NonExistent), CancellationToken.None);
 

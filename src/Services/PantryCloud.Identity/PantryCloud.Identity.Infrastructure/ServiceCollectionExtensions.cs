@@ -6,6 +6,7 @@ using PantryCloud.Identity.Core;
 using PantryCloud.Identity.Infrastructure.Persistence;
 using PantryCloud.Identity.Infrastructure.Services;
 using PantryCloud.SharedKernel.Correlation;
+using PantryCloud.SharedKernel.Email;
 using PantryCloud.SharedKernel.Extensions;
 using PantryCloud.SharedKernel.Observability;
 
@@ -33,7 +34,20 @@ public static class ServiceCollectionExtensions
         services.AddHealthChecks().AddNpgSql(connectionString!);
         services.AddOpenTelemetryTracing(configuration);
         services.AddApiVersioningDefaults();
-        
+
+        services.Configure<EmailSenderOptions>(opts =>
+        {
+            opts.Host = apiConfiguration.Email.Host;
+            opts.Port = apiConfiguration.Email.Port;
+            opts.From = apiConfiguration.Email.From;
+            opts.UserName = apiConfiguration.Email.Username;
+            opts.Password = apiConfiguration.Email.Password;
+        });
+        if (apiConfiguration.App.SendEmails)
+            services.AddSmtpEmailSender();
+        else
+            services.AddLoggingEmailSender();
+
         return services;
     }
 }
