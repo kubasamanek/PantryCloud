@@ -13,6 +13,7 @@ using PantryCloud.Web.Services.Notification;
 using PantryCloud.Web.Services.Recipe;
 using PantryCloud.Web.Services.ShoppingList;
 using PantryCloud.Web.Services.Sessions;
+using PantryCloud.Web.Services.Audit;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -51,6 +52,7 @@ builder.Services.AddScoped<IRecipeApi, RecipeApiService>();
 builder.Services.AddScoped<INotificationHubClient, NotificationHubClient>();
 builder.Services.AddScoped<INotificationStateService, NotificationStateService>();
 builder.Services.AddScoped<INotificationApi, NotificationApiService>();
+builder.Services.AddScoped<IAuditApi, AuditApiService>();
 
 // Gateway client with Bearer + 401 refresh
 builder.Services.AddScoped<GatewayAuthorizationMessageHandler>();

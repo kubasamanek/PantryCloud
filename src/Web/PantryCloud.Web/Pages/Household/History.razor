@@ -1,0 +1,193 @@
+@page "/audit"
+@attribute [Authorize]
+@using PantryCloud.Web.Services.Audit
+
+<PageTitle>History - PantryCloud</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8 mb-16">
+    <MudText Typo="Typo.h5" Class="mb-6">Household History</MudText>
+
+    @if (IsLoadingHousehold)
+    {
+        <MudProgressCircular Indeterminate Color="Color.Primary" />
+    }
+    else if (_currentHousehold == null)
+    {
+        <MudAlert Severity="Severity.Info">You need to join or create a household to view history.</MudAlert>
+    }
+    else
+    {
+        <MudPaper Elevation="2" Class="pa-4 mb-6">
+            <MudStack Row="true" Spacing="4" AlignItems="AlignItems.Center" Class="flex-wrap">
+                <MudSelect T="string" Label="Entity Type" @bind-Value="_entityType" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense" Style="min-width: 150px" HelperText="Filter by type">
+                    <MudSelectItem Value="@("PantryItem")">Pantry Item</MudSelectItem>
+                    <MudSelectItem Value="@("Member")">Member</MudSelectItem>
+                    <MudSelectItem Value="@("ShoppingList")">Shopping List</MudSelectItem>
+                    <MudSelectItem Value="@("ShoppingListItem")">Shopping List Item</MudSelectItem>
+                    <MudSelectItem Value="@("Ownership")">Ownership</MudSelectItem>
+                </MudSelect>
+                <MudSelect T="string" Label="Action" @bind-Value="_actionType" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense" Style="min-width: 150px" HelperText="Filter by action">
+                    <MudSelectItem Value="@("Created")">Created</MudSelectItem>
+                    <MudSelectItem Value="@("Updated")">Updated</MudSelectItem>
+                    <MudSelectItem Value="@("Deleted")">Deleted</MudSelectItem>
+                    <MudSelectItem Value="@("Depleted")">Depleted</MudSelectItem>
+                    <MudSelectItem Value="@("Joined")">Joined</MudSelectItem>
+                    <MudSelectItem Value="@("Left")">Left</MudSelectItem>
+                    <MudSelectItem Value="@("Transferred")">Transferred</MudSelectItem>
+                    <MudSelectItem Value="@("Checked")">Checked</MudSelectItem>
+                </MudSelect>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ReloadDataAsync" StartIcon="@Icons.Material.Filled.Search">Apply Filters</MudButton>
+            </MudStack>
+        </MudPaper>
+
+        <MudTable ServerData="ServerReload"
+                  @ref="_table" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="2"
+                  Loading="@IsLoadingTable" LoadingProgressColor="Color.Primary">
+            <HeaderContent>
+                <MudTh>Date</MudTh>
+                <MudTh>Action</MudTh>
+                <MudTh>Entity</MudTh>
+                <MudTh>Details</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Date">
+                    @context.OccurredAt.ToLocalTime().ToString("g")
+                </MudTd>
+                <MudTd DataLabel="Action">
+                    <MudChip T="string" Size="Size.Small" Color="@GetActionColor(context.ActionType)">@context.ActionType</MudChip>
+                </MudTd>
+                <MudTd DataLabel="Entity">
+                    @context.EntityType
+                </MudTd>
+                <MudTd DataLabel="Details">
+                    <MudText Typo="Typo.body2" Style="max-width: 300px" Class="mud-text-secondary">
+                        @FormatPayload(context.Payload)
+                    </MudText>
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText>No history records found.</MudText>
+            </NoRecordsContent>
+            <LoadingContent>
+                <MudText>Loading history...</MudText>
+            </LoadingContent>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    }
+</MudContainer>
+
+@code {
+    [Inject] private IAuditApi AuditApi { get; set; } = null!;
+    [Inject] private IHouseholdApi HouseholdApi { get; set; } = null!;
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
+
+    private MudTable<AuditEntryDto> _table = null!;
+    private GetCurrentHouseholdResponse? _currentHousehold;
+    
+    private string? _entityType;
+    private string? _actionType;
+
+    private bool IsLoadingHousehold { get; set; } = true;
+    private bool IsLoadingTable { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _currentHousehold = await HouseholdApi.GetCurrentHouseholdAsync();
+        }
+        finally
+        {
+            IsLoadingHousehold = false;
+        }
+    }
+
+    private async Task<TableData<AuditEntryDto>> ServerReload(TableState state, CancellationToken token)
+    {
+        if (_currentHousehold == null)
+        {
+            return new TableData<AuditEntryDto> { Items = [], TotalItems = 0 };
+        }
+
+        IsLoadingTable = true;
+        StateHasChanged();
+
+        try
+        {
+            var response = await AuditApi.ListHouseholdAuditEntriesAsync(
+                _currentHousehold.Id,
+                actionType: string.IsNullOrWhiteSpace(_actionType) ? null : _actionType,
+                entityType: string.IsNullOrWhiteSpace(_entityType) ? null : _entityType,
+                page: state.Page + 1, // MudTable is 0-indexed, API is 1-indexed
+                pageSize: state.PageSize,
+                cancellationToken: token
+            );
+
+            if (response != null)
+            {
+                return new TableData<AuditEntryDto>
+                {
+                    Items = response.Entries,
+                    TotalItems = response.TotalCount
+                };
+            }
+            
+            Snackbar.Add("Failed to load history.", Severity.Error);
+            return new TableData<AuditEntryDto> { Items = [], TotalItems = 0 };
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("An error occurred while loading history.", Severity.Error);
+            return new TableData<AuditEntryDto> { Items = [], TotalItems = 0 };
+        }
+        finally
+        {
+            IsLoadingTable = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ReloadDataAsync()
+    {
+        if (_table != null)
+        {
+            await _table.ReloadServerData();
+        }
+    }
+
+    private Color GetActionColor(string actionType) => actionType switch
+    {
+        "Created" or "Joined" or "Added" => Color.Success,
+        "Updated" => Color.Info,
+        "Deleted" or "Left" or "Depleted" => Color.Error,
+        "Transferred" => Color.Warning,
+        "Checked" => Color.Primary,
+        _ => Color.Surface
+    };
+
+    private string FormatPayload(string? payload)
+    {
+        if (string.IsNullOrWhiteSpace(payload) || payload == "{}") return "—";
+        try
+        {
+            // Simple formatting just to extract key-values from the JSON payload.
+            using var doc = System.Text.Json.JsonDocument.Parse(payload);
+            var items = new List<string>();
+            foreach (var prop in doc.RootElement.EnumerateObject())
+            {
+                var val = prop.Value.ToString();
+                if (!string.IsNullOrWhiteSpace(val))
+                {
+                    items.Add($"{prop.Name}: {val}");
+                }
+            }
+            return string.Join(", ", items);
+        }
+        catch
+        {
+            return payload; // fallback
+        }
+    }
+}

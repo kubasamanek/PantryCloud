@@ -5,20 +5,30 @@ using PantryCloud.Audit.Application.Dtos;
 using PantryCloud.Audit.Core.Errors;
 using PantryCloud.Audit.Infrastructure.Persistence;
 
+using Microsoft.Extensions.Logging;
+
 namespace PantryCloud.Audit.Infrastructure.Services;
 
 public class AuditQueryService(
     AuditDbContext dbContext,
-    IHouseholdMembershipRepository membershipRepository) : IAuditQueryService
+    IHouseholdMembershipRepository membershipRepository,
+    ILogger<AuditQueryService> logger) : IAuditQueryService
 {
     public async Task<ErrorOr<ListAuditEntriesResponseDto>> ListHouseholdAuditEntriesAsync(
         ListAuditEntriesRequestDto request,
         Guid requestingUserId,
         CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("Attempting to list audit entries for household {HouseholdId}. Requested by user {UserId}",
+            request.HouseholdId, requestingUserId);
+
         var isMember = await membershipRepository.IsUserInHouseholdAsync(requestingUserId, request.HouseholdId, cancellationToken);
         if (!isMember)
+        {
+            logger.LogWarning("User {UserId} is not a member of household {HouseholdId}. Denying access.",
+                requestingUserId, request.HouseholdId);
             return AuditErrors.UserNotInHousehold;
+        }
 
         var query = dbContext.HouseholdAuditEntries
             .Where(e => e.HouseholdId == request.HouseholdId);
@@ -41,6 +51,9 @@ public class AuditQueryService(
             query = query.Where(e => e.EntityType == request.EntityType);
 
         var totalCount = await query.CountAsync(cancellationToken);
+
+        logger.LogInformation("Found {TotalCount} audit entries for household {HouseholdId}. Returning page {Page} (Size: {PageSize})",
+            totalCount, request.HouseholdId, request.Page, request.PageSize);
 
         var entries = await query
             .OrderByDescending(e => e.OccurredAt)

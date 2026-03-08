@@ -58,7 +58,7 @@ public abstract class ConsumerBase<TEvent, TDbContext> : IConsumer<TEvent>
         {
             if (DbContext is DbContext dbContext)
             {
-                var brokerId = context.MessageId ?? Guid.NewGuid();
+                var brokerId = context.MessageId ?? @event.Id;
 
                 var alreadyProcessed = await dbContext.Set<ProcessedInboxMessage>()
                     .AnyAsync(m => m.MessageId == brokerId, context.CancellationToken);

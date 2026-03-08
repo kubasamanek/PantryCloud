@@ -5,6 +5,7 @@ using PantryCloud.Audit.Core.Entities;
 using PantryCloud.Audit.Core.Errors;
 using PantryCloud.Audit.Infrastructure.Persistence;
 using PantryCloud.Audit.Infrastructure.Services;
+using Microsoft.Extensions.Logging;
 using Shouldly;
 
 namespace PantryCloud.Audit.UnitTests.Services;
@@ -21,7 +22,9 @@ public class AuditQueryServiceTests
         var membershipRepo = Substitute.For<IHouseholdMembershipRepository>();
         membershipRepo.IsUserInHouseholdAsync(userId, householdId, Arg.Any<CancellationToken>()).Returns(false);
 
-        var service = new AuditQueryService(db, membershipRepo);
+        var logger = Substitute.For<ILogger<AuditQueryService>>();
+
+        var service = new AuditQueryService(db, membershipRepo, logger);
         var request = new ListAuditEntriesRequestDto(householdId, null, null, null, null);
 
         var result = await service.ListHouseholdAuditEntriesAsync(request, userId);
@@ -61,7 +64,9 @@ public class AuditQueryServiceTests
         var membershipRepo = Substitute.For<IHouseholdMembershipRepository>();
         membershipRepo.IsUserInHouseholdAsync(userId, householdId, Arg.Any<CancellationToken>()).Returns(true);
 
-        var service = new AuditQueryService(db, membershipRepo);
+        var logger = Substitute.For<ILogger<AuditQueryService>>();
+
+        var service = new AuditQueryService(db, membershipRepo, logger);
         var request = new ListAuditEntriesRequestDto(householdId, null, null, null, null);
 
         var result = await service.ListHouseholdAuditEntriesAsync(request, userId);
@@ -97,7 +102,9 @@ public class AuditQueryServiceTests
         var membershipRepo = Substitute.For<IHouseholdMembershipRepository>();
         membershipRepo.IsUserInHouseholdAsync(userId, householdId, Arg.Any<CancellationToken>()).Returns(true);
 
-        var service = new AuditQueryService(db, membershipRepo);
+        var logger = Substitute.For<ILogger<AuditQueryService>>();
+
+        var service = new AuditQueryService(db, membershipRepo, logger);
         var request = new ListAuditEntriesRequestDto(
             householdId,
             baseDate.AddDays(0.5),
