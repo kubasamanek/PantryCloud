@@ -30,6 +30,13 @@ spec:
       ports:
         - port: 8080
           protocol: TCP
+    # Prometheus > K8s API server (pod discovery via kubernetes_sd_configs)
+    - to:
+        - ipBlock:
+            cidr: 172.19.0.0/16
+      ports:
+        - port: 6443
+          protocol: TCP
 ---
 # ===================================================================
 # Alloy
@@ -71,19 +78,10 @@ spec:
       ports:
         - port: 4317
           protocol: TCP
-    # Alloy > K8s API server (log tailing via kubernetes API)
+    # Alloy > K8s API server (hostNetwork pod on node CIDR)
     - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: default
-      ports:
-        - port: 443
-          protocol: TCP
-    # Alloy > kube-apiserver
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
+        - ipBlock:
+            cidr: 172.19.0.0/16
       ports:
         - port: 6443
           protocol: TCP
