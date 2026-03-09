@@ -1,6 +1,15 @@
 # Kubernetes Secrets
 
-All deployment secrets are created by `create-secrets.sh`. No credentials are stored in version control; the script is the single source of truth.
+All deployment secrets are created by `create-secrets.sh`. No credentials are stored in version control; the script is the single source of truth for local/Kind deployments.
+
+## How it fits together
+
+1. Create the namespace (`make namespace` or as part of `make up`).
+2. Run `create-secrets.sh` so all Secrets exist in the cluster.
+3. Install infrastructure (`make infra-install`); it reads credentials from the Secret named `pantry-infra-credentials`.
+4. Deploy application services (`make deploy-services`); each service’s Helm values list the relevant Secret name(s) in `existingSecrets`, and the Identity service also mounts `jwt-signing-keys` as a volume.
+
+Secrets are not in Git. The script generates JWT keys and builds connection strings from the same env vars you can override (see below). For production clusters, consider an external secret manager (e.g. Sealed Secrets, Vault, or your provider’s secret store) and use this script as reference for key names and which services consume which Secret.
 
 ## Usage
 
@@ -45,3 +54,7 @@ Example:
 ```bash
 POSTGRES_PASSWORD=mysecret ./create-secrets.sh pantry
 ```
+
+## Docker Compose (dev)
+
+For how secrets and credentials are handled in the Docker Compose development setup, see [SECRETS.md](../../SECRETS.md).
