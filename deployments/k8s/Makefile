@@ -100,6 +100,18 @@ calico-install: ## Install Calico CNI (required for NetworkPolicy enforcement)
 	@echo "==> Waiting for nodes to be ready..."
 	kubectl wait --for=condition=Ready nodes --all --timeout=120s
 
+.PHONY: metrics-server-install
+metrics-server-install: ## Install metrics-server for HPA (Kind-friendly config)
+	kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+	@echo "==> Patching metrics-server to allow kubelet insecure TLS (Kind)..."
+	kubectl patch deployment metrics-server -n kube-system \
+		--type=json -p='[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'
+	@echo "==> Waiting for metrics-server pods to be ready..."
+	kubectl wait --namespace kube-system \
+		--for=condition=ready pod \
+		--selector=k8s-app=metrics-server \
+		--timeout=180s
+
 .PHONY: require-cluster
 require-cluster: ## Check that a Kubernetes cluster is reachable (used by infra-install, secrets, deploy-services)
 	@kubectl cluster-info --request-timeout=5s >/dev/null 2>&1 || (echo ""; echo "Error: No Kubernetes cluster is reachable."; echo "  Create the Kind cluster first:  make cluster-create"; echo "  Or run the full deploy:         make up"; echo ""; exit 1)
@@ -271,7 +283,7 @@ undeploy-services: ## Undeploy all application services
 # ──────────────────────────────────────────────
 
 .PHONY: up
-up: cluster-create calico-install ingress-install images secrets infra-install observability-install deploy-services ## Full deploy: cluster + calico + images + secrets + infra + observability + apps
+up: cluster-create calico-install metrics-server-install ingress-install images secrets infra-install observability-install deploy-services ## Full deploy: cluster + calico + metrics-server + ingress + images + secrets + infra + observability + apps
 	@echo ""
 	@echo "============================================="
 	@echo " PantryCloud is running!"

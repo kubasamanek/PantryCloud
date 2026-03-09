@@ -164,7 +164,7 @@ public static class ServiceCollectionExtensions
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/api/{version}/{**catch-all}"
+                        ["PathPattern"] = "/api/{version}/pantry/{**catch-all}"
                     }
                 ]
             },
@@ -246,7 +246,7 @@ public static class ServiceCollectionExtensions
                 [
                     new Dictionary<string, string>
                     {
-                        ["PathPattern"] = "/api/{version}/{**catch-all}"
+                        ["PathPattern"] = "/api/{version}/audit/{**catch-all}"
                     }
                 ]
             }
