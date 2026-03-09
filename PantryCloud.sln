@@ -283,6 +283,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NetworkPolicies", "NetworkP
 		deployments\k8s\charts\infrastructure\templates\network-policies\netpol-observability.yaml = deployments\k8s\charts\infrastructure\templates\network-policies\netpol-observability.yaml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{858C829A-B01A-4120-8226-D457E7F152EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PantryCloud.E2E.Runner", "test\PantryCloud.E2E.Runner\PantryCloud.E2E.Runner.csproj", "{E356A26E-EF22-454F-9085-AE75C88B6806}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PantryCloud.Load.NBomber", "test\PantryCloud.Load.NBomber\PantryCloud.Load.NBomber.csproj", "{FD6D757B-3634-4A6E-BFEC-3D6150E6B590}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -905,6 +911,30 @@ Global
 		{747A5636-299D-4879-8E82-E886049CAC62}.Release|x64.Build.0 = Release|Any CPU
 		{747A5636-299D-4879-8E82-E886049CAC62}.Release|x86.ActiveCfg = Release|Any CPU
 		{747A5636-299D-4879-8E82-E886049CAC62}.Release|x86.Build.0 = Release|Any CPU
+		{E356A26E-EF22-454F-9085-AE75C88B6806}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E356A26E-EF22-454F-9085-AE75C88B6806}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E356A26E-EF22-454F-9085-AE75C88B6806}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E356A26E-EF22-454F-9085-AE75C88B6806}.Debug|x64.Build.0 = Debug|Any CPU
+		{E356A26E-EF22-454F-9085-AE75C88B6806}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E356A26E-EF22-454F-9085-AE75C88B6806}.Debug|x86.Build.0 = Debug|Any CPU
+		{E356A26E-EF22-454F-9085-AE75C88B6806}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E356A26E-EF22-454F-9085-AE75C88B6806}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E356A26E-EF22-454F-9085-AE75C88B6806}.Release|x64.ActiveCfg = Release|Any CPU
+		{E356A26E-EF22-454F-9085-AE75C88B6806}.Release|x64.Build.0 = Release|Any CPU
+		{E356A26E-EF22-454F-9085-AE75C88B6806}.Release|x86.ActiveCfg = Release|Any CPU
+		{E356A26E-EF22-454F-9085-AE75C88B6806}.Release|x86.Build.0 = Release|Any CPU
+		{FD6D757B-3634-4A6E-BFEC-3D6150E6B590}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD6D757B-3634-4A6E-BFEC-3D6150E6B590}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD6D757B-3634-4A6E-BFEC-3D6150E6B590}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FD6D757B-3634-4A6E-BFEC-3D6150E6B590}.Debug|x64.Build.0 = Debug|Any CPU
+		{FD6D757B-3634-4A6E-BFEC-3D6150E6B590}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FD6D757B-3634-4A6E-BFEC-3D6150E6B590}.Debug|x86.Build.0 = Debug|Any CPU
+		{FD6D757B-3634-4A6E-BFEC-3D6150E6B590}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD6D757B-3634-4A6E-BFEC-3D6150E6B590}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD6D757B-3634-4A6E-BFEC-3D6150E6B590}.Release|x64.ActiveCfg = Release|Any CPU
+		{FD6D757B-3634-4A6E-BFEC-3D6150E6B590}.Release|x64.Build.0 = Release|Any CPU
+		{FD6D757B-3634-4A6E-BFEC-3D6150E6B590}.Release|x86.ActiveCfg = Release|Any CPU
+		{FD6D757B-3634-4A6E-BFEC-3D6150E6B590}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -999,5 +1029,7 @@ Global
 		{3B1F1363-69F4-4754-8798-178F33CD7D88} = {3E303348-2A99-4133-AB3C-8E97F011EA74}
 		{41CFEC88-924F-452A-9D88-2DB997BAB6C5} = {3B1F1363-69F4-4754-8798-178F33CD7D88}
 		{9FEA969A-753D-4FC2-85CD-3187C6095CC3} = {99A942F4-5896-4E05-BF15-DC718BFC197B}
+		{E356A26E-EF22-454F-9085-AE75C88B6806} = {858C829A-B01A-4120-8226-D457E7F152EB}
+		{FD6D757B-3634-4A6E-BFEC-3D6150E6B590} = {858C829A-B01A-4120-8226-D457E7F152EB}
 	EndGlobalSection
 EndGlobal

@@ -31,7 +31,12 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<DbContext>(sp => sp.GetRequiredService<PantryDbContext>());
 
-        services.AddOutboxRelay<PantryDbContext>();
+        services.AddOutboxRelay<PantryDbContext>(opts =>
+        {
+            var section = configuration.GetSection("OutboxRelay");
+            opts.PollInterval = TimeSpan.FromSeconds(section.GetValue("PollIntervalSeconds", 2));
+            opts.BatchSize = section.GetValue("BatchSize", 20);
+        });
 
         services.AddMessaging(configuration, typeof(ServiceCollectionExtensions).Assembly);
 

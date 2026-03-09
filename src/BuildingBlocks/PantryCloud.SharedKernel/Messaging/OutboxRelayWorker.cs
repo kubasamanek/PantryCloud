@@ -33,8 +33,23 @@ public class OutboxRelayWorker<TDbContext>(
         // Main loop
         while (!stoppingToken.IsCancellationRequested)
         {
-            await Task.Delay(options.PollInterval, stoppingToken);
-            await ProcessPendingMessagesAsync(stoppingToken);
+            try
+            {
+                await Task.Delay(options.PollInterval, stoppingToken);
+                await ProcessPendingMessagesAsync(stoppingToken);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                // Graceful shutdown requested, exit loop.
+                break;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    "OutboxRelayWorker<{DbContext}>: unhandled exception in polling loop",
+                    typeof(TDbContext).Name);
+            }
         }
     }
 
