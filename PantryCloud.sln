@@ -104,6 +104,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		GitVersion.yml = GitVersion.yml
 		.dockerignore = .dockerignore
 		.gitignore = .gitignore
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipelines", "Pipelines", "{E059CF8E-6433-4D8A-AEE5-7121754386F9}"
@@ -126,6 +127,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployments", "Deployments"
 	ProjectSection(SolutionItems) = preProject
 		deployments\docker-compose.yml = deployments\docker-compose.yml
 		deployments\init-scripts\init-db.sql = deployments\init-scripts\init-db.sql
+		deployments\SECRETS.md = deployments\SECRETS.md
+		deployments\README.md = deployments\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{E8D7C6B5-A432-4F01-9E8D-7C6B5A432109}"
@@ -224,12 +227,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Base", "Base", "{F91DB0DE-8
 	ProjectSection(SolutionItems) = preProject
 		deployments\k8s\charts\pantry-microservice\Chart.yaml = deployments\k8s\charts\pantry-microservice\Chart.yaml
 		deployments\k8s\charts\pantry-microservice\values.yaml = deployments\k8s\charts\pantry-microservice\values.yaml
+		deployments\k8s\charts\pantry-microservice\README.md = deployments\k8s\charts\pantry-microservice\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{E117BCA5-F0E0-4240-90CB-ABFA7D5DB366}"
 	ProjectSection(SolutionItems) = preProject
 		deployments\k8s\charts\infrastructure\Chart.yaml = deployments\k8s\charts\infrastructure\Chart.yaml
 		deployments\k8s\charts\infrastructure\values.yaml = deployments\k8s\charts\infrastructure\values.yaml
+		deployments\k8s\charts\infrastructure\README.md = deployments\k8s\charts\infrastructure\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{28292B19-5A7B-4A90-B827-606254F6FA19}"
@@ -258,6 +263,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Observability", "Observabil
 	ProjectSection(SolutionItems) = preProject
 		deployments\k8s\charts\observability\Chart.yaml = deployments\k8s\charts\observability\Chart.yaml
 		deployments\k8s\charts\observability\values.yaml = deployments\k8s\charts\observability\values.yaml
+		deployments\k8s\charts\observability\README.md = deployments\k8s\charts\observability\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{41CFEC88-924F-452A-9D88-2DB997BAB6C5}"
