@@ -28,19 +28,19 @@ Typical endpoints:
 - Web UI: `http://localhost:3000`
 - API Gateway: `http://localhost:5050`
 
-Secrets and credentials for the Compose stack are described in `[SECRETS.md](SECRETS.md)`.
+Secrets and credentials for the Compose stack are described in [SECRETS.md](SECRETS.md).
 
 ## Local Kubernetes (Kind)
 
 For a local Kubernetes cluster using Kind, including ingress, infrastructure, observability, and all services, use the Make targets under `deployments/k8s`:
 
-- `[k8s/README.md](k8s/README.md)` – quick start, prerequisites, and deployment steps.
+- [k8s/README.md](k8s/README.md) – quick start, prerequisites, and deployment steps.
 - `k8s/charts/*/README.md` – chart-specific values and install instructions.
 
 ## Secrets
 
 Secrets and credentials for both Docker Compose and Kubernetes deployments are documented in:
 
-- `[SECRETS.md](SECRETS.md)` – overview for all deployment methods.
-- `[k8s/secrets/README.md](k8s/secrets/README.md)` – details of the `create-secrets.sh` script and the Secrets it creates.
+- [SECRETS.md](SECRETS.md) – overview for all deployment methods.
+- [k8s/secrets/README.md](k8s/secrets/README.md) – details of the `create-secrets.sh` script and the Secrets it creates.
 

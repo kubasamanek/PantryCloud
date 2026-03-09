@@ -8,7 +8,7 @@ PantryCloud is a distributed pantry and household management system built as a s
 - **Docker** and **Docker Compose**
 - **Git** (for typical clone and CI workflows)
 
-For Kubernetes-based local deployment (Kind) prerequisites, see `[deployments/k8s/README.md](deployments/k8s/README.md)`.
+For Kubernetes-based local deployment (Kind) prerequisites, see [deployments/k8s/README.md](deployments/k8s/README.md).
 
 ## Repository layout
 
@@ -40,7 +40,7 @@ Secrets and credentials for the Compose stack are documented in `[deployments/SE
 
 For a local Kubernetes cluster using Kind, including NGINX ingress, infrastructure, observability, and all services, follow:
 
-- `[deployments/k8s/README.md](deployments/k8s/README.md)` – full quick start, Make targets, and chart references.
+- [deployments/k8s/README.md](deployments/k8s/README.md) – full quick start, Make targets, and chart references.
 
 Charts for individual components are documented under:
 
@@ -71,8 +71,8 @@ Each service’s integration tests follow a common pattern:
 
 How secrets and credentials are handled for both Kubernetes and Docker Compose is documented in:
 
-- `[deployments/SECRETS.md](deployments/SECRETS.md)`
-- `[deployments/k8s/secrets/README.md](deployments/k8s/secrets/README.md)`
+- [deployments/SECRETS.md](deployments/SECRETS.md)
+- [deployments/k8s/secrets/README.md](deployments/k8s/secrets/README.md)
 
 ## Architecture and standards
 
