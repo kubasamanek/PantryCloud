@@ -238,6 +238,7 @@ jobs:
           context: .
           file: ${{ inputs.dockerfile_path }}
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: |
             ${{ inputs.image_name }}:${{ steps.gitversion.outputs.semVer }}
             ${{ inputs.image_name }}:latest
