@@ -2,14 +2,22 @@ CLUSTER_NAME   := pantry-cloud
 NAMESPACE      := pantry
 REPO_ROOT      := $(shell git -C ../.. rev-parse --show-toplevel 2>/dev/null || echo "../..")
 CHART          := ./charts/pantry-microservice
+# IMAGE_TAG is the Docker tag used for all PantryCloud service images.
+# When IMAGE_SOURCE=hub, this tag must exist in Docker Hub.
 IMAGE_TAG      := latest
 
+ARCH           := $(shell uname -m)
+
 # ──────────────────────────────────────────────
-# Image Source: set IMAGE_SOURCE=local to build from Dockerfiles
-#               set IMAGE_SOURCE=hub  to pull from Docker Hub (default)
+# Image Source:
+#   - IMAGE_SOURCE=local  builds images from local Dockerfiles and loads them into Kind.
+#   - IMAGE_SOURCE=hub    pulls images from Docker Hub (default). This assumes that the
+#                         samanekj/* images for IMAGE_TAG are already published as multi-arch
+#                         (linux/amd64 + linux/arm64). On Apple Silicon (arm64), non-multi-arch
+#                         images will fail with a \"no matching manifest\" error.
 #
 # Usage:
-#   make up                       # pulls from Docker Hub
+#   make up                       # pulls from Docker Hub (multi-arch images required)
 #   make up IMAGE_SOURCE=local    # builds from local Dockerfiles
 # ──────────────────────────────────────────────
 IMAGE_SOURCE ?= hub
@@ -106,11 +114,8 @@ metrics-server-install: ## Install metrics-server for HPA (Kind-friendly config)
 	@echo "==> Patching metrics-server to allow kubelet insecure TLS (Kind)..."
 	kubectl patch deployment metrics-server -n kube-system \
 		--type=json -p='[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'
-	@echo "==> Waiting for metrics-server pods to be ready..."
-	kubectl wait --namespace kube-system \
-		--for=condition=ready pod \
-		--selector=k8s-app=metrics-server \
-		--timeout=180s
+	@echo "==> Waiting for metrics-server deployment rollout to complete..."
+	kubectl rollout status deployment/metrics-server -n kube-system --timeout=180s
 
 .PHONY: require-cluster
 require-cluster: ## Check that a Kubernetes cluster is reachable (used by infra-install, secrets, deploy-services)
@@ -146,18 +151,6 @@ ifeq ($(IMAGE_SOURCE),local)
 	docker build -t $(HUB_audit):$(IMAGE_TAG)        -f $(REPO_ROOT)/$(DF_audit)        $(REPO_ROOT)
 	docker build -t $(HUB_api-gateway):$(IMAGE_TAG)  -f $(REPO_ROOT)/$(DF_api-gateway)  $(REPO_ROOT)
 	docker build -t $(HUB_web):$(IMAGE_TAG)          -f $(REPO_ROOT)/$(DF_web)          $(REPO_ROOT)
-else
-	@echo "==> Pulling images from Docker Hub..."
-	docker pull $(HUB_identity):$(IMAGE_TAG)
-	docker pull $(HUB_household):$(IMAGE_TAG)
-	docker pull $(HUB_pantry):$(IMAGE_TAG)
-	docker pull $(HUB_recipe):$(IMAGE_TAG)
-	docker pull $(HUB_shoppinglist):$(IMAGE_TAG)
-	docker pull $(HUB_notification):$(IMAGE_TAG)
-	docker pull $(HUB_audit):$(IMAGE_TAG)
-	docker pull $(HUB_api-gateway):$(IMAGE_TAG)
-	docker pull $(HUB_web):$(IMAGE_TAG)
-endif
 	@echo "==> Loading images into Kind..."
 	kind load docker-image $(HUB_identity):$(IMAGE_TAG)     --name $(CLUSTER_NAME)
 	kind load docker-image $(HUB_household):$(IMAGE_TAG)    --name $(CLUSTER_NAME)
@@ -168,6 +161,34 @@ endif
 	kind load docker-image $(HUB_audit):$(IMAGE_TAG)        --name $(CLUSTER_NAME)
 	kind load docker-image $(HUB_api-gateway):$(IMAGE_TAG)  --name $(CLUSTER_NAME)
 	kind load docker-image $(HUB_web):$(IMAGE_TAG)          --name $(CLUSTER_NAME)
+else
+	@echo "==> Pulling images from Docker Hub..."
+ifeq ($(ARCH),arm64)
+	@echo "Detected arm64 host (Apple Silicon)."
+	@echo "If a docker pull fails with 'no matching manifest for linux/arm64', the Docker Hub images"
+	@echo "for tag '$(IMAGE_TAG)' are not published as multi-architecture (amd64+arm64)."
+	@echo "Either push multi-arch images (see build/docker/build-and-push-multiarch.sh) or use:"
+	@echo "  make up IMAGE_SOURCE=local"
+endif
+	docker pull $(HUB_identity):$(IMAGE_TAG) || { \
+		if [ "$(ARCH)" = "arm64" ]; then \
+			echo ""; \
+			echo "Pull for $(HUB_identity):$(IMAGE_TAG) failed on arm64."; \
+			echo "This usually means the image tag is not multi-arch (no linux/arm64 manifest)."; \
+			echo "Run:  ./build/docker/build-and-push-multiarch.sh $(IMAGE_TAG)"; \
+			echo "or:   IMAGE_SOURCE=local make up"; \
+		fi; \
+		exit 1; \
+	}
+	docker pull $(HUB_household):$(IMAGE_TAG)
+	docker pull $(HUB_pantry):$(IMAGE_TAG)
+	docker pull $(HUB_recipe):$(IMAGE_TAG)
+	docker pull $(HUB_shoppinglist):$(IMAGE_TAG)
+	docker pull $(HUB_notification):$(IMAGE_TAG)
+	docker pull $(HUB_audit):$(IMAGE_TAG)
+	docker pull $(HUB_api-gateway):$(IMAGE_TAG)
+	docker pull $(HUB_web):$(IMAGE_TAG)
+endif
 
 # ──────────────────────────────────────────────
 # Infrastructure
