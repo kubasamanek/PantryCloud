@@ -34,7 +34,7 @@ This brings up PostgreSQL, RabbitMQ, MongoDB, Redis, all backend services, the A
 - Web UI: `http://localhost:3000`
 - API Gateway: `http://localhost:5050`
 
-Secrets and credentials for the Compose stack are documented in `[deployments/SECRETS.md](deployments/SECRETS.md)`.
+Secrets and credentials for the Compose stack are documented in [deployments/SECRETS.md](deployments/SECRETS.md).
 
 ## Run on Kubernetes (Kind)
 
@@ -48,7 +48,7 @@ Charts for individual components are documented under:
 - `deployments/k8s/charts/infrastructure/README.md`
 - `deployments/k8s/charts/observability/README.md`
 
-Secrets for Kubernetes and Compose are described in `[deployments/SECRETS.md](deployments/SECRETS.md)` and `[deployments/k8s/secrets/README.md](deployments/k8s/secrets/README.md)`.
+Secrets for Kubernetes and Compose are described in [deployments/SECRETS.md](deployments/SECRETS.md) and [deployments/k8s/secrets/README.md](deployments/k8s/secrets/README.md).
 
 ## Tests
 
