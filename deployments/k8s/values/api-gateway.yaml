@@ -63,7 +63,6 @@ hpa:
   minReplicas: 2
   maxReplicas: 3
   targetCPUUtilizationPercentage: 75
-  targetMemoryUtilizationPercentage: 80
 
 pdb:
   enabled: true

@@ -10,7 +10,7 @@ public static class ApiPaths
 
     public const string Households = "api/" + Version + "/household/households";
 
-    public const string Pantry = "api/" + Version + "/pantry/pantry";
+    public const string Pantry = "api/" + Version + "/pantry";
 
     public const string ShoppingList = "api/" + Version + "/shoppinglist/shopping-lists";
 
@@ -18,5 +18,5 @@ public static class ApiPaths
 
     public const string Notification = "api/" + Version + "/notification/notifications";
 
-    public const string Audit = "api/" + Version + "/audit/audit";
+    public const string Audit = "api/" + Version + "/audit";
 }

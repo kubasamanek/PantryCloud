@@ -143,3 +143,13 @@ public record ShoppingListItemUpdateResult
 /// Result of shopping list item form dialog: either add (EditId=null, RowVersion=null) or edit (EditId and RowVersion set).
 /// </summary>
 public record ShoppingListItemFormResult(Guid? EditId, string Name, decimal Quantity, int Unit, byte[]? RowVersion);
+
+public record AddShoppingListItemsBatchRequest
+{
+    [JsonPropertyName("items")] public List<AddShoppingListItemRequest> Items { get; set; } = [];
+}
+
+public record AddShoppingListItemsBatchResponse
+{
+    [JsonPropertyName("items")] public IReadOnlyList<AddShoppingListItemResponse> Items { get; init; } = [];
+}

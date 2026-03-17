@@ -89,4 +89,12 @@ public class ShoppingListApiService(IHttpClientFactory httpClientFactory) : ISho
             ? await response.Content.ReadFromJsonAsync<CheckShoppingListItemResponse>(cancellationToken)
             : null;
     }
+
+    public async Task<AddShoppingListItemsBatchResponse?> AddItemsBatchAsync(Guid listId, AddShoppingListItemsBatchRequest request, CancellationToken cancellationToken = default)
+    {
+        var response = await Client.PostAsJsonAsync($"{BasePath}/{listId}/items/batch", request, cancellationToken);
+        return response.StatusCode == HttpStatusCode.Created
+            ? await response.Content.ReadFromJsonAsync<AddShoppingListItemsBatchResponse>(cancellationToken)
+            : null;
+    }
 }

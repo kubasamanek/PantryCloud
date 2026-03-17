@@ -27,15 +27,53 @@
             </MudStack>
 
             <MudText Typo="Typo.subtitle1">Ingredients</MudText>
-            <MudList T="string" Dense="true">
+            <MudStack Spacing="0">
                 @foreach (var ing in _recipe.Ingredients)
                 {
-                    <MudListItem T="string">
-                        @(ing.Quantity > 0 ? $"{ing.Quantity} {UnitDisplayHelper.UnitLabel(ing.Unit)} " : "")@ing.Name
-                        @if (ing.IsOptional) { <MudText Typo="Typo.caption" Color="Color.Secondary" component="span">(optional)</MudText> }
-                    </MudListItem>
+                    var label = (ing.Quantity > 0 ? $"{ing.Quantity} {UnitDisplayHelper.UnitLabel(ing.Unit)} " : "") +
+                                ing.Name +
+                                (ing.IsOptional ? " (optional)" : "");
+                    <MudCheckBox T="bool"
+                                 Value="@_checkedIngredients.Contains(ing.Name)"
+                                 ValueChanged="@(v => ToggleIngredient(ing.Name, v))"
+                                 Dense="true"
+                                 Label="@label" />
                 }
-            </MudList>
+            </MudStack>
+
+            <MudStack Spacing="2">
+                <MudText Typo="Typo.subtitle2">Add checked ingredients to shopping list</MudText>
+                @if (_lists.Count == 0)
+                {
+                    <MudAlert Severity="Severity.Info" Dense="true">
+                        No shopping lists found. Create a shopping list first to add ingredients.
+                    </MudAlert>
+                }
+                else
+                {
+                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Wrap="Wrap.Wrap">
+                        <MudSelect T="Guid" @bind-Value="_selectedListId" Label="Shopping list" Variant="Variant.Outlined" Dense="true" Style="min-width: 200px;">
+                            @foreach (var list in _lists)
+                            {
+                                <MudSelectItem T="Guid" Value="@list.Id">@list.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                   Disabled="@(_checkedIngredients.Count == 0 || _selectedListId == Guid.Empty || _adding)"
+                                   OnClick="AddToShoppingList">
+                            @(_adding ? "Adding…" : "Add to list")
+                        </MudButton>
+                    </MudStack>
+                    @if (_addError)
+                    {
+                        <MudAlert Severity="Severity.Error" Dense="true">Failed to add items. Please try again.</MudAlert>
+                    }
+                    @if (_addSuccess)
+                    {
+                        <MudAlert Severity="Severity.Success" Dense="true">Items added to list.</MudAlert>
+                    }
+                }
+            </MudStack>
 
             <MudText Typo="Typo.subtitle1">Steps</MudText>
             <MudList T="string" Dense="true">
@@ -61,16 +99,76 @@
 @code {
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
     [Parameter] public Guid RecipeId { get; set; }
+    [Parameter] public HashSet<string> PantryIngredientNames { get; set; } = [];
     [Inject] private IRecipeApi RecipeApi { get; set; } = null!;
+    [Inject] private IShoppingListApi ShoppingListApi { get; set; } = null!;
 
     private RecipeDto? _recipe;
     private bool _loading = true;
+    private HashSet<string> _checkedIngredients = new(StringComparer.OrdinalIgnoreCase);
+    private List<ShoppingListSummaryDto> _lists = [];
+    private Guid _selectedListId;
+    private bool _adding;
+    private bool _addError;
+    private bool _addSuccess;
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await RecipeApi.GetRecipeAsync(RecipeId);
-        _recipe = response?.Recipe;
+        var recipeTask = RecipeApi.GetRecipeAsync(RecipeId);
+        var listsTask = ShoppingListApi.ListListsAsync(1, 100);
+        await Task.WhenAll(recipeTask, listsTask);
+
+        _recipe = recipeTask.Result?.Recipe;
+
+        if (_recipe != null)
+        {
+            foreach (var ing in _recipe.Ingredients)
+            {
+                if (!PantryIngredientNames.Contains(ing.Name))
+                    _checkedIngredients.Add(ing.Name);
+            }
+        }
+
+        _lists = listsTask.Result.Data?.Lists.ToList() ?? [];
+        if (_lists.Count > 0)
+            _selectedListId = _lists[0].Id;
+
         _loading = false;
+    }
+
+    private void ToggleIngredient(string name, bool isChecked)
+    {
+        if (isChecked) _checkedIngredients.Add(name);
+        else _checkedIngredients.Remove(name);
+    }
+
+    private async Task AddToShoppingList()
+    {
+        if (_selectedListId == Guid.Empty || _checkedIngredients.Count == 0 || _recipe == null)
+            return;
+
+        _adding = true;
+        _addError = false;
+        _addSuccess = false;
+        StateHasChanged();
+
+        var items = _recipe.Ingredients
+            .Where(ing => _checkedIngredients.Contains(ing.Name))
+            .Select(ing => new AddShoppingListItemRequest
+            {
+                Name = ing.Name,
+                Quantity = ing.Quantity > 0 ? ing.Quantity : 1,
+                Unit = ing.Unit,
+                Source = 2 // Recipe
+            })
+            .ToList();
+
+        var result = await ShoppingListApi.AddItemsBatchAsync(_selectedListId, new AddShoppingListItemsBatchRequest { Items = items });
+
+        _addError = result == null;
+        _addSuccess = result != null;
+        _adding = false;
+        StateHasChanged();
     }
 
     private void Close() => MudDialog.Close();

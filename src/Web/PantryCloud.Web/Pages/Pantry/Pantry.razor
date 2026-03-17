@@ -23,8 +23,21 @@
     {
         <MudPaper Class="pa-6" Elevation="2">
             <MudAlert Severity="Severity.Warning">
-                You need to be in a household to manage your pantry.
-                <MudLink Href="@Routes.Household" Typo="Typo.body2" Class="ml-2">Go to household</MudLink>
+                <MudStack Spacing="2">
+                    <MudText Typo="Typo.body2">
+                        You need to be in a household to manage your pantry.
+                        If you just created or joined one, it may take a moment to sync.
+                    </MudText>
+                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                        <MudButton Variant="Variant.Filled" Size="Size.Small" Color="Color.Warning"
+                                   StartIcon="@Icons.Material.Filled.Refresh"
+                                   Disabled="@_loading"
+                                   OnClick="@(() => LoadListAsync())">
+                            @(_loading ? "Checking…" : "Retry")
+                        </MudButton>
+                        <MudLink Href="@Routes.Household" Typo="Typo.body2">Go to household</MudLink>
+                    </MudStack>
+                </MudStack>
             </MudAlert>
         </MudPaper>
     }
@@ -168,6 +181,7 @@
 
     [Inject] private IPantryApi PantryApi { get; set; } = null!;
     [Inject] private IRecipeApi RecipeApi { get; set; } = null!;
+    [Inject] private IHouseholdApi HouseholdApi { get; set; } = null!;
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
     [Inject] private IDialogService DialogService { get; set; } = null!;
 
@@ -185,10 +199,23 @@
     private List<RecipeDto>? _recommendRecipes;
     private bool _recipesLoading;
     private bool _recipesError;
+    private GetMyPreferencesResponse? _myPreferences;
 
     protected override async Task OnInitializedAsync()
     {
+        var preferencesTask = HouseholdApi.GetMyPreferencesAsync();
         await LoadListAsync();
+
+        // If no household was found on first load, retry a few times to cover the
+        // eventual-consistency window between household creation and the Pantry service
+        // receiving the MemberJoinedHousehold event via the outbox (~2-5 seconds).
+        for (var i = 0; i < 3 && _noHousehold; i++)
+        {
+            await Task.Delay(2000);
+            await LoadListAsync();
+        }
+
+        _myPreferences = await preferencesTask;
     }
 
     private async Task LoadListAsync(CancellationToken ct = default)
@@ -353,7 +380,12 @@
             var request = new RecommendRecipesRequest
             {
                 IngredientHints = ingredientNames,
-                Limit = 10
+                Limit = 10,
+                Preferences = _myPreferences == null ? null : new PreferencesFilterDto
+                {
+                    DietaryProfile = _myPreferences.DietaryProfile switch { 1 => "Vegetarian", 2 => "Vegan", _ => "None" },
+                    ExcludedIngredients = _myPreferences.ExcludedIngredients
+                }
             };
             var response = await RecipeApi.RecommendAsync(request, ct);
             _recommendRecipes = response?.Recipes?.ToList();
@@ -373,7 +405,17 @@
 
     private async Task OpenRecipeDetail(Guid recipeId)
     {
+        var pantryNames = (_listResponse?.Items ?? [])
+            .Select(i => i.Name?.Trim() ?? "")
+            .Where(n => n.Length > 0)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        await DialogService.ShowAsync<RecipeDetailDialog>("Recipe", new DialogParameters { ["RecipeId"] = recipeId }, options);
+        var parameters = new DialogParameters
+        {
+            ["RecipeId"] = recipeId,
+            ["PantryIngredientNames"] = pantryNames
+        };
+        await DialogService.ShowAsync<RecipeDetailDialog>("Recipe", parameters, options);
     }
 }

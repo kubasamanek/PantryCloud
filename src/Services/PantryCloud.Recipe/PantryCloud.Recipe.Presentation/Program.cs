@@ -1,5 +1,6 @@
 using PantryCloud.Recipe.Application;
 using PantryCloud.Recipe.Infrastructure;
+using PantryCloud.Recipe.Infrastructure.Persistence;
 using PantryCloud.Recipe.Presentation.Extensions;
 using PantryCloud.SharedKernel.Correlation;
 using PantryCloud.SharedKernel.Logging;
@@ -17,6 +18,12 @@ builder.Services
     .AddApplicationLayerServices();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<RecipeDbSeeder>();
+    await seeder.SeedAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {

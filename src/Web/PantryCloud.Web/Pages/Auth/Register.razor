@@ -9,12 +9,41 @@
         <MudText Typo="Typo.h5" Class="mb-6">Create account</MudText>
         <EditForm Model="_model" OnValidSubmit="HandleSubmit">
             <DataAnnotationsValidator />
-            <MudTextField @bind-Value="_model.Email" Label="Email" Variant="Variant.Outlined" InputType="InputType.Email" Class="mb-4" />
-            <MudTextField @bind-Value="_model.Password" Label="Password" Variant="Variant.Outlined" InputType="InputType.Password" Class="mb-4" />
+            <MudTextField @bind-Value="_model.Email"
+                          For="@(() => _model.Email)"
+                          Label="Email"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Email"
+                          Class="mb-4" />
+            <MudTextField @bind-Value="_model.Password"
+                          For="@(() => _model.Password)"
+                          Label="Password"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Password"
+                          HelperText="Min. 8 characters with uppercase, lowercase, and a digit"
+                          Class="mb-4" />
             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="mb-2" Disabled="_loading">
                 @(_loading ? "Creating account..." : "Register")
             </MudButton>
         </EditForm>
+        @if (_errors.Count > 0)
+        {
+            <MudAlert Severity="Severity.Error" Class="mt-4">
+                @if (_errors.Count == 1)
+                {
+                    <MudText Typo="Typo.body2">@_errors[0]</MudText>
+                }
+                else
+                {
+                    <MudList T="string" Dense="true" DisablePadding="true">
+                        @foreach (var error in _errors)
+                        {
+                            <MudListItem T="string" Icon="@Icons.Material.Filled.Circle" IconSize="Size.Small">@error</MudListItem>
+                        }
+                    </MudList>
+                }
+            </MudAlert>
+        }
         @if (_success && !string.IsNullOrEmpty(_verifyLink))
         {
             <MudAlert Severity="Severity.Success" Class="mt-4">
@@ -31,30 +60,31 @@
 @code {
     [Inject] private IAuthApi AuthApi { get; set; } = null!;
     [Inject] private NavigationManager Navigation { get; set; } = null!;
-    [Inject] private ISnackbar Snackbar { get; set; } = null!;
 
     private readonly RegisterRequest _model = new();
     private bool _loading;
     private bool _success;
     private string? _verifyLink;
+    private List<string> _errors = [];
 
     private async Task HandleSubmit()
     {
         _loading = true;
         _success = false;
         _verifyLink = null;
+        _errors = [];
         try
         {
-            var response = await AuthApi.RegisterAsync(_model);
-            if (response != null)
+            var result = await AuthApi.RegisterAsync(_model);
+            if (result.IsSuccess)
             {
                 _success = true;
                 var baseUri = new Uri(Navigation.Uri).GetLeftPart(UriPartial.Authority);
-                _verifyLink = $"{baseUri}{Routes.VerifyEmail}?email={Uri.EscapeDataString(_model.Email)}&token={Uri.EscapeDataString(response.VerifyEmailToken)}";
+                _verifyLink = $"{baseUri}{Routes.VerifyEmail}?email={Uri.EscapeDataString(_model.Email)}&token={Uri.EscapeDataString(result.Value!.VerifyEmailToken)}";
             }
             else
             {
-                Snackbar.Add("Registration failed. Email may already be in use.", Severity.Error);
+                _errors = result.Errors;
             }
         }
         finally

@@ -5,7 +5,7 @@ namespace PantryCloud.Web.Services.Auth;
 public class LoginRequest
 {
     [Required(ErrorMessage = "Email is required")]
-    [EmailAddress]
+    [EmailAddress(ErrorMessage = "Enter a valid email address")]
     public string Email { get; set; } = "";
 
     [Required(ErrorMessage = "Password is required")]
@@ -15,15 +15,32 @@ public class LoginRequest
 
 public record LoginResponse(string AccessToken, string RefreshToken);
 
+public record LoginResult
+{
+    public LoginResponse? Value { get; init; }
+    public bool IsSuccess => Value != null;
+    public bool IsEmailNotVerified { get; init; }
+    public string? ErrorMessage { get; init; }
+}
+
 public class RegisterRequest
 {
     [Required(ErrorMessage = "Email is required")]
-    [EmailAddress]
+    [EmailAddress(ErrorMessage = "Enter a valid email address")]
     public string Email { get; set; } = "";
 
     [Required(ErrorMessage = "Password is required")]
-    [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
+    [MinLength(8, ErrorMessage = "Password must be at least 8 characters")]
+    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$",
+        ErrorMessage = "Password must contain at least one uppercase letter, one lowercase letter, and one digit")]
     public string Password { get; set; } = "";
+}
+
+public record RegisterResult
+{
+    public RegisterResponse? Value { get; init; }
+    public bool IsSuccess => Value != null;
+    public List<string> Errors { get; init; } = [];
 }
 
 public record RegisterResponse(string UserId, string VerifyEmailToken);
