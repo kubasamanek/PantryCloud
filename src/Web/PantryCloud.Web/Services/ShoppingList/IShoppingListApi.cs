@@ -10,4 +10,5 @@ public interface IShoppingListApi
     Task<ShoppingListItemUpdateResult> UpdateItemAsync(Guid listId, Guid itemId, UpdateShoppingListItemRequest request, CancellationToken cancellationToken = default);
     Task<bool> DeleteItemAsync(Guid listId, Guid itemId, CancellationToken cancellationToken = default);
     Task<CheckShoppingListItemResponse?> CheckItemAsync(Guid listId, Guid itemId, CancellationToken cancellationToken = default);
+    Task<AddShoppingListItemsBatchResponse?> AddItemsBatchAsync(Guid listId, AddShoppingListItemsBatchRequest request, CancellationToken cancellationToken = default);
 }

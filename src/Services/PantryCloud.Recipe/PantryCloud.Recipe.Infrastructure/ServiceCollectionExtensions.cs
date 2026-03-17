@@ -57,6 +57,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IRecipeRepository, MongoRecipeRepository>();
         services.AddScoped<IRecipeSearchService, LocalMongoRecipeSearchService>();
+        services.AddScoped<RecipeDbSeeder>();
         
         services.AddOpenTelemetryTracing(configuration);
         services.AddApiVersioningDefaults();
