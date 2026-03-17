@@ -219,9 +219,22 @@
         {
             await LoadListsAsync();
             await LoadListDetailAsync(SelectedListId.Value);
+
+            if (response.AllItemsChecked && _currentList != null && _currentList.Items.Count > 0)
+                await OfferTransferToPantryAsync(_currentList.Items);
         }
         else
             Snackbar.Add("Could not update check status.", Severity.Warning);
+    }
+
+    private async Task OfferTransferToPantryAsync(IReadOnlyList<ShoppingListItemDto> items)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var parameters = new DialogParameters { ["Items"] = items };
+        var dialog = await DialogService.ShowAsync<TransferToPantryDialog>("Transfer to pantry?", parameters, options);
+        var result = await dialog.Result;
+        if (result?.Data is int count && count > 0)
+            Snackbar.Add($"{count} item(s) added to pantry.", Severity.Success);
     }
 
     private async Task OpenCreateListDialog()
