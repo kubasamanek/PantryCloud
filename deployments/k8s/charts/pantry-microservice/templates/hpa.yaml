@@ -27,4 +27,17 @@ spec:
           type: Utilization
           averageUtilization: {{ .Values.hpa.targetMemoryUtilizationPercentage }}
     {{- end }}
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: {{ .Values.hpa.stabilizationWindowSeconds }}
+      policies:
+        - type: Pods
+          value: {{ .Values.hpa.maxPodScalingPerPeriod }}
+          periodSeconds: {{ .Values.hpa.scalingPeriodSeconds }}
+    scaleDown:
+      stabilizationWindowSeconds: {{ .Values.hpa.stabilizationWindowSeconds }}
+      policies:
+        - type: Pods
+          value: {{ .Values.hpa.maxPodScalingPerPeriod }}
+          periodSeconds: {{ .Values.hpa.scalingPeriodSeconds }}
 {{- end }}

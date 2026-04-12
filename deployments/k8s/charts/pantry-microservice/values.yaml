@@ -50,6 +50,9 @@ hpa:
   minReplicas: 1
   maxReplicas: 3
   targetCPUUtilizationPercentage: 75
+  stabilizationWindowSeconds: 120
+  maxPodScalingPerPeriod: 1
+  scalingPeriodSeconds: 60
 
 ingress:
   enabled: false
