@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - develop
+      - master
+      - 'release/**'
     paths:
       - 'src/Services/PantryCloud.Household/**'
       - 'src/BuildingBlocks/**'
@@ -12,6 +14,7 @@ on:
   pull_request:
     branches:
       - develop
+      - master
     paths:
       - 'src/Services/PantryCloud.Household/**'
       - 'src/BuildingBlocks/**'
