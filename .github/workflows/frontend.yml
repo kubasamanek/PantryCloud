@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - develop
+      - master
+      - 'release/**'
     paths:
       - 'src/Web/PantryCloud.Web/**'
       - '.github/workflows/frontend.yml'
@@ -11,6 +13,7 @@ on:
   pull_request:
     branches:
       - develop
+      - master
     paths:
       - 'src/Web/PantryCloud.Web/**'
       - '.github/workflows/frontend.yml'

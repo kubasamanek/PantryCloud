@@ -185,14 +185,19 @@ jobs:
     needs: [build, test]
     # Run CD if:
     # 1. dockerfile_path is provided
-    # 2. It is a push to develop
+    # 2. It is a push to develop, master, or a release/* branch
     # 3. Build succeeded
     # 4. Test phase succeeded OR was skipped (because unit_test_project_path was empty)
     if: |
-      always() && 
-      inputs.dockerfile_path != '' && 
-      github.event_name == 'push' && 
-      github.ref == 'refs/heads/develop' &&
+      always() &&                                                                   
+      inputs.dockerfile_path != '' &&
+      ((github.event_name == 'push' &&                                                
+        (github.ref == 'refs/heads/develop' ||
+         github.ref == 'refs/heads/master' ||                                         
+         startsWith(github.ref, 'refs/heads/release/'))) ||                           
+       (github.event_name == 'workflow_dispatch' &&
+        (github.ref == 'refs/heads/master' ||                                         
+         startsWith(github.ref, 'refs/heads/release/')))) &&                          
       needs.build.result == 'success' &&
       (needs.test.result == 'success' || needs.test.result == 'skipped')
     runs-on: ubuntu-latest
