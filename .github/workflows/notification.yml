@@ -1,0 +1,39 @@
+name: CI/CD - NotificationService
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.Notification/**'
+      - 'src/BuildingBlocks/**'
+      - 'test/PantryCloud.Notification/**'
+      - '.github/workflows/notification.yml'
+      - '.github/workflows/base.yml'
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.Notification/**'
+      - 'src/BuildingBlocks/**'
+      - 'test/PantryCloud.Notification/**'
+      - '.github/workflows/notification.yml'
+      - '.github/workflows/base.yml'
+  workflow_dispatch:
+
+jobs:
+  pipeline:
+    uses: ./.github/workflows/base.yml
+    with:
+      service_project_path: src/Services/PantryCloud.Notification/PantryCloud.Notification.Presentation/PantryCloud.Notification.Presentation.csproj
+      unit_test_project_path: test/PantryCloud.Notification/PantryCloud.Notification.UnitTests/PantryCloud.Notification.UnitTests.csproj
+      integration_test_project_path: test/PantryCloud.Notification/PantryCloud.Notification.IntegrationTests/PantryCloud.Notification.IntegrationTests.csproj
+      dockerfile_path: src/Services/PantryCloud.Notification/PantryCloud.Notification.Presentation/Dockerfile
+      image_name: samanekj/notificationservice
+      test_image_name: pantrycloud-notification-test:latest
+      coverage_flag: notification-service
+      test_results_name: "NotificationService - Test Results"
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

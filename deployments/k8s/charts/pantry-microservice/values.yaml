@@ -1,0 +1,83 @@
+replicaCount: 1
+
+image:
+  repository: ""
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 8080
+
+env: {}
+
+secretEnv: {}
+
+existingSecrets: []
+
+probes:
+  enabled: true
+  path: /health
+  liveness:
+    initialDelaySeconds: 15
+    periodSeconds: 20
+    failureThreshold: 3
+    timeoutSeconds: 5
+  readiness:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+    timeoutSeconds: 5
+  startup:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    failureThreshold: 30
+    timeoutSeconds: 5
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+hpa:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 75
+  stabilizationWindowSeconds: 120
+  maxPodScalingPerPeriod: 1
+  scalingPeriodSeconds: 60
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts: []
+  tls: []
+
+volumes: []
+volumeMounts: []
+
+# PodDisruptionBudget configuration
+# Only one of minAvailable / maxUnavailable should be non-null when enabled.
+pdb:
+  enabled: false
+  minAvailable: null
+  maxUnavailable: 1
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+serviceAccount:
+  create: true
+  name: ""
+
+observability:
+  otlpEndpoint: "http://pantry-alloy:4317"

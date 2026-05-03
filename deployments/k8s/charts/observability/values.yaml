@@ -1,0 +1,70 @@
+namespace: pantry
+
+prometheus:
+  image: prom/prometheus:v3.9.1
+  serviceName: pantry-prometheus
+  port: 9090
+  storage: 2Gi
+  retention: 15d
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+grafana:
+  image: grafana/grafana:12.3.3
+  serviceName: pantry-grafana
+  port: 3000
+  storage: 1Gi
+  adminUser: admin
+  adminPassword: admin
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+loki:
+  image: grafana/loki:3.6.6
+  serviceName: pantry-loki
+  port: 3100
+  storage: 5Gi
+  retentionPeriod: 168h
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+alloy:
+  image: grafana/alloy:v1.13.1
+  serviceName: pantry-alloy
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+tempo:
+  image: grafana/tempo:2.10.1
+  serviceName: pantry-tempo
+  port: 3200
+  otlpGrpcPort: 4317
+  storage: 5Gi
+  retentionPeriod: 72h
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi

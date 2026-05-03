@@ -1,0 +1,1994 @@
+{
+  "info": {
+    "_postman_id": "89fcce37-9ee5-41c5-a4e9-a4038e7a104b",
+    "name": "PantryCloud API Gateway",
+    "description": "Complete API collection for PantryCloud microservices through the API Gateway. Tokens and IDs are automatically saved to collection variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "29837299"
+  },
+  "item": [
+    {
+      "name": "Gateway",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            },
+            "description": "Check if the API Gateway is healthy and running"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Identity Service",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Register",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200 || pm.response.code === 201) {",
+                      "    var jsonData = pm.response.json();",
+                      "    if (jsonData.value && jsonData.value.userId) {",
+                      "        pm.collectionVariables.set(\"user_id\", jsonData.value.userId);",
+                      "        console.log(\"User ID saved: \" + jsonData.value.userId);",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"Test123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/identity/auth/register",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "auth",
+                    "register"
+                  ]
+                },
+                "description": "Register a new user account. User ID is automatically saved to collection variables."
+              },
+              "response": []
+            },
+            {
+              "name": "Login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var jsonData = pm.response.json();",
+                      "    if (jsonData.value && jsonData.value.accessToken) {",
+                      "        pm.collectionVariables.set(\"access_token\", jsonData.value.accessToken);",
+                      "        pm.collectionVariables.set(\"refresh_token\", jsonData.value.refreshToken);",
+                      "        if (jsonData.value.sessionId) pm.collectionVariables.set(\"session_id\", jsonData.value.sessionId);",
+                      "        console.log(\"Access token saved successfully\");",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"Test123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/identity/auth/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "description": "Login and get access/refresh tokens. Tokens are automatically saved to collection variables."
+              },
+              "response": []
+            },
+            {
+              "name": "Refresh Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var jsonData = pm.response.json();",
+                      "    if (jsonData.value && jsonData.value.accessToken) {",
+                      "        pm.collectionVariables.set(\"access_token\", jsonData.value.accessToken);",
+                      "        pm.collectionVariables.set(\"refresh_token\", jsonData.value.refreshToken);",
+                      "        if (jsonData.value.sessionId) pm.collectionVariables.set(\"session_id\", jsonData.value.sessionId);",
+                      "        console.log(\"Tokens refreshed and saved successfully\");",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/identity/auth/refresh",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "auth",
+                    "refresh"
+                  ]
+                },
+                "description": "Refresh the access token using the refresh token. New tokens are automatically saved."
+              },
+              "response": []
+            },
+            {
+              "name": "List Sessions",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/identity/auth/sessions",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "auth",
+                    "sessions"
+                  ]
+                },
+                "description": "List all active sessions for the current user. Requires authentication."
+              },
+              "response": []
+            },
+            {
+              "name": "Revoke Session",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/identity/auth/sessions/{{session_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "auth",
+                    "sessions",
+                    "{{session_id}}"
+                  ]
+                },
+                "description": "Revoke a specific session by ID. Requires authentication."
+              },
+              "response": []
+            },
+            {
+              "name": "Revoke All Other Sessions",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/identity/auth/sessions/others",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "auth",
+                    "sessions",
+                    "others"
+                  ]
+                },
+                "description": "Revoke all sessions except the one used for this request."
+              },
+              "response": []
+            },
+            {
+              "name": "Logout",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/identity/auth/logout",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "auth",
+                    "logout"
+                  ]
+                },
+                "description": "Revoke the current session (logout)."
+              },
+              "response": []
+            },
+            {
+              "name": "Forgot Password",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"test@example.com\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/identity/auth/forgot-password",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "auth",
+                    "forgot-password"
+                  ]
+                },
+                "description": "Request a password reset token"
+              },
+              "response": []
+            },
+            {
+              "name": "Reset Password",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"test@example.com\",\n    \"token\": \"reset-token-here\",\n    \"newPassword\": \"NewPassword123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/identity/auth/reset-password",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "auth",
+                    "reset-password"
+                  ]
+                },
+                "description": "Reset password using the token from forgot-password"
+              },
+              "response": []
+            },
+            {
+              "name": "Verify Email",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"test@example.com\",\n    \"token\": \"verification-token-here\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/identity/auth/verify-email",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "auth",
+                    "verify-email"
+                  ]
+                },
+                "description": "Verify user email address"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Test",
+          "item": [
+            {
+              "name": "Public Endpoint",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/identity/test/public",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "test",
+                    "public"
+                  ]
+                },
+                "description": "Public test endpoint - no authentication required"
+              },
+              "response": []
+            },
+            {
+              "name": "Secure Endpoint",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/identity/test/secure",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "identity",
+                    "test",
+                    "secure"
+                  ]
+                },
+                "description": "Secure test endpoint - requires authentication"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "OpenID Configuration",
+          "item": [
+            {
+              "name": "Get OpenID Configuration",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/.well-known/openid-configuration",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    ".well-known",
+                    "openid-configuration"
+                  ]
+                },
+                "description": "Get OpenID Connect discovery document"
+              },
+              "response": []
+            },
+            {
+              "name": "Get JWKS",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/.well-known/openid-configuration/jwks",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    ".well-known",
+                    "openid-configuration",
+                    "jwks"
+                  ]
+                },
+                "description": "Get JSON Web Key Set for token verification"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Household Service",
+      "item": [
+        {
+          "name": "Get Current Household",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.value && jsonData.value.id) {",
+                  "        pm.collectionVariables.set(\"household_id\", jsonData.value.id);",
+                  "        console.log(\"Household ID saved: \" + jsonData.value.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/household/households/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "me"
+              ]
+            },
+            "description": "Get the current user's household. Requires authentication. Household ID is automatically saved."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Household",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.value && jsonData.value.id) {",
+                  "        pm.collectionVariables.set(\"household_id\", jsonData.value.id);",
+                  "        console.log(\"Household ID saved: \" + jsonData.value.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"My Household\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/household/households",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households"
+              ]
+            },
+            "description": "Create a new household. Requires authentication. Household ID is automatically saved."
+          },
+          "response": []
+        },
+        {
+          "name": "Send Invitation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"toEmail\": \"invite@example.com\",\n    \"householdId\": \"{{household_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/household/households/invite",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "invite"
+              ]
+            },
+            "description": "Send an invitation to join a household. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Accept Invitation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"code\": \"invitation-code-here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/household/households/join",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "join"
+              ]
+            },
+            "description": "Accept a household invitation using the invitation code. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Leave Household",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/household/households/leave",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "leave"
+              ]
+            },
+            "description": "Leave the current household. Requires authentication. Owners must transfer ownership first."
+          },
+          "response": []
+        },
+        {
+          "name": "Kick Member",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/household/households/members/{{member_user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "members",
+                "{{member_user_id}}"
+              ]
+            },
+            "description": "Remove a member from the household. Owner only. Cannot kick yourself or another owner. Get member IDs from Get Household Members Preferences."
+          },
+          "response": []
+        },
+        {
+          "name": "Transfer Ownership",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"newOwnerUserId\": \"{{member_user_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/household/households/transfer-ownership",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "transfer-ownership"
+              ]
+            },
+            "description": "Transfer household ownership to another member. Owner only. New owner must be existing member. Notifies all household members."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/household/households/me/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "me",
+                "profile"
+              ]
+            },
+            "description": "Get current user's profile (display name, avatar URL). 404 if no profile set."
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"displayName\": \"My Display Name\",\n    \"avatarUrl\": \"https://example.com/avatar.png\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/household/households/me/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "me",
+                "profile"
+              ]
+            },
+            "description": "Create or update profile. displayName required (1-100 chars), avatarUrl optional (max 500 chars)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Preferences",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/household/households/me/preferences",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "me",
+                "preferences"
+              ]
+            },
+            "description": "Get current user's recipe preferences (dietary profile, excluded ingredients). 404 if none set. Fetch and send in Recipe search/recommend."
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"dietaryProfile\": 1,\n    \"excludedIngredients\": [\"nuts\", \"shellfish\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/household/households/me/preferences",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "me",
+                "preferences"
+              ]
+            },
+            "description": "Create or update preferences. dietaryProfile: 0=None, 1=Vegetarian, 2=Vegan. User must be in a household."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Household Members Preferences",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/household/households/me/members/preferences",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "household",
+                "households",
+                "me",
+                "members",
+                "preferences"
+              ]
+            },
+            "description": "Get all household members' preferences, profile data (DisplayName, AvatarUrl), and Role (Owner/Member). Use userId as member_user_id for Kick/Transfer. For 'recommend for household': aggregate (union excluded, strictest dietary) and send in POST /recipes/recommend."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pantry Service",
+      "item": [
+        {
+          "name": "Items",
+          "item": [
+            {
+              "name": "Create Pantry Item",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    var jsonData = pm.response.json();",
+                      "    if (jsonData.value && jsonData.value.id) {",
+                      "        pm.collectionVariables.set(\"pantry_item_id\", jsonData.value.id);",
+                      "        console.log(\"Pantry Item ID saved: \" + jsonData.value.id);",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Milk\",\n    \"quantity\": 2.5,\n    \"unit\": 3,\n    \"expirationDate\": \"2024-12-31T00:00:00Z\",\n    \"category\": \"Dairy\",\n    \"notes\": \"Whole milk\",\n    \"imageUrl\": null\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/pantry/pantry/items",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "pantry",
+                    "pantry",
+                    "items"
+                  ]
+                },
+                "description": "Create a new pantry item. Requires authentication and household membership.\n\nUnit values:\n- 0: Piece\n- 1: Kilogram\n- 2: Gram\n- 3: Liter\n- 4: Milliliter\n- 5: Pound\n- 6: Ounce\n- 7: Cup\n- 8: Tablespoon\n- 9: Teaspoon\n\nItem ID is automatically saved."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Pantry Item",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/pantry/pantry/items/{{pantry_item_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "pantry",
+                    "pantry",
+                    "items",
+                    "{{pantry_item_id}}"
+                  ]
+                },
+                "description": "Get a specific pantry item by ID. Requires authentication."
+              },
+              "response": []
+            },
+            {
+              "name": "Update Pantry Item",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Milk (Updated)\",\n    \"quantity\": 3.0,\n    \"unit\": 3,\n    \"expirationDate\": \"2025-01-15T00:00:00Z\",\n    \"category\": \"Dairy\",\n    \"notes\": \"Updated notes\",\n    \"imageUrl\": null,\n    \"rowVersion\": \"AAAAAAAAAAA=\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/pantry/pantry/items/{{pantry_item_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "pantry",
+                    "pantry",
+                    "items",
+                    "{{pantry_item_id}}"
+                  ]
+                },
+                "description": "Update an existing pantry item. Requires authentication and rowVersion for optimistic concurrency control.\n\n**IMPORTANT**: Before running this request:\n1. Run \"Get Pantry Item\" to get the current item details\n2. Copy the \"rowVersion\" value (base64 string) from the response\n3. Paste it into the \"rowVersion\" field below\n4. Then run this request\n\nThe rowVersion ensures no one else modified the item since you last read it."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Pantry Item",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/pantry/pantry/items/{{pantry_item_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "pantry",
+                    "pantry",
+                    "items",
+                    "{{pantry_item_id}}"
+                  ]
+                },
+                "description": "Delete a pantry item. Requires authentication."
+              },
+              "response": []
+            },
+            {
+              "name": "List Pantry Items",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/pantry/pantry/items?category=&searchTerm=&page=1&pageSize=50",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "pantry",
+                    "pantry",
+                    "items"
+                  ],
+                  "query": [
+                    {
+                      "key": "category",
+                      "value": "",
+                      "description": "Filter by category (optional)"
+                    },
+                    {
+                      "key": "searchTerm",
+                      "value": "",
+                      "description": "Search term for item name (optional)"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number (default: 1)"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "50",
+                      "description": "Items per page (default: 50)"
+                    }
+                  ]
+                },
+                "description": "List all pantry items with optional filtering and pagination. Requires authentication."
+              },
+              "response": []
+            },
+            {
+              "name": "List Pantry Items - Filter by Category",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/pantry/pantry/items?category=Dairy&page=1&pageSize=50",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "pantry",
+                    "pantry",
+                    "items"
+                  ],
+                  "query": [
+                    {
+                      "key": "category",
+                      "value": "Dairy",
+                      "description": "Filter by category"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "List pantry items filtered by category. Requires authentication."
+              },
+              "response": []
+            },
+            {
+              "name": "List Pantry Items - Search",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/pantry/pantry/items?searchTerm=milk&page=1&pageSize=50",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "pantry",
+                    "pantry",
+                    "items"
+                  ],
+                  "query": [
+                    {
+                      "key": "searchTerm",
+                      "value": "milk",
+                      "description": "Search term"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "Search pantry items by name. Requires authentication."
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Shopping List Service",
+      "item": [
+        {
+          "name": "Shopping Lists",
+          "item": [
+            {
+              "name": "Create Shopping List",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    var jsonData = pm.response.json();",
+                      "    if (jsonData.value && jsonData.value.id) {",
+                      "        pm.collectionVariables.set(\"shopping_list_id\", jsonData.value.id);",
+                      "        console.log(\"Shopping List ID saved: \" + jsonData.value.id);",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Weekly Shopping\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shoppinglist",
+                    "shopping-lists"
+                  ]
+                },
+                "description": "Create a new shopping list. Requires authentication and household membership. List names must be unique per household."
+              },
+              "response": []
+            },
+            {
+              "name": "List Shopping Lists",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists?page=1&pageSize=50",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shoppinglist",
+                    "shopping-lists"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number (default: 1)"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "50",
+                      "description": "Items per page (default: 50)"
+                    }
+                  ]
+                },
+                "description": "List all shopping lists for the household with pagination. Returns summary information including item counts."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Shopping List",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists/{{shopping_list_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shoppinglist",
+                    "shopping-lists",
+                    "{{shopping_list_id}}"
+                  ]
+                },
+                "description": "Get a specific shopping list with all its items. Requires authentication."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Shopping List",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists/{{shopping_list_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shoppinglist",
+                    "shopping-lists",
+                    "{{shopping_list_id}}"
+                  ]
+                },
+                "description": "Delete a shopping list. This will also delete all items in the list (cascade delete)."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Shopping List Items",
+          "item": [
+            {
+              "name": "Add Item to List",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    var jsonData = pm.response.json();",
+                      "    if (jsonData.value && jsonData.value.id) {",
+                      "        pm.collectionVariables.set(\"shopping_item_id\", jsonData.value.id);",
+                      "        console.log(\"Shopping Item ID saved: \" + jsonData.value.id);",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Milk\",\n    \"quantity\": 2,\n    \"unit\": 0,\n    \"source\": 0\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists/{{shopping_list_id}}/items",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shoppinglist",
+                    "shopping-lists",
+                    "{{shopping_list_id}}",
+                    "items"
+                  ]
+                },
+                "description": "Add a new item to a shopping list.\n\nUnit values:\n- 0: Piece\n- 1: Gram\n- 2: Kilogram\n- 3: Liter\n- 4: Milliliter\n\nSource values:\n- 0: Manual (added by user)\n- 1: Pantry (from pantry service)\n- 2: Recipe (from recipe service)"
+              },
+              "response": []
+            },
+            {
+              "name": "Batch Add Items",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"items\": [\n        {\n            \"name\": \"Tomatoes\",\n            \"quantity\": 3,\n            \"unit\": 0,\n            \"source\": 2\n        },\n        {\n            \"name\": \"Onions\",\n            \"quantity\": 2,\n            \"unit\": 0,\n            \"source\": 2\n        },\n        {\n            \"name\": \"Garlic\",\n            \"quantity\": 5,\n            \"unit\": 0,\n            \"source\": 2\n        }\n    ]\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists/{{shopping_list_id}}/items/batch",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shoppinglist",
+                    "shopping-lists",
+                    "{{shopping_list_id}}",
+                    "items",
+                    "batch"
+                  ]
+                },
+                "description": "Add multiple items to a shopping list at once. Useful for recipe integration."
+              },
+              "response": []
+            },
+            {
+              "name": "Update Item",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Milk (Updated)\",\n    \"quantity\": 3,\n    \"unit\": 0,\n    \"rowVersion\": \"AAAAAAAAAAA=\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists/{{shopping_list_id}}/items/{{shopping_item_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shoppinglist",
+                    "shopping-lists",
+                    "{{shopping_list_id}}",
+                    "items",
+                    "{{shopping_item_id}}"
+                  ]
+                },
+                "description": "Update a shopping list item. Requires rowVersion for optimistic concurrency control.\n\n**IMPORTANT**: Before running this request:\n1. Run \"Get Shopping List\" to get the full list with items\n2. Copy the \"rowVersion\" value (base64 string) from the item you want to update\n3. Paste it into the \"rowVersion\" field below\n4. Then run this request\n\nThe rowVersion ensures no one else modified the item since you last read it."
+              },
+              "response": []
+            },
+            {
+              "name": "Check/Uncheck Item",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists/{{shopping_list_id}}/items/{{shopping_item_id}}/check",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shoppinglist",
+                    "shopping-lists",
+                    "{{shopping_list_id}}",
+                    "items",
+                    "{{shopping_item_id}}",
+                    "check"
+                  ]
+                },
+                "description": "Toggle the checked status of an item. Automatically tracks who checked it and when."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Item",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/shoppinglist/shopping-lists/{{shopping_list_id}}/items/{{shopping_item_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shoppinglist",
+                    "shopping-lists",
+                    "{{shopping_list_id}}",
+                    "items",
+                    "{{shopping_item_id}}"
+                  ]
+                },
+                "description": "Delete an item from a shopping list."
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Recipe Service",
+      "item": [
+        {
+          "name": "Search Recipes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"ingredients\": [\"chicken\", \"rice\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/recipe/recipes/search",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recipe",
+                "recipes",
+                "search"
+              ]
+            },
+            "description": "Search recipes by ingredients. Optionally include preferences (from Get My Preferences): { \"ingredients\": [...], \"preferences\": { \"dietaryProfile\": \"Vegetarian\", \"excludedIngredients\": [\"nuts\"] } }."
+          },
+          "response": []
+        },
+        {
+          "name": "Search Recipes (with preferences)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"ingredients\": [\"chicken\", \"rice\"],\n    \"preferences\": {\n        \"dietaryProfile\": \"Vegetarian\",\n        \"excludedIngredients\": [\"nuts\", \"shellfish\"]\n    }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/recipe/recipes/search",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recipe",
+                "recipes",
+                "search"
+              ]
+            },
+            "description": "Search with preference filter. Fetch preferences from GET /households/me/preferences, then send here. dietaryProfile: None|Vegetarian|Vegan."
+          },
+          "response": []
+        },
+        {
+          "name": "Recommend Recipes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"ingredientHints\": [\"chicken\"],\n    \"preferences\": {\n        \"dietaryProfile\": \"Vegetarian\",\n        \"excludedIngredients\": [\"nuts\"]\n    },\n    \"limit\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/recipe/recipes/recommend",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recipe",
+                "recipes",
+                "recommend"
+              ]
+            },
+            "description": "Recommend recipes. Fetch GET /households/me/members/preferences, aggregate (union excluded, strictest dietary), then send here. ingredientHints optional; limit 1\u2013100."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recipe",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.value && jsonData.value.recipe && jsonData.value.recipe.id) {",
+                  "        pm.collectionVariables.set(\"recipe_id\", jsonData.value.recipe.id);",
+                  "        console.log(\"Recipe ID saved: \" + jsonData.value.recipe.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/recipe/recipes/{{recipe_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recipe",
+                "recipes",
+                "{{recipe_id}}"
+              ]
+            },
+            "description": "Get a specific recipe by ID. Requires authentication. Recipe ID is automatically saved when running Search Recipes or when using a known ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Seed Recipes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"count\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/recipe/recipes/seed",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recipe",
+                "recipes",
+                "seed"
+              ]
+            },
+            "description": "Seed sample recipes into the database. Only available in Development environment. Requires authentication."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notification Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notification/notifications/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notification",
+                "notifications",
+                "health"
+              ]
+            },
+            "description": "Check if the Notification service is healthy."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notification/notifications/me?limit=50",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notification",
+                "notifications",
+                "me"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Max notifications to return (1-100)"
+                },
+                {
+                  "key": "since",
+                  "value": "",
+                  "description": "Optional UTC datetime (ISO 8601) to return only notifications after this time",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get recent notifications for the current user (for \"what I missed\" when offline). Requires authentication. Optional query: limit (default 50), since (UTC datetime)."
+          },
+          "response": []
+        },
+        {
+          "name": "SignalR Hub - How to Test",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notification/notifications/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notification",
+                "notifications",
+                "health"
+              ]
+            },
+            "description": "**SignalR Real-Time Notifications**\n\n**Option A \u2013 HTML test page (recommended)**\nOpen `test/signalr-test.html` in a browser. Paste your access_token and click Connect. Uses skipNegotiation for direct WebSocket (avoids CORS when opening from file://).\n\n**Option B \u2013 Node.js script (good for CLI)**\n```\ncd test && npm install && node signalr-connect.mjs YOUR_ACCESS_TOKEN\n```\nHandles the 0x1E handshake automatically.\n\n**Option C \u2013 Postman WebSocket**\n1. File > New > WebSocket Request\n2. URL: `ws://localhost:5050/hubs/notifications?access_token=YOUR_TOKEN`\n3. Connect, then send: `{\"protocol\":\"json\",\"version\":1}` + 0x1E character. Without 0x1E you get \"Handshake was canceled.\" To insert 0x1E: VS Code extension \"insert-unicode\" (U+001E), or Mac: Ctrl+Shift+U, type 1e, Enter.\n\nKeep connected to receive `ReceiveNotification` events (member joined/left, pantry depleted, etc.)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Audit Service",
+      "item": [
+        {
+          "name": "List Household Audit Entries",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/audit/audit/households/{{household_id}}/entries?page=1&pageSize=50",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "audit",
+                "audit",
+                "households",
+                "{{household_id}}",
+                "entries"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "actionType",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "entityType",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "List audit entries for a household. Requires authentication and household membership. Optional filters: from, to (date range), actionType, entityType."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5050",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "session_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "household_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "member_user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pantry_item_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shopping_list_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shopping_item_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "recipe_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "signalr_ws_url",
+      "value": "ws://localhost:5050/hubs/notifications",
+      "type": "string"
+    }
+  ]
+}

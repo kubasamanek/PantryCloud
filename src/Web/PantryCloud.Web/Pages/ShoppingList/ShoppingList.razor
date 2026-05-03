@@ -1,0 +1,344 @@
+@page "/shopping-list"
+@attribute [Authorize]
+
+<PageTitle>Shopping list - PantryCloud</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
+    <MudText Typo="Typo.h5" Class="mb-4">Shopping list</MudText>
+
+    @if (_listsLoading && _listsResult == null && !_noHousehold && !_unauthorized)
+    {
+        <MudProgressCircular Indeterminate Color="Color.Primary" />
+    }
+    else if (_unauthorized)
+    {
+        <MudPaper Class="pa-6" Elevation="2">
+            <MudAlert Severity="Severity.Warning">
+                Session may have expired. Please sign in again.
+                <MudLink Href="@Routes.Login" Typo="Typo.body2" Class="ml-2">Sign in</MudLink>
+            </MudAlert>
+        </MudPaper>
+    }
+    else if (_noHousehold)
+    {
+        <MudPaper Class="pa-6" Elevation="2">
+            <MudAlert Severity="Severity.Warning">
+                You need to be in a household to use shopping lists.
+                <MudLink Href="@Routes.Household" Typo="Typo.body2" Class="ml-2">Go to household</MudLink>
+            </MudAlert>
+        </MudPaper>
+    }
+    else if (_listsLoadError)
+    {
+        <MudPaper Class="pa-6" Elevation="2">
+            <MudAlert Severity="Severity.Error">Request failed. Please try again.</MudAlert>
+        </MudPaper>
+    }
+    else
+    {
+        <MudGrid>
+            <MudItem xs="12" md="4">
+                <MudPaper Class="pa-4" Elevation="2">
+                    <MudStack Spacing="2">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <MudText Typo="Typo.subtitle1">Lists</MudText>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreateListDialog">New list</MudButton>
+                        </MudStack>
+                        @if (_listsResult?.Data != null)
+                        {
+                            @if (_listsResult.Data.TotalCount == 0)
+                            {
+                                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="py-4">No lists yet. Create your first shopping list.</MudText>
+                            }
+                            else
+                            {
+                                @foreach (var list in _listsResult.Data.Lists)
+                                {
+                                    <MudCard @onclick="@(() => SelectList(list.Id))" Elevation="@(SelectedListId == list.Id ? 4 : 2)" Style="@GetListCardStyle(list.Id)">
+                                        <MudCardContent Class="py-2">
+                                            <MudStack Spacing="0">
+                                                <MudText Typo="Typo.body1">@list.Name</MudText>
+                                                <MudText Typo="Typo.body2" Color="Color.Secondary">@list.CheckedItemCount / @list.ItemCount items</MudText>
+                                            </MudStack>
+                                            <MudStack Row="true" Justify="Justify.FlexEnd" Class="mt-2" @onclick:stopPropagation="true">
+                                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="@(() => ConfirmDeleteList(list))" aria-label="Delete list" />
+                                            </MudStack>
+                                        </MudCardContent>
+                                    </MudCard>
+                                }
+                            }
+                        }
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" md="8">
+                @if (SelectedListId == null)
+                {
+                    <MudPaper Class="pa-8" Elevation="2">
+                        <MudStack Spacing="2" AlignItems="AlignItems.Center" Justify="Justify.Center" Class="py-8">
+                            <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Size="Size.Large" Color="Color.Secondary" />
+                            <MudText Typo="Typo.body1" Color="Color.Secondary">Select a list or create a new one.</MudText>
+                        </MudStack>
+                    </MudPaper>
+                }
+                else
+                {
+                    @if (_detailLoading)
+                    {
+                        <MudProgressCircular Indeterminate Color="Color.Primary" />
+                    }
+                    else if (_currentList != null)
+                    {
+                        <MudPaper Class="pa-4" Elevation="2">
+                            <MudStack Spacing="3">
+                                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                    <MudText Typo="Typo.h6">@_currentList.Name</MudText>
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenAddItemDialog">Add item</MudButton>
+                                </MudStack>
+                                @if (_currentList.Items.Count == 0)
+                                {
+                                    <MudStack Spacing="2" AlignItems="AlignItems.Center" Class="py-6">
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary">No items. Add your first item.</MudText>
+                                        <MudButton Variant="Variant.Outlined" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenAddItemDialog">Add item</MudButton>
+                                    </MudStack>
+                                }
+                                else
+                                {
+                                    <MudList T="object" Dense="true">
+                                        @foreach (var item in _currentList.Items)
+                                        {
+                                            <MudListItem T="object">
+                                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                                    <MudCheckBox T="bool" Value="@item.IsChecked" ValueChanged="@(async (bool v) => await ToggleCheckAsync(item))" Color="Color.Primary" />
+                                                    <MudText Typo="Typo.body1" Style="@(item.IsChecked ? "text-decoration: line-through; opacity: 0.7;" : "")">@item.Name</MudText>
+                                                    <MudText Typo="Typo.body2" Color="Color.Secondary">@item.Quantity @UnitDisplayHelper.UnitLabel(item.Unit)</MudText>
+                                                    <MudStack Row="true" Spacing="0" Class="ms-auto">
+                                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary" OnClick="@(() => OpenEditItemDialog(item))" aria-label="Edit item" />
+                                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="@(() => ConfirmDeleteItem(item))" aria-label="Delete item" />
+                                                    </MudStack>
+                                                </MudStack>
+                                            </MudListItem>
+                                        }
+                                    </MudList>
+                                }
+                            </MudStack>
+                        </MudPaper>
+                    }
+                }
+            </MudItem>
+        </MudGrid>
+    }
+</MudContainer>
+
+@code {
+    [Inject] private IShoppingListApi ShoppingListApi { get; set; } = null!;
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
+    [Inject] private IDialogService DialogService { get; set; } = null!;
+
+    private ListShoppingListsResult? _listsResult;
+    private bool _listsLoading = true;
+    private bool _noHousehold;
+    private bool _unauthorized;
+    private bool _listsLoadError;
+    private GetShoppingListResponse? _currentList;
+    private bool _detailLoading;
+
+    private Guid? SelectedListId { get; set; }
+
+    private string GetListCardStyle(Guid listId)
+    {
+        var baseStyle = "cursor: pointer;";
+        if (SelectedListId == listId)
+            baseStyle += " border: 2px solid var(--mud-palette-primary);";
+        return baseStyle;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadListsAsync();
+    }
+
+    private async Task LoadListsAsync(CancellationToken ct = default)
+    {
+        _listsLoading = true;
+        _noHousehold = false;
+        _unauthorized = false;
+        _listsLoadError = false;
+        StateHasChanged();
+        try
+        {
+            var result = await ShoppingListApi.ListListsAsync(1, 50, ct);
+            _listsResult = result;
+            _noHousehold = result.NoHousehold;
+            _unauthorized = result.Unauthorized;
+            _listsLoadError = result.Data == null && !result.NoHousehold && !result.Unauthorized;
+        }
+        catch
+        {
+            _listsResult = null;
+            _noHousehold = false;
+            _unauthorized = false;
+            _listsLoadError = true;
+        }
+        finally
+        {
+            _listsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SelectList(Guid id)
+    {
+        SelectedListId = id;
+        await LoadListDetailAsync(id);
+    }
+
+    private async Task LoadListDetailAsync(Guid id, CancellationToken ct = default)
+    {
+        _detailLoading = true;
+        _currentList = null;
+        StateHasChanged();
+        try
+        {
+            var result = await ShoppingListApi.GetListAsync(id, ct);
+            if (result.Data != null)
+                _currentList = result.Data;
+        }
+        finally
+        {
+            _detailLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ToggleCheckAsync(ShoppingListItemDto item)
+    {
+        if (SelectedListId == null) return;
+        var response = await ShoppingListApi.CheckItemAsync(SelectedListId.Value, item.Id);
+        if (response != null)
+        {
+            await LoadListsAsync();
+            await LoadListDetailAsync(SelectedListId.Value);
+
+            if (response.AllItemsChecked && _currentList != null && _currentList.Items.Count > 0)
+                await OfferTransferToPantryAsync(_currentList.Items);
+        }
+        else
+            Snackbar.Add("Could not update check status.", Severity.Warning);
+    }
+
+    private async Task OfferTransferToPantryAsync(IReadOnlyList<ShoppingListItemDto> items)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var parameters = new DialogParameters { ["Items"] = items };
+        var dialog = await DialogService.ShowAsync<TransferToPantryDialog>("Transfer to pantry?", parameters, options);
+        var result = await dialog.Result;
+        if (result?.Data is int count && count > 0)
+            Snackbar.Add($"{count} item(s) added to pantry.", Severity.Success);
+    }
+
+    private async Task OpenCreateListDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small };
+        var dialog = await DialogService.ShowAsync<CreateListDialog>("New list", options);
+        var result = await dialog.Result;
+        if (result?.Canceled == true || result?.Data is not string name) return;
+        var createResult = await ShoppingListApi.CreateListAsync(new CreateShoppingListRequest { Name = name });
+        if (createResult.IsDuplicateName)
+        {
+            Snackbar.Add("A shopping list with this name already exists.", Severity.Warning);
+            return;
+        }
+        if (createResult.Value != null)
+        {
+            Snackbar.Add("List created.", Severity.Success);
+            await LoadListsAsync();
+            SelectedListId = createResult.Value.Id;
+            await LoadListDetailAsync(createResult.Value.Id);
+        }
+        else
+            Snackbar.Add("Request failed. Please try again.", Severity.Error);
+    }
+
+    private async Task ConfirmDeleteList(ShoppingListSummaryDto list)
+    {
+        var confirmed = await DialogService.ShowMessageBox("Delete list", $"Delete \"{list.Name}\"? All items will be removed.", "Delete", "Cancel");
+        if (confirmed != true) return;
+        var ok = await ShoppingListApi.DeleteListAsync(list.Id);
+        if (ok)
+        {
+            Snackbar.Add("List removed.", Severity.Success);
+            if (SelectedListId == list.Id)
+            {
+                SelectedListId = null;
+                _currentList = null;
+            }
+            await LoadListsAsync();
+        }
+        else
+            Snackbar.Add("Request failed. Please try again.", Severity.Error);
+    }
+
+    private async Task OpenAddItemDialog()
+    {
+        if (SelectedListId == null) return;
+        var parameters = new DialogParameters { ["IsEdit"] = false, ["Item"] = null };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium };
+        var dialog = await DialogService.ShowAsync<ShoppingListItemFormDialog>("Add item", parameters, options);
+        var result = await dialog.Result;
+        if (result == null || result.Canceled || result.Data is not ShoppingListItemFormResult form || form.EditId.HasValue) return;
+        var request = new AddShoppingListItemRequest { Name = form.Name, Quantity = form.Quantity, Unit = form.Unit, Source = 0 };
+        var added = await ShoppingListApi.AddItemAsync(SelectedListId.Value, request);
+        if (added != null)
+        {
+            Snackbar.Add("Item added.", Severity.Success);
+            await LoadListsAsync();
+            await LoadListDetailAsync(SelectedListId.Value);
+        }
+        else
+            Snackbar.Add("Request failed. Please try again.", Severity.Error);
+    }
+
+    private async Task OpenEditItemDialog(ShoppingListItemDto item)
+    {
+        if (SelectedListId == null) return;
+        var parameters = new DialogParameters { ["IsEdit"] = true, ["Item"] = item };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium };
+        var dialog = await DialogService.ShowAsync<ShoppingListItemFormDialog>("Edit item", parameters, options);
+        var result = await dialog.Result;
+        if (result == null || result.Canceled || result.Data is not ShoppingListItemFormResult form || !form.EditId.HasValue || form.RowVersion == null) return;
+        var updateRequest = new UpdateShoppingListItemRequest { Name = form.Name, Quantity = form.Quantity, Unit = form.Unit, RowVersion = form.RowVersion };
+        var updateResult = await ShoppingListApi.UpdateItemAsync(SelectedListId.Value, form.EditId.Value, updateRequest);
+        if (updateResult.IsConcurrencyConflict)
+        {
+            Snackbar.Add("This item was updated by someone else. Refreshing…", Severity.Warning);
+            await LoadListsAsync();
+            await LoadListDetailAsync(SelectedListId.Value);
+            return;
+        }
+        if (updateResult.Value != null)
+        {
+            Snackbar.Add("Item updated.", Severity.Success);
+            await LoadListsAsync();
+            await LoadListDetailAsync(SelectedListId.Value);
+        }
+        else
+            Snackbar.Add("Request failed. Please try again.", Severity.Error);
+    }
+
+    private async Task ConfirmDeleteItem(ShoppingListItemDto item)
+    {
+        if (SelectedListId == null) return;
+        var confirmed = await DialogService.ShowMessageBox("Delete item", $"Remove \"{item.Name}\"?", "Delete", "Cancel");
+        if (confirmed != true) return;
+        var ok = await ShoppingListApi.DeleteItemAsync(SelectedListId.Value, item.Id);
+        if (ok)
+        {
+            Snackbar.Add("Item removed.", Severity.Success);
+            await LoadListsAsync();
+            await LoadListDetailAsync(SelectedListId.Value);
+        }
+        else
+            Snackbar.Add("Request failed. Please try again.", Severity.Error);
+    }
+}

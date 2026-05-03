@@ -1,0 +1,38 @@
+name: CI/CD - HouseholdService
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.Household/**'
+      - 'src/BuildingBlocks/**'
+      - '.github/workflows/household.yml'
+      - '.github/workflows/base.yml'
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.Household/**'
+      - 'src/BuildingBlocks/**'
+      - 'test/PantryCloud.Household/**'
+      - '.github/workflows/household.yml'
+      - '.github/workflows/base.yml'
+  workflow_dispatch:
+
+jobs:
+  pipeline:
+    uses: ./.github/workflows/base.yml
+    with:
+      service_project_path: src/Services/PantryCloud.Household/PantryCloud.Household.Presentation/PantryCloud.Household.Presentation.csproj
+      unit_test_project_path: test/PantryCloud.Household/PantryCloud.Household.UnitTests/PantryCloud.Household.UnitTests.csproj
+      integration_test_project_path: test/PantryCloud.Household/PantryCloud.Household.IntegrationTests/PantryCloud.Household.IntegrationTests.csproj
+      dockerfile_path: src/Services/PantryCloud.Household/PantryCloud.Household.Presentation/Dockerfile
+      image_name: samanekj/householdservice
+      test_image_name: pantrycloud-household-test:latest
+      coverage_flag: household-service
+      test_results_name: "HouseholdService - Test Results"
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

@@ -1,0 +1,39 @@
+name: CI/CD - RecipeService
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.Recipe/**'
+      - 'src/BuildingBlocks/**'
+      - 'test/PantryCloud.Recipe/**'
+      - '.github/workflows/recipe.yml'
+      - '.github/workflows/base.yml'
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.Recipe/**'
+      - 'src/BuildingBlocks/**'
+      - 'test/PantryCloud.Recipe/**'
+      - '.github/workflows/recipe.yml'
+      - '.github/workflows/base.yml'
+  workflow_dispatch:
+
+jobs:
+  pipeline:
+    uses: ./.github/workflows/base.yml
+    with:
+      service_project_path: src/Services/PantryCloud.Recipe/PantryCloud.Recipe.Presentation/PantryCloud.Recipe.Presentation.csproj
+      unit_test_project_path: test/PantryCloud.Recipe/PantryCloud.Recipe.UnitTests/PantryCloud.Recipe.UnitTests.csproj
+      integration_test_project_path: test/PantryCloud.Recipe/PantryCloud.Recipe.IntegrationTests/PantryCloud.Recipe.IntegrationTests.csproj
+      dockerfile_path: src/Services/PantryCloud.Recipe/PantryCloud.Recipe.Presentation/Dockerfile
+      image_name: samanekj/recipeservice
+      test_image_name: pantrycloud-recipe-test:latest
+      coverage_flag: recipe-service
+      test_results_name: "RecipeService - Test Results"
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

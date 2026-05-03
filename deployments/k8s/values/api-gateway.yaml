@@ -1,0 +1,71 @@
+replicaCount: 2
+
+image:
+  repository: samanekj/apigateway
+  tag: latest
+
+fullnameOverride: api-gateway
+
+env:
+  ASPNETCORE_ENVIRONMENT: Production
+  ASPNETCORE_HTTP_PORTS: "8080"
+  Jwt__Issuer: pantry-identity
+  Jwt__Audience: pantry-cloud
+  App__IdentityUrl: http://identity-api:8080
+  Services__IdentityService: http://identity-api:8080
+  Services__HouseholdService: http://household-api:8080
+  Services__PantryService: http://pantry-api:8080
+  Services__RecipeService: http://recipe-api:8080
+  Services__ShoppingListService: http://shoppinglist-api:8080
+  Services__NotificationService: http://notification-api:8080
+  Services__AuditService: http://audit-api:8080
+  Gateway__RateLimit__Enabled: "true"
+  Gateway__RateLimit__PermitLimit: "1000"
+  Gateway__RateLimit__WindowSeconds: "60"
+  # Allow both hostname and localhost (for port-forward when port 80 is unavailable)
+Cors__AllowedOrigins: http://pantry.test,http://localhost:8080
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+  hosts:
+    - host: pantry.test
+      paths:
+        - path: /api
+          pathType: Prefix
+        - path: /hubs
+          pathType: Prefix
+    - host: localhost
+      paths:
+        - path: /api
+          pathType: Prefix
+        - path: /hubs
+          pathType: Prefix
+
+probes:
+  enabled: true
+  path: /api/health
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 75
+
+pdb:
+  enabled: true
+  # With 2 replicas, keep at least 1 available during voluntary disruptions.
+  minAvailable: 1
+  maxUnavailable: null

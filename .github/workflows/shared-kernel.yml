@@ -1,0 +1,33 @@
+name: CI - SharedKernel
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'src/BuildingBlocks/PantryCloud.SharedKernel/**'
+      - 'test/PantryCloud.SharedKernel/**'
+      - '.github/workflows/shared-kernel.yml'
+      - '.github/workflows/base.yml'
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - 'src/BuildingBlocks/PantryCloud.SharedKernel/**'
+      - 'test/PantryCloud.SharedKernel/**'
+  workflow_dispatch:
+
+jobs:
+  pipeline:
+    uses: ./.github/workflows/base.yml
+    with:
+      service_project_path: src/BuildingBlocks/PantryCloud.SharedKernel/PantryCloud.SharedKernel.csproj
+      unit_test_project_path: test/PantryCloud.SharedKernel/PantryCloud.SharedKernel.UnitTests/PantryCloud.SharedKernel.UnitTests.csproj
+      # No integration tests for SharedKernel
+      # No Dockerfile (Library)
+      coverage_flag: shared-kernel
+      test_results_name: "SharedKernel - Test Results"
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

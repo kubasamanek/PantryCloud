@@ -1,0 +1,88 @@
+@page "/login"
+@layout AuthLayout
+@attribute [AllowAnonymous]
+
+<PageTitle>Login - PantryCloud</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Class="pa-8" Elevation="2">
+        <MudText Typo="Typo.h5" Class="mb-6">Sign in</MudText>
+        <EditForm Model="_model" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <MudTextField @bind-Value="_model.Email"
+                          For="@(() => _model.Email)"
+                          Label="Email"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Email"
+                          Class="mb-4" />
+            <MudTextField @bind-Value="_model.Password"
+                          For="@(() => _model.Password)"
+                          Label="Password"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Password"
+                          Class="mb-4" />
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="mb-2" Disabled="@_isBusy">
+                @(_isBusy ? "Signing in..." : "Sign in")
+            </MudButton>
+        </EditForm>
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <MudAlert Severity="@(_isEmailNotVerified ? Severity.Warning : Severity.Error)" Class="mt-4">
+                @_errorMessage
+                @if (_isEmailNotVerified)
+                {
+                    <MudText Typo="Typo.body2" Class="mt-1">
+                        Check your inbox for the verification email, or
+                        <MudLink Href="@Routes.Register" Typo="Typo.body2">re-register</MudLink>
+                        to receive a new one.
+                    </MudText>
+                }
+            </MudAlert>
+        }
+        <MudStack Row="true" Class="mt-4" Justify="Justify.SpaceBetween">
+            <MudLink Href="@Routes.ForgotPassword" Typo="Typo.body2">Forgot password?</MudLink>
+            <MudLink Href="@Routes.Register" Typo="Typo.body2">Create account</MudLink>
+        </MudStack>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Inject] private IAuthApi AuthApi { get; set; } = null!;
+    [Inject] private IDeviceNameProvider DeviceNameProvider { get; set; } = null!;
+    [Inject] private ITokenStorage TokenStorage { get; set; } = null!;
+    [Inject] private TokenAuthenticationStateProvider AuthStateProvider { get; set; } = null!;
+    [Inject] private NavigationManager Navigation { get; set; } = null!;
+
+    private readonly LoginRequest _model = new();
+    private bool _isBusy;
+    private string? _errorMessage;
+    private bool _isEmailNotVerified;
+
+    private async Task HandleSubmit()
+    {
+        _isBusy = true;
+        _errorMessage = null;
+        _isEmailNotVerified = false;
+        try
+        {
+            _model.DeviceName = await DeviceNameProvider.GetDeviceNameAsync();
+            var result = await AuthApi.LoginAsync(_model);
+            if (result.IsSuccess)
+            {
+                await TokenStorage.SetTokensAsync(result.Value!.AccessToken, result.Value.RefreshToken);
+                AuthStateProvider.NotifyLoggedIn();
+                var returnPath = NavigationHelper.GetReturnUrlOrDefault(Navigation, Routes.Household);
+                Navigation.NavigateTo(returnPath, forceLoad: true);
+            }
+            else
+            {
+                _errorMessage = result.ErrorMessage;
+                _isEmailNotVerified = result.IsEmailNotVerified;
+            }
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+}

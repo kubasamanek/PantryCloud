@@ -1,0 +1,40 @@
+name: CI/CD - PantryService
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.Pantry/**'
+      - 'src/Services/PantryCloud.Household/PantryCloud.Household.Application/**'
+      - 'src/BuildingBlocks/**'
+      - '.github/workflows/pantry.yml'
+      - '.github/workflows/base.yml'
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.Pantry/**'
+      - 'src/Services/PantryCloud.Household/PantryCloud.Household.Application/**'
+      - 'src/BuildingBlocks/**'
+      - 'test/PantryCloud.Pantry/**'
+      - '.github/workflows/pantry.yml'
+      - '.github/workflows/base.yml'
+  workflow_dispatch:
+
+jobs:
+  pipeline:
+    uses: ./.github/workflows/base.yml
+    with:
+      service_project_path: src/Services/PantryCloud.Pantry/PantryCloud.Pantry.Presentation/PantryCloud.Pantry.Presentation.csproj
+      unit_test_project_path: test/PantryCloud.Pantry/PantryCloud.Pantry.UnitTests/PantryCloud.Pantry.UnitTests.csproj
+      integration_test_project_path: test/PantryCloud.Pantry/PantryCloud.Pantry.IntegrationTests/PantryCloud.Pantry.IntegrationTests.csproj
+      dockerfile_path: src/Services/PantryCloud.Pantry/PantryCloud.Pantry.Presentation/Dockerfile
+      image_name: samanekj/pantryservice
+      test_image_name: pantrycloud-pantry-test:latest
+      coverage_flag: pantry-service
+      test_results_name: "PantryService - Test Results"
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

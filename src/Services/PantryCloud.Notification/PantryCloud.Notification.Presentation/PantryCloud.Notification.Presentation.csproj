@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.11">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PantryCloud.Notification.Application\PantryCloud.Notification.Application.csproj" />
+    <ProjectReference Include="..\PantryCloud.Notification.Infrastructure\PantryCloud.Notification.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\PantryCloud.SharedKernel\PantryCloud.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\PantryCloud.Household\PantryCloud.Household.Application\PantryCloud.Household.Application.csproj" />
+    <ProjectReference Include="..\..\PantryCloud.Pantry\PantryCloud.Pantry.Application\PantryCloud.Pantry.Application.csproj" />
+    <ProjectReference Include="..\..\PantryCloud.ShoppingList\PantryCloud.ShoppingList.Application\PantryCloud.ShoppingList.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Properties\launchSettings.json" />
+  </ItemGroup>
+
+</Project>
+

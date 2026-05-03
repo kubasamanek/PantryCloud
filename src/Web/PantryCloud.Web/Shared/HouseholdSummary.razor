@@ -1,0 +1,16 @@
+@inject IHouseholdApi HouseholdApi
+
+@if (_household != null)
+{
+    <MudText Typo="Typo.body1" Class="mb-2">Current household: <MudLink Href="@Routes.Household" Typo="Typo.body1">@_household.Name</MudLink></MudText>
+}
+<MudLink Href="@Routes.Household" Typo="Typo.body1">@(_household != null ? "Manage household" : "Go to household")</MudLink>
+
+@code {
+    private GetCurrentHouseholdResponse? _household;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _household = await HouseholdApi.GetCurrentHouseholdAsync();
+    }
+}

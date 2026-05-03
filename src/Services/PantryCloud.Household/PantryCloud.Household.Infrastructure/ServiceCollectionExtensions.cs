@@ -1,0 +1,75 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using PantryCloud.Household.Application;
+using PantryCloud.Household.Application.Commands;
+using PantryCloud.Household.Core;
+using PantryCloud.Household.Infrastructure.Persistence;
+using PantryCloud.Household.Infrastructure.Services;
+using PantryCloud.SharedKernel.Correlation;
+using PantryCloud.SharedKernel.Extensions;
+using PantryCloud.SharedKernel.Identity;
+using PantryCloud.SharedKernel.Email;
+using PantryCloud.SharedKernel.Messaging;
+using PantryCloud.SharedKernel.Observability;
+using PantryCloud.SharedKernel.Persistence;
+
+namespace PantryCloud.Household.Infrastructure;
+
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddInfrastructureLayerServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        var apiConfiguration = new ApiConfiguration();
+        configuration.Bind(apiConfiguration);
+        services.AddSingleton(apiConfiguration);
+
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+        services.AddDbContextWithAuditing<HouseholdDbContext>(options =>
+            options.UseNpgsql(connectionString));
+
+        services.AddScoped<DbContext>(sp => sp.GetRequiredService<HouseholdDbContext>());
+
+        services.AddOutboxRelay<HouseholdDbContext>(opts =>
+        {
+            var section = configuration.GetSection("OutboxRelay");
+            opts.PollInterval = TimeSpan.FromSeconds(section.GetValue("PollIntervalSeconds", 2));
+            opts.BatchSize = section.GetValue("BatchSize", 20);
+        });
+
+        services.AddMessaging(configuration, typeof(CreateHouseholdCommand).Assembly);
+
+        services.AddHealthChecks().AddNpgSql(connectionString!);
+
+        services.AddJwtBearerFromConfiguration(configuration, "App:IdentityUrl");
+
+        services.AddAuthorization();
+
+        services.AddCorrelationId();
+
+        services.AddScoped<IUserContext, UserContext>();
+        services.AddScoped<IHouseholdManagementService, HouseholdManagementService>();
+        services.AddScoped<IInvitationService, InvitationService>();
+        services.AddScoped<IPreferencesService, PreferencesService>();
+        services.AddScoped<IProfileService, ProfileService>();
+
+        services.Configure<PantryCloud.SharedKernel.Email.EmailSenderOptions>(opts =>
+        {
+            opts.Host = apiConfiguration.Email.Host;
+            opts.Port = apiConfiguration.Email.Port;
+            opts.From = apiConfiguration.Email.From;
+            opts.UserName = apiConfiguration.Email.UserName;
+            opts.Password = apiConfiguration.Email.Password;
+        });
+        if (apiConfiguration.App.SendEmails)
+            services.AddSmtpEmailSender();
+        else
+            services.AddLoggingEmailSender();
+
+        services.AddOpenTelemetryTracing(configuration);
+        services.AddApiVersioningDefaults();
+
+        return services;
+    }
+}

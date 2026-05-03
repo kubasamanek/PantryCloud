@@ -1,0 +1,33 @@
+name: CI/CD - Frontend
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'src/Web/PantryCloud.Web/**'
+      - '.github/workflows/frontend.yml'
+      - '.github/workflows/base.yml'
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - 'src/Web/PantryCloud.Web/**'
+      - '.github/workflows/frontend.yml'
+      - '.github/workflows/base.yml'
+  workflow_dispatch:
+
+jobs:
+  pipeline:
+    uses: ./.github/workflows/base.yml
+    with:
+      service_project_path: src/Web/PantryCloud.Web/PantryCloud.Web.csproj
+      # No tests for Frontend
+      dockerfile_path: src/Web/PantryCloud.Web/Dockerfile
+      image_name: samanekj/pantrycloud-web
+      # No coverage flag
+      # No test results name
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

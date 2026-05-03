@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PantryCloud</title>
+    <base href="/" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:300,400,500,600,700&family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <link href="css/site.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div id="app">
+        <div class="app-loading" aria-live="polite" aria-busy="true">
+            <div class="app-loading-spinner"></div>
+            <p class="app-loading-text">Loading…</p>
+        </div>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    <script src="js/device.js"></script>
+    <script>
+        window.getLocalStorage = function (key) { return localStorage.getItem(key); };
+        window.setLocalStorage = function (key, value) { localStorage.setItem(key, value); };
+        window.removeLocalStorage = function (key) { localStorage.removeItem(key); };
+        window.addEventListener('error', function (e) {
+            var app = document.getElementById('app');
+            if (app && !app.querySelector('.blazor-error')) {
+                app.innerHTML = '<div class="blazor-error" style="padding: 1rem; font-family: sans-serif;"><strong>Load error:</strong> ' + (e.message || e.reason || 'Unknown') + '</div>';
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: pantry-microservice
+description: Universal Helm chart for PantryCloud .NET microservices
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

@@ -1,0 +1,98 @@
+@* Dialog shown when all shopping list items are checked. Lets the user transfer purchased items into the pantry. *@
+<div class="pa-4">
+    @if (_transferring)
+    {
+        <MudStack Spacing="2" AlignItems="AlignItems.Center" Class="py-4">
+            <MudProgressCircular Indeterminate Color="Color.Primary" />
+            <MudText Typo="Typo.body2">Adding items to pantry…</MudText>
+        </MudStack>
+    }
+    else
+    {
+        <MudStack Spacing="3">
+            <MudText Typo="Typo.body1">
+                All items have been checked off. Select which items to transfer to your pantry:
+            </MudText>
+
+            <MudStack Spacing="0">
+                @foreach (var item in Items)
+                {
+                    <MudCheckBox T="bool"
+                                 Value="@_selected.Contains(item.Id)"
+                                 ValueChanged="@(v => Toggle(item.Id, v))"
+                                 Dense="true"
+                                 Label="@($"{item.Name} — {item.Quantity} {UnitDisplayHelper.UnitLabel(item.Unit)}")" />
+                }
+            </MudStack>
+
+            @if (_error)
+            {
+                <MudAlert Severity="Severity.Error" Dense="true">Some items could not be added. Please try again.</MudAlert>
+            }
+
+            <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd">
+                <MudButton Variant="Variant.Text" OnClick="Skip">Skip</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                           Disabled="@(_selected.Count == 0)"
+                           OnClick="Transfer">
+                    Add to pantry
+                </MudButton>
+            </MudStack>
+        </MudStack>
+    }
+</div>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public IReadOnlyList<ShoppingListItemDto> Items { get; set; } = [];
+    [Inject] private IPantryApi PantryApi { get; set; } = null!;
+
+    private HashSet<Guid> _selected = [];
+    private bool _transferring;
+    private bool _error;
+
+    protected override void OnInitialized()
+    {
+        _selected = Items.Select(i => i.Id).ToHashSet();
+    }
+
+    private void Toggle(Guid id, bool isChecked)
+    {
+        if (isChecked) _selected.Add(id);
+        else _selected.Remove(id);
+    }
+
+    private async Task Transfer()
+    {
+        if (_selected.Count == 0) return;
+
+        _transferring = true;
+        _error = false;
+        StateHasChanged();
+
+        var selectedItems = Items.Where(i => _selected.Contains(i.Id)).ToList();
+
+        var tasks = selectedItems.Select(item => PantryApi.CreateItemAsync(new CreatePantryItemRequest
+        {
+            Name = item.Name,
+            Quantity = item.Quantity,
+            Unit = item.Unit
+        }));
+
+        var results = await Task.WhenAll(tasks);
+        var failCount = results.Count(r => r == null);
+
+        if (failCount == 0)
+        {
+            MudDialog.Close(DialogResult.Ok(_selected.Count));
+        }
+        else
+        {
+            _error = true;
+            _transferring = false;
+            StateHasChanged();
+        }
+    }
+
+    private void Skip() => MudDialog.Close(DialogResult.Ok(0));
+}

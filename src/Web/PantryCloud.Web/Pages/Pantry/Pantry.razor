@@ -1,0 +1,484 @@
+@page "/pantry"
+@attribute [Authorize]
+
+<PageTitle>Pantry - PantryCloud</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
+    <MudText Typo="Typo.h5" Class="mb-4">Pantry</MudText>
+
+    @if (_loading && _listResponse == null && !_noHousehold)
+    {
+        <MudProgressCircular Indeterminate Color="Color.Primary" />
+    }
+    else if (_unauthorized)
+    {
+        <MudPaper Class="pa-6" Elevation="2">
+            <MudAlert Severity="Severity.Warning">
+                Session may have expired. Please sign in again.
+                <MudLink Href="@Routes.Login" Typo="Typo.body2" Class="ml-2">Sign in</MudLink>
+            </MudAlert>
+        </MudPaper>
+    }
+    else if (_noHousehold)
+    {
+        <MudPaper Class="pa-6" Elevation="2">
+            <MudAlert Severity="Severity.Warning">
+                <MudStack Spacing="2">
+                    <MudText Typo="Typo.body2">
+                        You need to be in a household to manage your pantry.
+                        If you just created or joined one, it may take a moment to sync.
+                    </MudText>
+                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                        <MudButton Variant="Variant.Filled" Size="Size.Small" Color="Color.Warning"
+                                   StartIcon="@Icons.Material.Filled.Refresh"
+                                   Disabled="@_loading"
+                                   OnClick="@(() => LoadListAsync())">
+                            @(_loading ? "Checking…" : "Retry")
+                        </MudButton>
+                        <MudLink Href="@Routes.Household" Typo="Typo.body2">Go to household</MudLink>
+                    </MudStack>
+                </MudStack>
+            </MudAlert>
+        </MudPaper>
+    }
+    else if (_loadError)
+    {
+        <MudPaper Class="pa-6" Elevation="2">
+            <MudAlert Severity="Severity.Error">Request failed. Please try again.</MudAlert>
+        </MudPaper>
+    }
+    else
+    {
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudStack Spacing="3">
+                <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <MudStack Row="true" Spacing="2">
+                        <MudTextField @bind-Value="_searchTerm" Label="Search" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Style="max-width: 240px;"/>
+                        <MudTextField @bind-Value="_categoryFilter" Label="Category" Variant="Variant.Outlined" Style="max-width: 160px;"/>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ApplyFilters">Search</MudButton>
+                    </MudStack>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenAddDialog">Add item</MudButton>
+                </MudStack>
+
+                @if (_listResponse != null)
+                {
+                    @if (_listResponse.TotalCount == 0)
+                    {
+                        <MudStack Spacing="2" AlignItems="AlignItems.Center" Class="py-8">
+                            <MudText Typo="Typo.body1">No pantry items yet. Add your first item.</MudText>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenAddDialog">Add item</MudButton>
+                        </MudStack>
+                    }
+                    else
+                    {
+                        <MudTable Items="@_listResponse.Items" Hover="true" Breakpoint="Breakpoint.Sm" Dense="true" Striped="true">
+                            <HeaderContent>
+                                <MudTh>Name</MudTh>
+                                <MudTh>Quantity</MudTh>
+                                <MudTh>Unit</MudTh>
+                                <MudTh>Expiration</MudTh>
+                                <MudTh>Category</MudTh>
+                                <MudTh>Notes</MudTh>
+                                <MudTh Style="width: 160px;">Actions</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Name">@context.Name</MudTd>
+                                <MudTd DataLabel="Quantity">@context.Quantity</MudTd>
+                                <MudTd DataLabel="Unit">@UnitDisplayHelper.UnitLabel(context.Unit)</MudTd>
+                                <MudTd DataLabel="Expiration">
+                                    @{
+                                        var (expText, expColor) = GetExpirationChip(context.ExpirationDate);
+                                    }
+                                    @if (expText != null)
+                                    {
+                                        <MudChip T="string" Color="@expColor" Size="Size.Small">@expText</MudChip>
+                                    }
+                                    else if (context.ExpirationDate.HasValue)
+                                    {
+                                        <MudText Typo="Typo.body2">@context.ExpirationDate.Value.ToString("yyyy-MM-dd")</MudText>
+                                    }
+                                    else
+                                    {
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary">—</MudText>
+                                    }
+                                </MudTd>
+                                <MudTd DataLabel="Category">@(context.Category ?? "—")</MudTd>
+                                <MudTd DataLabel="Notes">@(context.Notes != null && context.Notes.Length > 40 ? context.Notes[..40] + "…" : context.Notes ?? "—")</MudTd>
+                                <MudTd DataLabel="Actions">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary" OnClick="@(() => OpenEditDialog(context))" aria-label="Edit item"/>
+                                    <MudIconButton Icon="@Icons.Material.Filled.RemoveCircle" Size="Size.Small" Color="Color.Warning"
+                                                   Disabled="@(_depletingItems.Contains(context.Id))"
+                                                   OnClick="@(() => DepleteItem(context))"
+                                                   Title="Mark as depleted &amp; remove from pantry"
+                                                   aria-label="Deplete item" />
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="@(() => ConfirmDelete(context))" aria-label="Delete item"/>
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+
+                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mt-3">
+                            <MudText Typo="Typo.body2">@_listResponse.TotalCount item(s)</MudText>
+                            <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                                <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="PreviousPage" Disabled="@(_page <= 1)">Previous</MudButton>
+                                <MudText Typo="Typo.body2">Page @_page of @TotalPages</MudText>
+                                <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="NextPage" Disabled="@(_page >= TotalPages)">Next</MudButton>
+                            </MudStack>
+                        </MudStack>
+                    }
+                }
+            </MudStack>
+        </MudPaper>
+
+        @if (_listResponse != null)
+        {
+            <MudPaper Class="pa-4 mt-6" Elevation="2">
+                <MudText Typo="Typo.h6" Class="mb-3">Recipes from your pantry</MudText>
+                @if (_listResponse.Items.Count == 0)
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Add pantry items to get recipe suggestions.</MudText>
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Restaurant" OnClick="@(async () => await SuggestRecipes())" Disabled="@_recipesLoading" Class="mb-3">
+                        @(_recipesLoading ? "Loading…" : "Suggest recipes")
+                    </MudButton>
+                    @if (_recipesError)
+                    {
+                        <MudAlert Severity="Severity.Warning" Class="mt-2">Could not load suggestions. Try again.</MudAlert>
+                    }
+                    else if (_recommendRecipes != null && _recommendRecipes.Count > 0)
+                    {
+                        <MudGrid Spacing="3">
+                            @foreach (var recipe in _recommendRecipes)
+                            {
+                                <MudItem size="Size.Md" sizeMd="4">
+                                    <MudCard Class="cursor-pointer" @onclick="@(() => OpenRecipeDetail(recipe.Id))">
+                                        <MudCardContent>
+                                            <MudText Typo="Typo.subtitle1">@recipe.Title</MudText>
+                                            @if (!string.IsNullOrWhiteSpace(recipe.Description))
+                                            {
+                                                <MudText Typo="Typo.body2" Class="mt-1">@(recipe.Description.Length > 120 ? recipe.Description[..120] + "…" : recipe.Description)</MudText>
+                                            }
+                                            <MudStack Row="true" Spacing="1" Class="mt-2">
+                                                <MudChip T="string" Size="Size.Small">@recipe.PrepTimeMinutes min prep</MudChip>
+                                                <MudChip T="string" Size="Size.Small">@recipe.CookTimeMinutes min cook</MudChip>
+                                                <MudChip T="string" Size="Size.Small">@recipe.Servings servings</MudChip>
+                                            </MudStack>
+                                        </MudCardContent>
+                                    </MudCard>
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    }
+                    else if (_recommendRecipes != null && _recommendRecipes.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">No recipe suggestions for your current pantry items.</MudText>
+                    }
+                }
+            </MudPaper>
+        }
+    }
+</MudContainer>
+
+@code {
+    private const int PageSize = 20;
+    private const int ExpirationWarningDays = 7;
+
+    [Inject] private IPantryApi PantryApi { get; set; } = null!;
+    [Inject] private IRecipeApi RecipeApi { get; set; } = null!;
+    [Inject] private IHouseholdApi HouseholdApi { get; set; } = null!;
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
+    [Inject] private IDialogService DialogService { get; set; } = null!;
+
+    private ListPantryItemsResponse? _listResponse;
+    private bool _loading = true;
+    private bool _noHousehold;
+    private bool _unauthorized;
+    private bool _loadError;
+    private string _searchTerm = "";
+    private string _categoryFilter = "";
+    private int _page = 1;
+
+    private int TotalPages => _listResponse == null ? 0 : Math.Max(1, (int)Math.Ceiling(_listResponse.TotalCount / (double)_listResponse.PageSize));
+
+    private readonly HashSet<Guid> _depletingItems = [];
+
+    private List<RecipeDto>? _recommendRecipes;
+    private bool _recipesLoading;
+    private bool _recipesError;
+    private GetMyPreferencesResponse? _myPreferences;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var preferencesTask = HouseholdApi.GetMyPreferencesAsync();
+        await LoadListAsync();
+
+        // If no household was found on first load, retry a few times to cover the
+        // eventual-consistency window between household creation and the Pantry service
+        // receiving the MemberJoinedHousehold event via the outbox (~2-5 seconds).
+        for (var i = 0; i < 3 && _noHousehold; i++)
+        {
+            await Task.Delay(2000);
+            await LoadListAsync();
+        }
+
+        _myPreferences = await preferencesTask;
+    }
+
+    private async Task LoadListAsync(CancellationToken ct = default)
+    {
+        _loading = true;
+        _noHousehold = false;
+        _unauthorized = false;
+        _loadError = false;
+        StateHasChanged();
+        try
+        {
+            var result = await PantryApi.ListItemsAsync(
+                string.IsNullOrWhiteSpace(_categoryFilter) ? null : _categoryFilter.Trim(),
+                string.IsNullOrWhiteSpace(_searchTerm) ? null : _searchTerm.Trim(),
+                _page,
+                PageSize,
+                ct);
+            _listResponse = result.Data;
+            _noHousehold = result.NoHousehold;
+            _unauthorized = result.Unauthorized;
+            _loadError = result.Data == null && !result.NoHousehold && !result.Unauthorized;
+        }
+        catch
+        {
+            _listResponse = null;
+            _noHousehold = false;
+            _unauthorized = false;
+            _loadError = true;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private static (string? ChipText, Color Color) GetExpirationChip(DateTime? expirationDate)
+    {
+        if (!expirationDate.HasValue) return (null, Color.Default);
+        
+        var today = DateTime.UtcNow.Date;
+        var exp = expirationDate.Value;
+        var expDateOnly = new DateTime(exp.Year, exp.Month, exp.Day);
+        var days = (expDateOnly - today).Days;
+
+        if (days < 0) return ("Expired", Color.Error);
+        if (days <= ExpirationWarningDays) return ($"Expires in {days} day(s)", Color.Warning);
+        
+        return (null, Color.Default);
+    }
+
+    private void ApplyFilters() => _ = LoadListAsync();
+
+    private void PreviousPage()
+    {
+        if (_page > 1) { _page--; _ = LoadListAsync(); }
+    }
+
+    private void NextPage()
+    {
+        if (_page < TotalPages) { _page++; _ = LoadListAsync(); }
+    }
+
+    private async Task OpenAddDialog()
+    {
+        var parameters = new DialogParameters { ["IsEdit"] = false, ["Item"] = null };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = false };
+        var dialog = await DialogService.ShowAsync<PantryItemFormDialog>("Add item", parameters, options);
+        var result = await dialog.Result;
+        if (result?.Canceled != false) return;
+        if (result.Data is not PantryItemFormResult form) return;
+        if (form.EditId.HasValue) return;
+        var request = new CreatePantryItemRequest
+        {
+            Name = form.Name,
+            Quantity = form.Quantity,
+            Unit = form.Unit,
+            ExpirationDate = form.ExpirationDate,
+            Category = string.IsNullOrWhiteSpace(form.Category) ? null : form.Category,
+            Notes = string.IsNullOrWhiteSpace(form.Notes) ? null : form.Notes
+        };
+        var created = await PantryApi.CreateItemAsync(request);
+        if (created != null)
+        {
+            Snackbar.Add("Item added.", Severity.Success);
+            await LoadListAsync();
+        }
+        else
+        {
+            Snackbar.Add("Request failed. If you are not in a household, go to Household first.", Severity.Warning);
+            await LoadListAsync();
+        }
+    }
+
+    private async Task OpenEditDialog(PantryItemDto item)
+    {
+        var parameters = new DialogParameters { ["IsEdit"] = true, ["Item"] = item };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = false };
+        var dialog = await DialogService.ShowAsync<PantryItemFormDialog>("Edit item", parameters, options);
+        var result = await dialog.Result;
+        if (result?.Canceled != false) return;
+        if (result.Data is not PantryItemFormResult form || !form.EditId.HasValue || form.RowVersion == null) return;
+        var request = new UpdatePantryItemRequest
+        {
+            Name = form.Name,
+            Quantity = form.Quantity,
+            Unit = form.Unit,
+            ExpirationDate = form.ExpirationDate,
+            Category = string.IsNullOrWhiteSpace(form.Category) ? null : form.Category,
+            Notes = string.IsNullOrWhiteSpace(form.Notes) ? null : form.Notes,
+            RowVersion = form.RowVersion
+        };
+        var updateResult = await PantryApi.UpdateItemAsync(form.EditId.Value, request);
+        if (updateResult.IsConcurrencyConflict)
+        {
+            Snackbar.Add("This item was updated by someone else. Refreshing…", Severity.Warning);
+            await LoadListAsync();
+            return;
+        }
+        if (updateResult.Value != null)
+        {
+            Snackbar.Add("Item updated.", Severity.Success);
+            await LoadListAsync();
+        }
+        else
+        {
+            Snackbar.Add("Request failed. Please try again.", Severity.Error);
+        }
+    }
+
+    private async Task ConfirmDelete(PantryItemDto item)
+    {
+        var confirmed = await DialogService.ShowMessageBox("Delete item", $"Delete \"{item.Name}\"?", "Delete", "Cancel");
+        if (confirmed != true) return;
+        var ok = await PantryApi.DeleteItemAsync(item.Id);
+        if (ok)
+        {
+            Snackbar.Add("Item removed.", Severity.Success);
+            await LoadListAsync();
+        }
+        else
+        {
+            Snackbar.Add("Request failed. Please try again.", Severity.Error);
+        }
+    }
+
+    private async Task DepleteItem(PantryItemDto item)
+    {
+        if (!_depletingItems.Add(item.Id)) return;
+        StateHasChanged();
+        try
+        {
+            if (item.Quantity > 0)
+            {
+                var confirmed = await DialogService.ShowMessageBox(
+                    "Deplete item",
+                    $"Mark \"{item.Name}\" as depleted? It will be removed from your pantry.",
+                    "Deplete", "Cancel");
+                if (confirmed != true) return;
+
+                var request = new UpdatePantryItemRequest
+                {
+                    Name = item.Name,
+                    Quantity = 0,
+                    Unit = item.Unit,
+                    ExpirationDate = item.ExpirationDate,
+                    Category = item.Category,
+                    Notes = item.Notes,
+                    ImageUrl = item.ImageUrl,
+                    RowVersion = item.RowVersion
+                };
+                var updateResult = await PantryApi.UpdateItemAsync(item.Id, request);
+                if (updateResult.IsConcurrencyConflict)
+                {
+                    Snackbar.Add("This item was updated by someone else. Refreshing…", Severity.Warning);
+                    await LoadListAsync();
+                    return;
+                }
+                if (updateResult.Value == null)
+                {
+                    Snackbar.Add("Failed to deplete item. Please try again.", Severity.Error);
+                    return;
+                }
+            }
+
+            var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+            var parameters = new DialogParameters { ["ItemName"] = item.Name, ["ItemUnit"] = item.Unit };
+            var dialog = await DialogService.ShowAsync<DepletedItemDialog>("Add to shopping list?", parameters, options);
+            var dialogResult = await dialog.Result;
+            if (dialogResult?.Data is true)
+                Snackbar.Add($"\"{item.Name}\" added to shopping list.", Severity.Success);
+
+            await PantryApi.DeleteItemAsync(item.Id);
+            await LoadListAsync();
+        }
+        finally
+        {
+            _depletingItems.Remove(item.Id);
+            StateHasChanged();
+        }
+    }
+
+    private async Task SuggestRecipes(CancellationToken ct = default)
+    {
+        var ingredientNames = _listResponse?.Items?
+            .Select(i => i.Name?.Trim())
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(n => n!)
+            .ToList() ?? [];
+        
+        _recipesLoading = true;
+        _recipesError = false;
+        _recommendRecipes = null;
+        StateHasChanged();
+        try
+        {
+            var request = new RecommendRecipesRequest
+            {
+                IngredientHints = ingredientNames,
+                Limit = 10,
+                Preferences = _myPreferences == null ? null : new PreferencesFilterDto
+                {
+                    DietaryProfile = _myPreferences.DietaryProfile switch { 1 => "Vegetarian", 2 => "Vegan", _ => "None" },
+                    ExcludedIngredients = _myPreferences.ExcludedIngredients
+                }
+            };
+            var response = await RecipeApi.RecommendAsync(request, ct);
+            _recommendRecipes = response?.Recipes?.ToList();
+            _recipesError = response == null;
+        }
+        catch
+        {
+            _recommendRecipes = null;
+            _recipesError = true;
+        }
+        finally
+        {
+            _recipesLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OpenRecipeDetail(Guid recipeId)
+    {
+        var pantryNames = (_listResponse?.Items ?? [])
+            .Select(i => i.Name?.Trim() ?? "")
+            .Where(n => n.Length > 0)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var parameters = new DialogParameters
+        {
+            ["RecipeId"] = recipeId,
+            ["PantryIngredientNames"] = pantryNames
+        };
+        await DialogService.ShowAsync<RecipeDetailDialog>("Recipe", parameters, options);
+    }
+}

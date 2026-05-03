@@ -1,0 +1,32 @@
+<div class="pa-6">
+    <EditForm Model="_model" OnValidSubmit="Submit" FormName="CreateListForm">
+        <DataAnnotationsValidator />
+        <MudTextField @bind-Value="_model.Name" Label="List name" Variant="Variant.Outlined" Class="mb-4" Required="true" />
+        <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd">
+            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Disabled="@_saving">
+                @(_saving ? "Creating..." : "Create")
+            </MudButton>
+        </MudStack>
+    </EditForm>
+</div>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    private readonly CreateListFormModel _model = new();
+    private bool _saving;
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void Submit()
+    {
+        _saving = true;
+        MudDialog.Close(DialogResult.Ok(_model.Name.Trim()));
+    }
+
+    private class CreateListFormModel
+    {
+        public string Name { get; set; } = "";
+    }
+}

@@ -1,0 +1,59 @@
+@page "/verify-email"
+@layout AuthLayout
+@attribute [AllowAnonymous]
+
+<PageTitle>Verify email - PantryCloud</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Class="pa-8" Elevation="2">
+        @if (_invalidLink)
+        {
+            <MudAlert Severity="Severity.Error">Invalid or expired verification link.</MudAlert>
+            <MudLink Href="@Routes.Login" Class="mt-4">Sign in</MudLink>
+        }
+        else if (_loading)
+        {
+            <MudProgressCircular Indeterminate Color="Color.Primary" />
+            <MudText Typo="Typo.body2" Class="mt-2">Verifying your email...</MudText>
+        }
+        else if (_verified)
+        {
+            <MudAlert Severity="Severity.Success">Your email has been verified. You can sign in now.</MudAlert>
+            <MudButton Href="@Routes.Login" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">Sign in</MudButton>
+        }
+        else if (_failed)
+        {
+            <MudAlert Severity="Severity.Error">Verification failed. The link may have expired.</MudAlert>
+            <MudLink Href="@Routes.Login" Class="mt-4">Sign in</MudLink>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Inject] private IAuthApi AuthApi { get; set; } = null!;
+
+    [SupplyParameterFromQuery] public string? Email { get; set; }
+    [SupplyParameterFromQuery] public string? Token { get; set; }
+
+    private bool _invalidLink;
+    private bool _loading = true;
+    private bool _verified;
+    private bool _failed;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Token))
+        {
+            _invalidLink = true;
+            _loading = false;
+            return;
+        }
+
+        var success = await AuthApi.VerifyEmailAsync(new VerifyEmailRequest(Email, Token));
+        _loading = false;
+        if (success)
+            _verified = true;
+        else
+            _failed = true;
+    }
+}

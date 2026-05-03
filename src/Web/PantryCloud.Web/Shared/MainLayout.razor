@@ -1,0 +1,114 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+
+<MudLayout>
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Breakpoint="Breakpoint.Md" Elevation="2">
+        <NavMenu />
+    </MudDrawer>
+    <MudAppBar Elevation="1" Fixed="false">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" OnClick="ToggleDrawer" Class="mr-2" aria-label="Toggle menu" />
+        <MudLink Href="@Routes.Home" Typo="Typo.h6" Class="mr-4" Color="Color.Inherit" Style="text-decoration: none;">PantryCloud</MudLink>
+        <MudSpacer />
+        <AuthorizeView>
+            <Authorized>
+                <NotificationConnection />
+                <NotificationBell />
+                <TokenExpiryDisplay />
+                <MudText Typo="Typo.body2" Class="mr-2" Style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@_displayName</MudText>
+                <MudButton Variant="Variant.Text" Color="Color.Inherit" OnClick="BeginLogout">
+                    Logout
+                </MudButton>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Variant="Variant.Text" Color="Color.Inherit" OnClick="BeginLogin">
+                    Login
+                </MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudAppBar>
+    <MudMainContent>
+        <div class="layout-content">
+            @Body
+        </div>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    [Inject]
+    private NavigationManager Navigation { get; set; } = null!;
+    [Inject]
+    private ITokenStorage TokenStorage { get; set; } = null!;
+    [Inject]
+    private ISessionsApi SessionsApi { get; set; } = null!;
+    [Inject]
+    private TokenAuthenticationStateProvider AuthStateProvider { get; set; } = null!;
+    [Inject]
+    private ICurrentProfileService CurrentProfile { get; set; } = null!;
+    [Inject]
+    private AuthenticationStateProvider AuthState { get; set; } = null!;
+
+    private bool _drawerOpen = true;
+    private string _displayName = "User";
+    private string? _authName;
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthState.GetAuthenticationStateAsync();
+        if (state.User.Identity?.IsAuthenticated == true)
+        {
+            _authName = state.User.Identity?.Name;
+            await CurrentProfile.EnsureLoadedAsync();
+            UpdateDisplayName();
+            CurrentProfile.ProfileUpdated += OnProfileUpdated;
+        }
+    }
+
+    private void UpdateDisplayName()
+    {
+        _displayName = CurrentProfile.DisplayName ?? _authName ?? "User";
+    }
+
+    private async void OnProfileUpdated()
+    {
+        await InvokeAsync(() =>
+        {
+            UpdateDisplayName();
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose()
+    {
+        CurrentProfile.ProfileUpdated -= OnProfileUpdated;
+    }
+
+    private void BeginLogin()
+    {
+        Navigation.NavigateTo(Routes.Login, forceLoad: true);
+    }
+
+    private async Task BeginLogout()
+    {
+        try
+        {
+            var refreshToken = await TokenStorage.GetRefreshTokenAsync();
+            if (!string.IsNullOrWhiteSpace(refreshToken))
+                await SessionsApi.LogoutAsync(refreshToken);
+        }
+        catch
+        {
+            // clear even if system fails
+        }
+        finally
+        {
+            await TokenStorage.ClearAsync();
+            AuthStateProvider.NotifyLoggedOut();
+            Navigation.NavigateTo(Routes.Login, forceLoad: true);
+        }
+    }
+}

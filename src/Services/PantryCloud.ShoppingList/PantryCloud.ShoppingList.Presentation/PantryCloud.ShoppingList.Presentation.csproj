@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\PantryCloud.ShoppingList.Application\PantryCloud.ShoppingList.Application.csproj" />
+    <ProjectReference Include="..\PantryCloud.ShoppingList.Core\PantryCloud.ShoppingList.Core.csproj" />
+    <ProjectReference Include="..\PantryCloud.ShoppingList.Infrastructure\PantryCloud.ShoppingList.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\PantryCloud.SharedKernel\PantryCloud.SharedKernel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.11">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

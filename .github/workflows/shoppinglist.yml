@@ -1,0 +1,40 @@
+name: CI/CD - ShoppingListService
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.ShoppingList/**'
+      - 'src/Services/PantryCloud.Household/PantryCloud.Household.Application/**'
+      - 'src/BuildingBlocks/**'
+      - 'test/PantryCloud.ShoppingList/**'
+      - '.github/workflows/shoppinglist.yml'
+      - '.github/workflows/base.yml'
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - 'src/Services/PantryCloud.ShoppingList/**'
+      - 'src/Services/PantryCloud.Household/PantryCloud.Household.Application/**'
+      - 'src/BuildingBlocks/**'
+      - 'test/PantryCloud.ShoppingList/**'
+      - '.github/workflows/shoppinglist.yml'
+  workflow_dispatch:
+
+jobs:
+  pipeline:
+    uses: ./.github/workflows/base.yml
+    with:
+      service_project_path: src/Services/PantryCloud.ShoppingList/PantryCloud.ShoppingList.Presentation/PantryCloud.ShoppingList.Presentation.csproj
+      unit_test_project_path: test/PantryCloud.ShoppingList/PantryCloud.ShoppingList.UnitTests/PantryCloud.ShoppingList.UnitTests.csproj
+      integration_test_project_path: test/PantryCloud.ShoppingList/PantryCloud.ShoppingList.IntegrationTests/PantryCloud.ShoppingList.IntegrationTests.csproj
+      dockerfile_path: src/Services/PantryCloud.ShoppingList/PantryCloud.ShoppingList.Presentation/Dockerfile
+      image_name: samanekj/shoppinglistservice
+      test_image_name: pantrycloud-shoppinglist-test:latest
+      coverage_flag: shoppinglist-service
+      test_results_name: "ShoppingListService - Test Results"
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

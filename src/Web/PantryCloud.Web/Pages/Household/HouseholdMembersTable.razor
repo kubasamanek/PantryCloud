@@ -1,0 +1,42 @@
+@if (Members != null)
+{
+    <MudText Typo="Typo.h6" Class="mb-2">Members</MudText>
+    <MudTable Items="@Members.Members" Hover="true" Breakpoint="Breakpoint.Sm" Class="mb-4">
+        <HeaderContent>
+            <MudTh>Member</MudTh>
+            <MudTh>Role</MudTh>
+            <MudTh>Diet</MudTh>
+            @if (IsOwner)
+            {
+                <MudTh Style="width: 100px;">Actions</MudTh>
+            }
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Member">
+                <MudStack Spacing="1" Row="true" AlignItems="AlignItems.Center">
+                    <MudAvatar Size="Size.Small" image="@context.AvatarUrl" Color="Color.Primary">@((context.DisplayName ?? "M").Substring(0, 1).ToUpperInvariant())</MudAvatar>
+                    <MudText Typo="Typo.body2">@(context.DisplayName ?? "Member") @(context.UserId == CurrentUserId ? " (You)" : "")</MudText>
+                </MudStack>
+            </MudTd>
+            <MudTd DataLabel="Role">@HouseholdDisplayHelper.RoleLabel(context.Role)</MudTd>
+            <MudTd DataLabel="Diet">@HouseholdDisplayHelper.DietaryProfileLabel(context.DietaryProfile) @(context.ExcludedIngredients?.Count > 0 ? $"· Excl. {context.ExcludedIngredients.Count}" : "")</MudTd>
+            @if (IsOwner)
+            {
+                <MudTd DataLabel="Actions">
+                    @if (context.UserId != CurrentUserId && context.Role != 0)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.PersonRemove" Size="Size.Small" Color="Color.Default" OnClick="@(() => OnKick.InvokeAsync(context))" Disabled="@IsBusy" title="Kick member" aria-label="Kick member" />
+                    }
+                </MudTd>
+            }
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    [Parameter] public GetHouseholdMembersResponse? Members { get; set; }
+    [Parameter] public Guid? CurrentUserId { get; set; }
+    [Parameter] public bool IsOwner { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public EventCallback<MemberWithProfileDto> OnKick { get; set; }
+}

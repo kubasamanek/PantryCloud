@@ -1,0 +1,366 @@
+name: pantry-cloud-dev
+
+services:
+  # --- INFRASTRUCTURE ---
+  postgres:
+    image: postgres:16-alpine
+    container_name: pantry-postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pantry-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: pantry-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - pantry-network
+
+  mongodb:
+    image: mongo:7.0
+    container_name: pantry-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pantry-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: pantry-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pantry-network
+
+  smtp4dev:
+    image: rnwood/smtp4dev:latest
+    container_name: pantry-smtp4dev
+    ports:
+      - "5080:80"    # Web UI
+      - "2525:25"    # SMTP
+    networks:
+      - pantry-network
+
+  # --- FRONTEND ---
+  web:
+    container_name: pantry-web
+    build:
+      context: ../
+      dockerfile: src/Web/PantryCloud.Web/Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - pantry-network
+
+  # --- GATEWAY ---
+  api-gateway:
+    container_name: pantry-gateway
+    build:
+      context: ../
+      dockerfile: src/Gateways/PantryCloud.ApiGateway/PantryCloud.ApiGateway.Presentation/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - Services__IdentityService=http://identity-api:8080
+      - Services__HouseholdService=http://household-api:8080
+      - Services__PantryService=http://pantry-api:8080
+      - Services__RecipeService=http://recipe-api:8080
+      - Services__ShoppingListService=http://shoppinglist-api:8080
+      - Services__NotificationService=http://notification-api:8080
+      - Services__AuditService=http://audit-api:8080
+      - Gateway__EnableSwagger=true
+      - Jwt__Issuer=pantry-identity
+      - Jwt__Audience=pantry-cloud
+      - App__IdentityUrl=http://identity-api:8080
+    ports:
+      - "5050:8080"
+    depends_on:
+      - identity-api
+      - household-api
+      - pantry-api
+      - notification-api
+      - audit-api
+    networks:
+      - pantry-network
+
+  # --- SERVICES ---
+  jwt-keygen:
+    image: alpine
+    container_name: pantry-jwt-keygen
+    command: >
+      sh -c 'apk add --no-cache openssl && (test -f /secrets/private.pem || (openssl genrsa -out /secrets/private.pem 2048 && openssl rsa -in /secrets/private.pem -pubout -out /secrets/public.pem)) && chmod 644 /secrets/private.pem /secrets/public.pem'
+    volumes:
+      - jwt-secrets:/secrets
+    restart: "no"
+    networks:
+      - pantry-network
+
+  identity-api:
+    container_name: pantry-identity
+    build:
+      context: ../
+      dockerfile: src/Services/PantryCloud.Identity/PantryCloud.Identity.Presentation/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - IsDevelopment=true
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=identity_db;Username=admin;Password=password;
+      - Jwt__Issuer=pantry-identity
+      - Jwt__Audience=pantry-cloud
+      - Jwt__ExpirationInMinutes=5
+      - Jwt__PrivateKeyPath=/app/secrets/private.pem
+      - Jwt__PublicKeyPath=/app/secrets/public.pem
+      - App__FrontendUrl=http://localhost:3000
+      - App__AuthorityBaseUrl=http://localhost:5050/api/identity
+      - App__ResetPasswordTokenExpirationInMinutes=60
+      - App__VerifyEmailTokenExpirationInMinutes=60
+      - App__SendEmails=true
+      - Email__Host=smtp4dev
+      - Email__Port=25
+      - Email__Username=
+      - Email__Password=
+      - Email__From=admin@pantrycloud.dev
+    ports:
+      - "5072:8080"
+    volumes:
+      - jwt-secrets:/app/secrets:ro
+    depends_on:
+      jwt-keygen:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      smtp4dev:
+        condition: service_started
+    networks:
+      - pantry-network
+
+  household-api:
+    container_name: pantry-household
+    build:
+      context: ../
+      dockerfile: src/Services/PantryCloud.Household/PantryCloud.Household.Presentation/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - IsDevelopment=true
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=household_db;Username=admin;Password=password;
+      - App__IdentityUrl=http://identity-api:8080
+      - App__FrontendUrl=http://localhost:3000
+      - App__SendEmails=true
+      - App__InvitationExpirationMinutes=2
+      - Email__Host=smtp4dev
+      - Email__Port=25
+      - Email__UserName=
+      - Email__Password=
+      - Email__From=noreply@pantrycloud.dev
+      - Jwt__Issuer=pantry-identity
+      - Jwt__Audience=pantry-cloud
+      - Messaging__RabbitMQ__Host=rabbitmq
+      - Messaging__RabbitMQ__Username=admin
+      - Messaging__RabbitMQ__Password=password
+    ports:
+      - "5155:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      identity-api:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      smtp4dev:
+        condition: service_started
+    networks:
+      - pantry-network
+
+  pantry-api:
+    container_name: pantry-pantry
+    build:
+      context: ../
+      dockerfile: src/Services/PantryCloud.Pantry/PantryCloud.Pantry.Presentation/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - IsDevelopment=true
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pantry_db;Username=admin;Password=password;
+      - Services__HouseholdService=http://household-api:8080
+      - App__IdentityUrl=http://identity-api:8080
+      - Jwt__Issuer=pantry-identity
+      - Jwt__Audience=pantry-cloud
+      - Messaging__RabbitMQ__Host=rabbitmq
+      - Messaging__RabbitMQ__Username=admin
+      - Messaging__RabbitMQ__Password=password
+      - ExpirationCheck__DebugEnabled=true
+    ports:
+      - "5073:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      identity-api:
+        condition: service_started
+      household-api:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - pantry-network
+
+  notification-api:
+    container_name: pantry-notification
+    build:
+      context: ../
+      dockerfile: src/Services/PantryCloud.Notification/PantryCloud.Notification.Presentation/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - IsDevelopment=true
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=notification_db;Username=admin;Password=password
+      - ConnectionStrings__Redis=redis:6379
+      - Messaging__RabbitMQ__Host=rabbitmq
+      - Messaging__RabbitMQ__Username=admin
+      - Messaging__RabbitMQ__Password=password
+      - App__IdentityUrl=http://identity-api:8080
+      - Jwt__Issuer=pantry-identity
+      - Jwt__Audience=pantry-cloud
+    ports:
+      - "5160:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      identity-api:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - pantry-network
+
+  shoppinglist-api:
+    container_name: pantry-shoppinglist
+    build:
+      context: ../
+      dockerfile: src/Services/PantryCloud.ShoppingList/PantryCloud.ShoppingList.Presentation/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - IsDevelopment=true
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=shoppinglist_db;Username=admin;Password=password;
+      - App__IdentityUrl=http://identity-api:8080
+      - Jwt__Issuer=pantry-identity
+      - Jwt__Audience=pantry-cloud
+      - Messaging__RabbitMQ__Host=rabbitmq
+      - Messaging__RabbitMQ__Username=admin
+      - Messaging__RabbitMQ__Password=password
+    ports:
+      - "5074:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      identity-api:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - pantry-network
+
+  audit-api:
+    container_name: pantry-audit
+    build:
+      context: ../
+      dockerfile: src/Services/PantryCloud.Audit/PantryCloud.Audit.Presentation/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - IsDevelopment=true
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=audit_db;Username=admin;Password=password;
+      - App__IdentityUrl=http://identity-api:8080
+      - Jwt__Issuer=pantry-identity
+      - Jwt__Audience=pantry-cloud
+      - Messaging__RabbitMQ__Host=rabbitmq
+      - Messaging__RabbitMQ__Username=admin
+      - Messaging__RabbitMQ__Password=password
+    ports:
+      - "5076:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      identity-api:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - pantry-network
+
+  recipe-api:
+    container_name: pantry-recipe
+    build:
+      context: ../
+      dockerfile: src/Services/PantryCloud.Recipe/PantryCloud.Recipe.Presentation/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - IsDevelopment=true
+      - ConnectionStrings__DefaultConnection=mongodb://admin:password@mongodb:27017
+      - App__IdentityUrl=http://identity-api:8080
+      - Jwt__Issuer=pantry-identity
+      - Jwt__Audience=pantry-cloud
+      - MongoDB__DatabaseName=recipe_db
+    ports:
+      - "5075:8080"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      identity-api:
+        condition: service_started
+    networks:
+      - pantry-network
+
+volumes:
+  postgres-data:
+  rabbitmq-data:
+  mongodb-data:
+  jwt-secrets:
+
+networks:
+  pantry-network:
+    driver: bridge
