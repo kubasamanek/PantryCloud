@@ -5,7 +5,7 @@
 Integration tests are currently implemented as manual tests.
 
 ### Rate Limiting
-1. Start the Gateway: `docker-compose up api-gateway`
+1. Start the Gateway: `docker compose up api-gateway`
 2. Make multiple requests to `/api/health`:
    ```bash
    for i in {1..105}; do curl http://localhost:5050/api/health; done

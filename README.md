@@ -26,13 +26,13 @@ For Kubernetes-based local deployment (Kind) prerequisites, see [deployments/k8s
 From the repository root:
 
 ```bash
-docker-compose -f deployments/docker-compose.yml up
+docker compose -f deployments/docker-compose.yml up
 ```
 
 This brings up PostgreSQL, RabbitMQ, MongoDB, Redis, all backend services, the API Gateway, and the web frontend. Typical entry points:
 
 - Web UI: `http://localhost:3000`
-- API Gateway: `http://localhost:5050`
+- API Gateway: `http://localhost:5050` — requests are routed through the Gateway to the backend microservices; the Gateway itself does not serve a UI on this port, so opening it directly in a browser returns `404`.
 
 Secrets and credentials for the Compose stack are documented in [deployments/SECRETS.md](deployments/SECRETS.md).
 
@@ -41,6 +41,8 @@ Secrets and credentials for the Compose stack are documented in [deployments/SEC
 For a local Kubernetes cluster using Kind, including NGINX ingress, infrastructure, observability, and all services, follow:
 
 - [deployments/k8s/README.md](deployments/k8s/README.md) – full quick start, Make targets, and chart references.
+
+> **Platform note:** the Kubernetes deployment `Makefile` is currently tested on **macOS only**. See the platform support callout at the top of [deployments/k8s/README.md](deployments/k8s/README.md) for what to adjust on Linux; on Windows use WSL2.
 
 Charts for individual components are documented under:
 

@@ -7,13 +7,13 @@ This directory contains deployment configurations for running PantryCloud in dif
 Use the Docker Compose stack to run the full system on a single machine:
 
 ```bash
-docker-compose -f deployments/docker-compose.yml up
+docker compose -f deployments/docker-compose.yml up
 ```
 
 From the `deployments/` directory you can also run:
 
 ```bash
-docker-compose up
+docker compose up
 ```
 
 The stack brings up:
@@ -26,7 +26,7 @@ The stack brings up:
 Typical endpoints:
 
 - Web UI: `http://localhost:3000`
-- API Gateway: `http://localhost:5050`
+- API Gateway: `http://localhost:5050` — requests are routed through the Gateway to the backend microservices; the Gateway itself does not serve a UI on this port, so opening it directly in a browser returns `404`.
 
 Secrets and credentials for the Compose stack are described in [SECRETS.md](SECRETS.md).
 

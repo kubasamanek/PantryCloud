@@ -2,6 +2,13 @@
 
 This directory contains the necessary configuration to deploy the PantryCloud distributed system locally using [Kind](https://kind.sigs.k8s.io/) (Kubernetes IN Docker).
 
+> **Platform support:** The `Makefile` and helper scripts in this directory are developed and tested on **macOS only** in their current state. `make install-prereqs` uses Homebrew, and the remaining targets have not been validated on Linux or Windows. To run on another platform you will need to install the prerequisites manually (Kind, kubectl, Helm, openssl, Docker) and may need to adjust individual targets. On native Windows, use WSL2; PowerShell/CMD are not supported.
+
+> All `make` commands below are run from this directory (`deployments/k8s/`), where the `Makefile` lives:
+> ```bash
+> cd deployments/k8s
+> ```
+
 ## Prerequisites
 
 Ensure the following tools are installed on your system:
@@ -32,15 +39,11 @@ make check-prereqs
    ```bash
    echo "127.0.0.1 pantry.test" | sudo tee -a /etc/hosts
    ```
-2. Navigate to the deployment directory:
-   ```bash
-   cd deployments/k8s
-   ```
-3. Deploy the entire stack (pulls latest images from Docker Hub):
+2. Deploy the entire stack (pulls latest images from Docker Hub):
    ```bash
    make up
    ```
-4. Access the application at [http://pantry.test](http://pantry.test).
+3. Access the application at [http://pantry.test](http://pantry.test).
 
 ### Testing Access
 If the application is unreachable, ensure that your local port `80` is successfully bound to the cluster. Alternatively, use port-forwarding:
